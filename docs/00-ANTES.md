@@ -15,7 +15,8 @@ Cada dato va con el comando o la pantalla de donde salió.
 | Memoria global | `ls ~/.claude/CLAUDE.md` | `No such file or directory` | No debe existir: cumple |
 
 No se instaló nada: no faltaba ningún requisito.
-La carpeta del proyecto todavía no es un repositorio git (no tiene `.git`).
+La carpeta del proyecto es un repositorio git: al cerrar la sesión 1 tiene
+cuatro commits (`git log --oneline`), con la rama `main` conectada a `origin`.
 
 ## 2. Cómo pago
 
