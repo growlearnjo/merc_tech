@@ -81,7 +81,9 @@ usuario; no son estimaciones del agente.
 
 | Dato | Valor |
 |---|---|
-| Costo de esta conversación (`/cost`) | 26 % → 26 % de uso semanal del plan; por debajo de la resolución del indicador. Sin medir en dólares (plan de Claude, no saldo de API) |
+| Tokens de esta conversación (`python doc_sesions/sesion1/tokens.py`, fila `6d0de479`) | entrada 190 · caché escrita 303.848 · caché leída 8.837.394 · salida 211.479 · 91 turnos |
+| Costo equivalente | **≈ US$ 7,52** a tarifas públicas de `claude-opus-5-5` (consultadas el 2026-11-09). Con plan de suscripción no se cobra: es el valor de lo consumido |
+| Uso del plan (`/cost`) | 26 % → 26 % semanal; por debajo de la resolución del indicador, así que no sirve para medir una tarea |
 | Duración | 12 minutos |
 | Turnos en que hubo que corregir o recordar algo al agente | 0 |
 | Veces que el agente pidió aprobación | 0 preguntas del agente; avisos de permiso del modo `auto`: no contados |

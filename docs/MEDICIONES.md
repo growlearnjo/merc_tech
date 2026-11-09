@@ -6,7 +6,7 @@ conversación nueva y sobre el mismo código de partida
 
 | Corrida | Resultado | Turnos | Estado del filtro | Costo | Duración |
 |---|---|---|---|---|---|
-| S1 · sin reglas [^s1] | ✅ a la primera | 0 | La URL (`?page=N`), leída en el servidor en `src/app/page.tsx` | Sin medir en dólares (plan de Claude); el % semanal no tiene resolución para una tarea | 4 min |
+| S1 · sin reglas [^s1] | ✅ a la primera | 0 | La URL (`?page=N`), leída en el servidor en `src/app/page.tsx` | ≈ US$ 1,78 · 37 turnos · caché leída 2.760.079 · salida 33.151 (`tokens.py`, fila `5238c17d`) | 4 min |
 | S2 · con `CLAUDE.md` | | | | | |
 | S3 · configuración elegida | | | | | |
 

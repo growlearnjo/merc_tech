@@ -98,14 +98,29 @@ que son decisiones del producto y las tomó el agente, sin avisar.
 
 ### Qué costó
 
-| Tramo | Uso del plan (`/cost`, % semanal) | Duración | Turnos de corrección |
-|---|---|---|---|
-| Fase 1.2 · generación | 26 % → 26 % (por debajo de la resolución) | 12 min | 0 |
-| Fase 1.4 · tarea patrón | sin resolución para una tarea | 4 min | 0 |
-| Fases 1.1, 1.3 y cierre | sin medir | sin medir | sin medir |
+Medido con `python doc_sesions/sesion1/tokens.py`, que suma los tokens que
+Claude Code guarda en el disco, conversación por conversación. El comando
+`/cost` no servía: con un plan informa el porcentaje semanal, y toda la sesión
+lo movió menos de un punto (26 % → 26 %).
 
-En dólares: sin medir. Pago plan de suscripción, no saldo de API. Al empezar,
-el uso semanal estaba en 26 %; se reinicia el 2026-11-14.
+| Tramo | Conversación | Turnos | Caché leída | Salida | ~USD | Duración | Correcciones |
+|---|---|---|---|---|---|---|---|
+| Prompt 0 (dos intentos) | `dd22ebf0`, `ad675e41` | 59 | 3.922.576 | 26.474 | 2,84 | 25 min | — |
+| Fase 1.1 · entorno y modo | `9097e739` | 19 | 1.151.604 | 15.292 | 1,33 | 7 min | 0 |
+| **Fase 1.2 · generación** | `6d0de479` | **91** | **8.837.394** | **211.479** | **7,52** | 35 min | **0** |
+| Fase 1.4 · tarea patrón | `5238c17d` | 37 | 2.760.079 | 33.151 | 1,78 | 12 min | 0 |
+| Cierre y push | `cc34409f` | 40 | 3.483.419 | 30.247 | 2,12 | 19 min | — |
+| Prompt 1 y Fase 1.3 | `c338fbc4`, `d896368e` | 47 | 3.789.052 | 34.780 | 2,86 | — | 0 |
+| **TOTAL** | 8 conversaciones | **293** | **23.944.124** | **351.423** | **18,45** | | |
+
+**La sesión 1 completa consumió el equivalente a US$ 18,45** a tarifas públicas
+de `claude-opus-5-5` (consultadas el 2026-11-09). Con plan de suscripción no se
+cobra: es el valor de lo consumido, útil para comparar tareas entre sí.
+
+**Lo que hizo la caché, y es el dato más interesante:** de los 25,3 millones de
+tokens de entrada, **23,9 millones salieron de la caché**. Leerlos costó
+US$ 4,79; como entrada nueva habrían costado **US$ 95,78**. El 95 % del consumo
+entró por la vía que cuesta la veinteava parte.
 
 ### Qué salió mal
 
