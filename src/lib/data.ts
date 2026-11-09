@@ -17,8 +17,9 @@ export type Product = {
 
 const PRODUCT_COLUMNS = "id, name, description, price_cents, stock, category, image_url";
 
-export async function getProducts(filters: { q?: string; category?: string } = {}): Promise<Product[]> {
-  await connection();
+type ProductFilters = { q?: string; category?: string };
+
+function productWhere(filters: ProductFilters): { clause: string; args: string[] } {
   const where: string[] = [];
   const args: string[] = [];
   if (filters.q) {
@@ -29,10 +30,32 @@ export async function getProducts(filters: { q?: string; category?: string } = {
     where.push("category = ?");
     args.push(filters.category);
   }
-  const sql = `SELECT ${PRODUCT_COLUMNS} FROM products
-    ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-    ORDER BY (stock = 0), id DESC`;
+  return { clause: where.length ? `WHERE ${where.join(" AND ")}` : "", args };
+}
+
+const PRODUCT_ORDER = "ORDER BY (stock = 0), id DESC";
+
+export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
+  await connection();
+  const { clause, args } = productWhere(filters);
+  const sql = `SELECT ${PRODUCT_COLUMNS} FROM products ${clause} ${PRODUCT_ORDER}`;
   return getDb().prepare(sql).all(...args) as Product[];
+}
+
+export type ProductPage = { products: Product[]; total: number; page: number; totalPages: number };
+
+/** Devuelve una página del catálogo. Si `page` se pasa del final, devuelve la última. */
+export async function getProductPage(filters: ProductFilters, page: number, perPage: number): Promise<ProductPage> {
+  await connection();
+  const db = getDb();
+  const { clause, args } = productWhere(filters);
+  const { total } = db.prepare(`SELECT COUNT(*) AS total FROM products ${clause}`).get(...args) as { total: number };
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const current = Math.min(Math.max(1, page), totalPages);
+  const products = db
+    .prepare(`SELECT ${PRODUCT_COLUMNS} FROM products ${clause} ${PRODUCT_ORDER} LIMIT ? OFFSET ?`)
+    .all(...args, perPage, (current - 1) * perPage) as Product[];
+  return { products, total, page: current, totalPages };
 }
 
 export async function getProduct(id: number): Promise<Product | null> {

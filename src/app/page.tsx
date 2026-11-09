@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { getCategories, getProducts } from "@/lib/data";
+import { getCategories, getProductPage } from "@/lib/data";
 import { ProductCard } from "@/components/ProductCard";
+
+const PER_PAGE = 6;
 
 export default function Home({ searchParams }: PageProps<"/">) {
   return (
@@ -40,15 +42,22 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/">["searchP
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
   const cat = typeof sp.cat === "string" ? sp.cat : "";
-  const [products, categories] = await Promise.all([
-    getProducts({ q: q || undefined, category: cat || undefined }),
+  const requestedPage = typeof sp.page === "string" ? Number.parseInt(sp.page, 10) : 1;
+  const [{ products, page, totalPages }, categories] = await Promise.all([
+    getProductPage(
+      { q: q || undefined, category: cat || undefined },
+      Number.isFinite(requestedPage) ? requestedPage : 1,
+      PER_PAGE,
+    ),
     getCategories(),
   ]);
 
-  const href = (c: string) => {
+  // Cambiar de categoría vuelve a la página 1; cambiar de página conserva categoría y búsqueda.
+  const href = (c: string, p = 1) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (c) params.set("cat", c);
+    if (p > 1) params.set("page", String(p));
     const s = params.toString();
     return `/${s ? `?${s}` : ""}#catalogo`;
   };
@@ -100,13 +109,55 @@ async function Catalog({ searchParams }: { searchParams: PageProps<"/">["searchP
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+          {totalPages > 1 && <Pagination page={page} totalPages={totalPages} href={(p) => href(cat, p)} />}
+        </>
       )}
     </>
+  );
+}
+
+function Pagination({ page, totalPages, href }: { page: number; totalPages: number; href: (p: number) => string }) {
+  const base = "inline-flex h-10 min-w-10 items-center justify-center rounded-xl px-3 text-sm font-medium transition";
+  const idle = `${base} bg-white text-zinc-700 ring-1 ring-zinc-200 hover:ring-zinc-400`;
+  const disabled = `${base} bg-white text-zinc-300 ring-1 ring-zinc-100`;
+  return (
+    <nav aria-label="Paginación del catálogo" className="mt-8 flex flex-wrap items-center justify-center gap-2">
+      {page > 1 ? (
+        <Link href={href(page - 1)} className={idle} rel="prev">
+          ← Anterior
+        </Link>
+      ) : (
+        <span className={disabled} aria-disabled>
+          ← Anterior
+        </span>
+      )}
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
+        p === page ? (
+          <span key={p} aria-current="page" className={`${base} bg-zinc-900 text-white`}>
+            {p}
+          </span>
+        ) : (
+          <Link key={p} href={href(p)} className={idle}>
+            {p}
+          </Link>
+        ),
+      )}
+      {page < totalPages ? (
+        <Link href={href(page + 1)} className={idle} rel="next">
+          Siguiente →
+        </Link>
+      ) : (
+        <span className={disabled} aria-disabled>
+          Siguiente →
+        </span>
+      )}
+    </nav>
   );
 }
 
