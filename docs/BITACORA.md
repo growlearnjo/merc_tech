@@ -59,6 +59,43 @@ En este cierre:
 - `doc_sesions/` (material del curso) se sube al repositorio público junto con
   el resto.
 
+Reportadas por el agente en el chat de la Fase 1.2 y recuperadas al cierre
+del ensayo (ese chat se cerró antes de que quedaran escritas). Con ⚠️, las que
+un responsable del producto habría querido aprobar antes:
+
+- ⚠️ Eligió `node:sqlite`, una API que Node marca como **experimental**, en vez
+  de un paquete estable como `better-sqlite3`.
+- ⚠️ Actualizó `@types/node` de la versión 20 a la 24 por su cuenta.
+- Usó la plantilla de `create-next-app` con carpeta `src/`, App Router, Tailwind
+  y ESLint. Esa plantilla además inicializó un repositorio git en la carpeta.
+- Decidió que no hubiera API REST: los formularios llaman directamente a
+  Server Actions.
+- Cada lectura de la base espera la petición real del visitante
+  (`connection()`); sin eso, Next.js habría consultado al compilar y el stock y
+  los precios habrían quedado congelados.
+- ⚠️ Agregó funcionalidades que el encargo **no** pedía: buscador, filtro por
+  categoría, página "Mis pedidos", pantalla de confirmación de compra y una
+  página 404 propia.
+- ⚠️ Inventó texto de publicidad que nadie escribió: "Envío gratis" y tres
+  sellos de envío, garantía y cambios.
+- ⚠️ Inventó los nombres y las descripciones de los 12 productos de ejemplo.
+- ⚠️ Decidió que hace falta iniciar sesión para comprar. No se lo pidieron.
+- ⚠️ Dejó `/admin` sin ningún control de acceso y no creó el concepto de
+  administrador. En esa página solo se pueden crear productos, no editarlos ni
+  borrarlos.
+- Quitó el modo oscuro que traía la plantilla y dejó tema claro fijo.
+- Los productos no llevan fotos: fondo degradado con un emoji por categoría.
+- Fijó la duración de las sesiones en 30 días.
+- La redirección posterior al login solo acepta rutas internas.
+- Un pedido solo lo ve su dueño.
+- Escribió un script de prueba de punta a punta **fuera** del repositorio, lo
+  ejecutó una vez y borró la base de datos que había generado.
+- No probó la tienda en un celular ni en un navegador visual.
+
+**Total: 26 decisiones no pedidas registradas en esta sección**, de las cuales
+7 están marcadas con ⚠️. Ninguna es un error; varias son buenas. El punto es
+que son decisiones del producto y las tomó el agente, sin avisar.
+
 ### Qué costó
 
 | Tramo | Uso del plan (`/cost`, % semanal) | Duración | Turnos de corrección |
