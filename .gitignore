@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+
+# Build de Next.js
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# Variables de entorno: nunca se suben.
+# .env*.local va explícito aunque .env* ya lo cubre, para que se lea a simple vista.
+.env*.local
+.env*
+
+# La base SQLite se crea sola al arrancar (npm run db:reset la borra)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Pruebas y despliegue
+coverage/
+.vercel/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema y editor
+.DS_Store
+Thumbs.db
+desktop.ini
