@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listCategories, listProducts } from "@/lib/products";
+import { listCategories, listProductsPage } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 
 export const dynamic = "force-dynamic";
@@ -7,17 +7,23 @@ export const dynamic = "force-dynamic";
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string; page?: string }>;
 }) {
-  const { q = "", cat = "" } = await searchParams;
+  const { q = "", cat = "", page: pageParam = "1" } = await searchParams;
   const query = q.trim().slice(0, 80);
-  const products = listProducts({ q: query || undefined, category: cat || undefined });
+  const { products, total, page, totalPages } = listProductsPage({
+    q: query || undefined,
+    category: cat || undefined,
+    page: Number.parseInt(pageParam, 10) || 1,
+  });
   const categories = listCategories();
 
-  const chipHref = (c: string) => {
+  // Cambiar de categoría vuelve a la página 1; cambiar de página conserva búsqueda y categoría.
+  const buildHref = (c: string, n = 1) => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
     if (c) p.set("cat", c);
+    if (n > 1) p.set("page", String(n));
     const s = p.toString();
     return s ? `/?${s}` : "/";
   };
@@ -64,7 +70,7 @@ export default async function CatalogPage({
             return (
               <Link
                 key={c || "todos"}
-                href={chipHref(c)}
+                href={buildHref(c)}
                 className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
                   active
                     ? "border-slate-900 bg-slate-900 text-white"
@@ -83,7 +89,7 @@ export default async function CatalogPage({
             {query && <span className="font-normal text-slate-500"> · “{query}”</span>}
           </h2>
           <span className="text-sm text-slate-500">
-            {products.length} {products.length === 1 ? "producto" : "productos"}
+            {total} {total === 1 ? "producto" : "productos"}
           </span>
         </div>
 
@@ -100,6 +106,47 @@ export default async function CatalogPage({
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
+        )}
+
+        {totalPages > 1 && (
+          <nav aria-label="Paginación" className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            {page > 1 ? (
+              <Link
+                href={buildHref(cat, page - 1)}
+                rel="prev"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400"
+              >
+                ← Anterior
+              </Link>
+            ) : (
+              <span className="rounded-xl border border-slate-100 px-4 py-2 text-sm text-slate-300">← Anterior</span>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+              <Link
+                key={n}
+                href={buildHref(cat, n)}
+                aria-current={n === page ? "page" : undefined}
+                className={`min-w-10 rounded-xl border px-3 py-2 text-center text-sm font-medium transition ${
+                  n === page
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
+                }`}
+              >
+                {n}
+              </Link>
+            ))}
+            {page < totalPages ? (
+              <Link
+                href={buildHref(cat, page + 1)}
+                rel="next"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400"
+              >
+                Siguiente →
+              </Link>
+            ) : (
+              <span className="rounded-xl border border-slate-100 px-4 py-2 text-sm text-slate-300">Siguiente →</span>
+            )}
+          </nav>
         )}
       </section>
     </>
