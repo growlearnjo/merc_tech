@@ -13,11 +13,7 @@ export type Product = {
 const COLUMNS = `id, name, description, category, price_cents AS priceCents,
   stock, image_url AS imageUrl`;
 
-export const PAGE_SIZE = 6;
-
-type ProductFilter = { q?: string; category?: string };
-
-function buildWhere(opts: ProductFilter): { sql: string; params: string[] } {
+export function listProducts(opts: { q?: string; category?: string } = {}): Product[] {
   const where: string[] = [];
   const params: string[] = [];
   if (opts.q) {
@@ -28,35 +24,12 @@ function buildWhere(opts: ProductFilter): { sql: string; params: string[] } {
     where.push("category = ?");
     params.push(opts.category);
   }
-  return { sql: where.length ? "WHERE " + where.join(" AND ") : "", params };
-}
-
-export function listProducts(opts: ProductFilter = {}): Product[] {
-  const { sql, params } = buildWhere(opts);
-  return queryAll<Product>(`SELECT ${COLUMNS} FROM products ${sql} ORDER BY id`, ...params);
-}
-
-export type ProductPage = {
-  products: Product[];
-  total: number;
-  page: number;
-  totalPages: number;
-};
-
-// Devuelve una página del catálogo. Si `page` se pasa del final, se ajusta a la última.
-export function listProductsPage(opts: ProductFilter & { page?: number } = {}): ProductPage {
-  const { sql, params } = buildWhere(opts);
-  const total =
-    queryOne<{ n: number }>(`SELECT COUNT(*) AS n FROM products ${sql}`, ...params)?.n ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const page = Math.min(Math.max(1, Math.floor(opts.page ?? 1)), totalPages);
-  const products = queryAll<Product>(
-    `SELECT ${COLUMNS} FROM products ${sql} ORDER BY id LIMIT ? OFFSET ?`,
-    ...params,
-    PAGE_SIZE,
-    (page - 1) * PAGE_SIZE
+  return queryAll<Product>(
+    `SELECT ${COLUMNS} FROM products
+     ${where.length ? "WHERE " + where.join(" AND ") : ""}
+     ORDER BY id`,
+    ...params
   );
-  return { products, total, page, totalPages };
 }
 
 export function getProduct(id: number): Product | null {
