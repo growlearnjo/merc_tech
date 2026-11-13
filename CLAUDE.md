@@ -20,14 +20,14 @@ Tienda de práctica del curso; cada regla de abajo sale del inventario de `docs/
 ## Valores ajustables
 - Viven en un solo archivo, `src/lib/constants.ts`, que todavía no existe. Hoy están incrustados
   y duplicados: `120` en `actions.ts:115` y `ProductForm.tsx:20`; `99` en `actions.ts:77` y
-  `CartButton.tsx:21`; además `actions.ts:72`, `ProductForm.tsx:34`, `auth.ts:8`.
+  `CartButton.tsx:21`; además `actions.ts:72`, `ProductForm.tsx:34`, `auth.ts:8`, `src/app/page.tsx:13`.
 - Un valor nuevo no se escribe en línea, y no se inventan textos comerciales
-  (envío gratis, garantía): hoy hay dos sin aprobar, en `page.tsx` y `producto/[id]/page.tsx:61`.
-  Verificación: `grep -rnE "> ?99|> ?100|> ?120|maxLength=\{[0-9]|S/ [0-9]|[0-9]+ meses" src --include="*.ts*" | grep -v seed.ts` debe devolver vacío.
+  (envío gratis, garantía): hoy hay dos sin aprobar, en `src/app/page.tsx:32` y `producto/[id]/page.tsx:61`.
+  Verificación (cubre `99`, `100`, `120` y los textos comerciales; `10`, `30` y `80` se revisan a mano): `grep -rnE "> ?99|> ?100|> ?120|maxLength=\{[0-9]|S/ [0-9]|[0-9]+ meses" src --include="*.ts*" | grep -v -e seed.ts -e money.ts` debe devolver vacío.
 
 ## Estado de la interfaz
 - Filtros, búsqueda y paginación del catálogo viven en la URL (`searchParams`), no en `useState`.
-  Verificación: `grep -n "useState\|use client" src/app/page.tsx` debe devolver vacío.
+  La paginación hoy no existe (se revirtió en la Fase 2.2). Verificación: `grep -n "useState\|use client" src/app/page.tsx` debe devolver vacío.
 - `localStorage` solo guarda el carrito (`CartProvider.tsx`); no hay tabla `cart_items`.
   No la crees ni muevas el carrito sin que se pida.
   Verificación: `grep -rln localStorage src` devuelve solo `src/components/CartProvider.tsx`.
