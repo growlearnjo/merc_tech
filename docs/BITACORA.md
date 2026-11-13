@@ -170,3 +170,120 @@ asignada por el primer mensaje de cada conversación:
       navegador (material del revisor de la sesión 5).
 - [ ] Si el push del cierre quedó pendiente: hacerlo antes de empezar y
       confirmar con `git log --oneline -1` que local y remoto coinciden.
+
+---
+
+## Sesión 2 — 2026-11-13 — El contrato y la segunda medición
+
+### Qué se hizo, en orden
+
+| Hora | Commit | Fase |
+|---|---|---|
+| 11:27 | `3fa13ef` | 2.1 · se escribe `CLAUDE.md` |
+| 11:52 | `f019eac` | 2.2 · se revierte la tarea patrón S1 (`f9f38ce`) |
+| 12:09 | `50dc3bd` | 2.3 · auditoría del `CLAUDE.md` (4 líneas cambiadas) |
+| 12:37 | `1389e03` | 2.3 · segunda corrida de la tarea patrón (S2) y su fila |
+
+### Las reglas del `CLAUDE.md` y a qué fila del inventario apuntan
+
+Inventario = `docs/00-ANTES.md` §5.
+
+| Línea del `CLAUDE.md` | Regla | Fila del inventario |
+|---|---|---|
+| 8–10 | No hay pruebas; no decir que pasaron | Defecto 3 · cero pruebas |
+| 13–15 | `actions.ts` no ejecuta SQL; `users` pasa por `auth.ts` | Defecto 1 · forma parcial (SQL en `actions.ts`) |
+| 16–18 | No agregar funciones, páginas, dependencias ni versiones no pedidas | Ninguna fila de los cuatro defectos. Sale del problema 5 (la generación hizo el filtro sin que se pidiera) y del riesgo de §3 (TypeScript 7 → 5 sin pedirlo) |
+| 21–23 | Los valores ajustables viven en `src/lib/constants.ts` | Defecto 2 · valores incrustados |
+| 24–26 | Ni valores en línea ni textos comerciales inventados | Defecto 2 (fila del grep `S/ ` y `12 meses`) |
+| 29–30 | Filtros, búsqueda y paginación viven en la URL | Problema 5 · el filtro ya estaba en la URL |
+| 31–33 | `localStorage` solo para el carrito; no crear `cart_items` | Problema 6 · esquema sin `cart_items`, y defecto 4 forma c |
+| 36–39 | `/admin` y `createProductAction` exigen admin; hoy no se cumple | Defecto 4 · forma a |
+
+### La auditoría
+
+- `/doctor prompt-audit` dio **12 hallazgos**; **5** apuntaban a mi contrato.
+- Al ejecutar el comando de verificación de cada regla salieron **3 más**.
+- **Acepté 5.** Están en `50dc3bd`: falta `src/app/page.tsx:13` en la lista de
+  valores, ruta completa en `src/app/page.tsx:32`, el grep de valores excluye
+  `money.ts` y dice qué no cubre (`10`, `30`, `80`), y la regla de la URL
+  avisa que la paginación no existía.
+- **El hallazgo que el comando no vio:** la regla de la URL afirmaba que el
+  catálogo paginaba, y en ese momento no paginaba. Su grep la daba por buena
+  porque solo busca `useState`: un grep vacío no prueba que lo que la regla
+  describe exista.
+
+### Fase 2.2: caso de historial
+
+**Caso A.** Había un commit con la app y otro aparte con la tarea patrón
+(`f9f38ce`, toca `src/app/page.tsx` y `src/lib/products.ts`). Se revirtió con
+`git revert` (`f019eac`); el commit original sigue en el historial para la
+sesión 3.
+
+### La fila S2 al lado de la S1
+
+| | S1 · sin reglas | S2 · con `CLAUDE.md` |
+|---|---|---|
+| Resultado | ✅ sin intervención | ✅ sin intervención |
+| Turnos de corrección | 0 | 0 |
+| Estado de la página | La URL (`?page=`) | La URL (`?page=`) |
+| Decisiones no pedidas | 13, 4 con ⚠️ | 13, 4 con ⚠️ |
+| Dónde vive el 6 | `PAGE_SIZE` en `src/lib/products.ts` | `PRODUCTS_PER_PAGE` en `src/lib/constants.ts` |
+| Dónde se pagina | En la base (`LIMIT`/`OFFSET` + `COUNT`) | En memoria (`slice` en `page.tsx`) |
+| Salida (tokens) | 4,682 | 4,098 |
+| Caché leída (tokens) | 610,325 | 385,561 |
+| ~USD | 0.44 | 0.36 |
+| Duración | 2 min | 1 min |
+
+Costo y duración: del bloque del enunciado de cada conversación, con
+`tokens.py --patron` (detalle en `docs/MEDICIONES.md`). Una corrida por
+columna: la diferencia de costo y tiempo no alcanza para atribuirla al
+contrato.
+
+### Qué cambió y qué no
+
+- **Empataron** en resultado, turnos, dónde vive el estado y número de
+  decisiones no pedidas (13 y 4 ⚠️ en las dos). Las cuatro ⚠️ son las mismas
+  en las dos corridas: el admin sin paginar, la página fuera de rango, volver a
+  la página 1 al filtrar y el contador con el total.
+- **Lo que esta tarea mide, según mi `CLAUDE.md`:** la línea 29 dice que la
+  paginación vive en la URL y no en `useState`. La S1 ya lo hacía sin reglas,
+  así que esa regla no tenía nada que cambiar.
+- **Lo que sí cambió:** el 6 pasó a `src/lib/constants.ts`, que es lo que pide
+  la línea 21. Y la paginación pasó de la base a la memoria: la regla de la
+  línea 16 ("no agregues funciones que la tarea no pida") es ambigua y empujó
+  al agente a no tocar `products.ts`. **En esa decisión el contrato empeoró el
+  resultado.** No se corrige hoy.
+
+### Costo de la sesión 2
+
+Sin medir: hoy no se corrió `tokens.py` sobre las conversaciones completas de
+la sesión, solo sobre el bloque de la corrida S2.
+
+### Qué salió mal
+
+1. Un grep de verificación aprobó una regla falsa (ver "La auditoría").
+2. La regla de la línea 16 produjo una decisión de arquitectura peor que la
+   corrida sin reglas.
+3. Al cierre, cuatro afirmaciones del `CLAUDE.md` quedaron falsas por lo que
+   pasó hoy (ver Pendientes). No se cambiaron: esperan decisión.
+
+### Pendiente para la sesión 3
+
+- [ ] Decidir las cuatro afirmaciones del `CLAUDE.md` que la corrida S2 dejó
+      obsoletas:
+      - línea 21: `src/lib/constants.ts` "todavía no existe" → existe desde
+        `1389e03`;
+      - línea 23: `src/app/page.tsx:13` → el `80` está hoy en la línea 14;
+      - línea 25: `src/app/page.tsx:32` → el texto de envío está hoy en la 44;
+      - línea 30: "La paginación hoy no existe" → existe desde `1389e03`.
+- [ ] Avisos de la auditoría que quedaron fuera del contrato:
+      - los números de línea del contrato se moverán cuando se corrijan los
+        defectos (ya pasó con dos, arriba);
+      - posible tercer texto comercial en `src/app/layout.tsx:9`, sin volver
+        a medir;
+      - `AGENTS.md:7` choca con la regla de la línea 18 del `CLAUDE.md`.
+- [ ] Decidir si la regla de la línea 16 se reescribe para que no empuje a
+      paginar en memoria (es una regla nueva: pasa por auditoría).
+- [ ] Correr la S3 y llenar su fila en `docs/MEDICIONES.md`.
+- [ ] Si el push de este cierre quedó pendiente, hacerlo antes de empezar y
+      comprobar con `git status -sb` que no diga `ahead`.
