@@ -46,6 +46,19 @@ El dato que va a la tabla de MEDICIONES es el del bloque de tu enunciado, no
 el de la conversación entera. Y lo más simple es que no haya que elegir: si el
 chat de la tarea patrón lleva solo la tarea, su único bloque ya es el dato.
 
+Para no tener que acordarte de qué chat fue cada corrida, el script las busca
+por el texto del enunciado, en todas las conversaciones del proyecto:
+
+    python doc_sesions/sesion2/tokens.py --patron
+
+Reconoce los tres enunciados de TAREA_PATRON.md §1. Si tu docente te dio otro,
+pásalo entre comillas:
+
+    python doc_sesions/sesion2/tokens.py --patron "Agrega al catálogo un buscador"
+
+Si no aparece ninguna corrida, esa conversación ya no está en tu disco, y el
+camino de repuesto lo explica la spec de la sesión 3.
+
 QUÉ SIGNIFICA CADA COLUMNA
 --------------------------
 entrada     Tokens nuevos que el modelo leyó por primera vez. Se pagan completos.
@@ -100,6 +113,29 @@ ENVOLTURAS = (
     "<session-start-hook",
     "<post-tool-use-hook",
 )
+
+# Los tres enunciados de la tarea patrón (TAREA_PATRON.md §1). El buscador de
+# --patron compara por el principio del texto, así que basta la primera frase.
+ENUNCIADOS = (
+    "agrega al catálogo un filtro por categoría",
+    "muestra solo 6 productos por página",
+    "agrega al catálogo una forma de ordenar los productos por precio",
+)
+
+
+def normalizar(texto):
+    return " ".join(texto.split()).casefold()
+
+
+def momento(marca, con_fecha=False):
+    """La marca de tiempo del archivo, en tu hora local. El archivo guarda UTC."""
+    if not marca:
+        return ""
+    try:
+        t = datetime.datetime.fromisoformat(marca.replace("Z", "+00:00")).astimezone()
+    except ValueError:
+        return marca[11:16]
+    return t.strftime("%Y-%m-%d %H:%M") if con_fecha else t.strftime("%H:%M")
 
 
 def carpeta_de_proyecto(ruta):
@@ -184,7 +220,8 @@ def leer(archivo):
                 actual = {
                     "n": len(bloques) + 1,
                     "prompt": mio,
-                    "hora": (o.get("timestamp") or "")[11:16],
+                    "hora": momento(o.get("timestamp")),
+                    "fecha_hora": momento(o.get("timestamp"), con_fecha=True),
                     "tot": cero(),
                     "turnos": 0,
                     "modelos": set(),
@@ -273,11 +310,77 @@ def imprimir_bloques(nombre, bloques, invocacion):
     print("  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.")
     print("  Desglose de otra conversación: %s --bloques <conversación>" % invocacion)
     print("  Desglose de todas:             %s --bloques todas" % invocacion)
+    print("  Solo las corridas del patrón:  %s --patron" % invocacion)
+
+
+def imprimir_patron(filas, enunciado):
+    """Las corridas de la tarea patrón, buscadas por el texto del enunciado."""
+    buscados = [normalizar(enunciado)] if enunciado else list(ENUNCIADOS)
+    encontrados = []
+    for nombre, _, _, _, _, bloques in filas:
+        for b in bloques:
+            texto = normalizar(b["prompt"])
+            for e in buscados:
+                if texto.startswith(e):
+                    encontrados.append((nombre, b, e))
+                    break
+
+    print("\nCorridas de la tarea patrón en este proyecto")
+    if not encontrados:
+        print("""
+  No encontré ninguna. Dos motivos posibles:
+
+  1. El enunciado que usaste no es uno de los tres de TAREA_PATRON.md §1.
+     Pásalo entre comillas: --patron "tu enunciado"
+  2. Esa conversación ya no está en tu disco. Abrir un chat nuevo no la borra,
+     así que esto solo pasa si la borraste. El camino de repuesto está en la
+     spec de la sesión 3, en "Si algo falla".""")
+        return
+    # Agrupadas por enunciado: dos enunciados distintos no se comparan entre sí.
+    grupos = {}
+    for nombre, b, e in encontrados:
+        grupos.setdefault(e, []).append((nombre, b))
+    orden = sorted(
+        grupos,
+        key=lambda e: min(x[1]["marcas"][0] for x in grupos[e] if x[1]["marcas"]),
+    )
+    cab = "    %-14s%8s%18s%8s%9s%12s%12s%9s%16s%8s" % (
+        "conversación", "bloque", "cuándo", "turnos", "entrada", "caché esc",
+        "caché lec", "salida", "duración", "~USD")
+    for e in orden:
+        corridas = sorted(grupos[e], key=lambda x: x[1]["marcas"][0] if x[1]["marcas"] else "")
+        etiqueta = "Enunciado %d" % (ENUNCIADOS.index(e) + 1) if e in ENUNCIADOS else "Tu enunciado"
+        print('\n  %s — "%s"' % (etiqueta, resumen_prompt(corridas[0][1]["prompt"], 60)))
+        print(cab)
+        print("    " + "-" * (len(cab) - 4))
+        for nombre, b in corridas:
+            t = b["tot"]
+            print("    %-14s%8d%18s%8d%9s%12s%12s%9s%16s%8.2f" % (
+                nombre, b["n"], b["fecha_hora"], b["turnos"],
+                "{:,}".format(t["in"]), "{:,}".format(t["cw"]),
+                "{:,}".format(t["cr"]), "{:,}".format(t["out"]),
+                minutos(b["marcas"]) or "sin dato", dolares(t, b["modelos"])))
+    if len(orden) > 1:
+        print("""
+  AVISO: hay corridas con enunciados distintos, y esas no se comparan entre sí.
+  Usa solo el grupo del enunciado que tienes anotado al pie de tu
+  docs/MEDICIONES.md, y deja el otro fuera de la tabla.""")
+    else:
+        print("\n  Dentro de un grupo, la corrida más antigua es tu S1 y la siguiente tu S2.")
+    print("  Cada fila va tal cual a docs/MEDICIONES.md, con sus tokens y sus dólares.")
 
 
 def main():
     args = sys.argv[1:]
     pedido = None
+    patron = False
+    enunciado = None
+    if "--patron" in args:
+        i = args.index("--patron")
+        args.pop(i)
+        patron = True
+        if i < len(args) and not args[i].startswith("-"):
+            enunciado = args.pop(i)
     if "--bloques" in args:
         i = args.index("--bloques")
         args.pop(i)
@@ -347,6 +450,9 @@ def main():
             "{:,}".format(total["cr"]), con_cache))
         print("Sin caché, como entrada nueva, habrían costado US$ %.2f." % sin_cache)
 
+    if patron:
+        imprimir_patron(filas, enunciado)
+
     # El desglose por bloques. Sin pedir nada, la conversación más reciente.
     if pedido == "todas":
         elegidas = filas
@@ -354,6 +460,8 @@ def main():
         elegidas = [f for f in filas if f[0].startswith(pedido[:8])]
         if not elegidas:
             print("\nNo encontré la conversación %s. Usa un nombre de la tabla." % pedido)
+    elif patron:
+        elegidas = []
     else:
         elegidas = filas[-1:]
     for nombre, _, _, _, _, bloques in elegidas:
