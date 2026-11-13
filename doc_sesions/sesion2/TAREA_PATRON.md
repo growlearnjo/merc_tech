@@ -139,8 +139,9 @@ propio `docs/MEDICIONES.md`, que nace en la sesión 1.
 | S2 · con `CLAUDE.md` | | | | | | |
 | S3 · configuración elegida | | | | | | |
 
-> **Sobre la fila de la sesión 3.** En esa sesión la tarea se corre **tres
-> veces**, con tres configuraciones distintas de modelo, effort y caché. La fila
+> **Sobre la fila de la sesión 3.** En esa sesión la tarea se corre **cinco
+> veces**: una repite la configuración de la sesión 2, y las otras cuatro son
+> las combinaciones de dos modelos por dos niveles de effort. La fila
 > de aquí es la **configuración elegida**; la comparación de las tres vive en el
 > `docs/COSTOS.md` que nace en esa misma sesión. Así esta tabla sigue teniendo
 > tres filas comparables entre sí.
