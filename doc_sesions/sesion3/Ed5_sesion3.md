@@ -131,6 +131,7 @@ flowchart TD
 | Las conversaciones guardadas del proyecto, que es lo que lee `tokens.py` | la carpeta de proyectos de Claude Code en la máquina del alumno | 3.1, 3.2 |
 | La fila "S1 · sin reglas" llena | `docs/MEDICIONES.md` | 3.2, 3.3 |
 | La fila "S2 · con `CLAUDE.md`" llena, **o la constancia de que falta** | `docs/MEDICIONES.md` | 3.2, 3.3 |
+| El costo de las filas S1 y S2 **medido por bloque**, con el `tokens.py` corregido, y dicho al pie de la tabla | `docs/MEDICIONES.md` | 3.3 |
 | El enunciado de la tarea patrón, al pie de la tabla | `docs/MEDICIONES.md` | 3.2 |
 | El `CLAUDE.md` del proyecto, escrito y auditado en la sesión 2 | raíz de `<RUTA_PROYECTO>` | 3.2 |
 | El commit de la tarea patrón, aislado y reversible | el historial, `git log --oneline` | 3.2 |
@@ -156,6 +157,7 @@ diferencias.
 | 7 | **El dólar que muestra Claude Code lo calcula la máquina del alumno**, contando tokens a tarifa de lista. Con un plan de Claude no se factura por token: se consume cuota | Es una lámina obligatoria. Sin ella, medio grupo cree que le están cobrando | 3.1 |
 | 8 | Un prompt vago sí sale caro, pero **no por sus tokens**: por los turnos de corrección que provoca | El costo se mide **por tarea terminada**, y eso es lo que mide la columna de turnos | 3.1, 3.3 |
 | 9 | En la corrida de preparación, la mayor parte del consumo entró **por lectura de caché**, y leerlo costó una fracción de lo que habría costado como entrada nueva | La caché se enseña **con el número del propio alumno**. Ese número lo guarda el paso 2 de `PROMPTS_sesion2.md` en la sección FACTURA, así que esta fase **solo lo lee**: no vuelve a medir | 3.1 |
+| 10 | **El `tokens.py` de las sesiones 1 y 2 medía mal, por dos motivos a la vez.** Contaba cada respuesta tantas veces como pedazos tiene en el disco —Claude Code parte una respuesta en una línea por el texto y una por cada herramienta, y repite el contador en todas—, así que inflaba el gasto entre **1,9 y 4,2 veces**, con un factor distinto en cada conversación. Y daba el total de la conversación, no el de la tarea: un chat con tres trabajos dentro reportaba los tres sumados | **El script cuenta cada respuesta una sola vez, por su `message.id`, y da el gasto por bloque**: cada mensaje del alumno con las respuestas que vinieron después. Las filas S1 y S2 se vuelven a medir en el **Paso 3 de la ruta (condicional)** de los prompts, que las busca por el texto del enunciado con `--patron`. El factor de inflado **no es constante**, así que no se corrige dividiendo: o se vuelve a medir, o la comparación de esta sesión no vale | 3.2, 3.3 |
 
 ---
 
@@ -164,7 +166,7 @@ diferencias.
 | Fase | Qué entrega (en una línea) | Depende de | Se verifica con |
 |---|---|---|---|
 | 3.1 | La factura de la sesión 1 leída, y una hipótesis escrita en una línea | Prompt 0 | La hipótesis está escrita en `docs/COSTOS.md` o en la bitácora, antes de medir |
-| 3.2 | Las tres corridas, cada una con sus siete datos | 3.1 | Tres totales de `/usage` anotados, y `git log` con un revert antes de cada corrida |
+| 3.2 | Las tres corridas, cada una con sus siete datos | 3.1 | Tres bloques medidos con `tokens.py`, y `git log` con un revert antes de cada corrida |
 | 3.3 | `docs/COSTOS.md` con la tabla y la regla, y la fila S3 de `docs/MEDICIONES.md` | 3.2 | El archivo existe, tiene la fecha de consulta de los precios, y termina con la frase del alumno |
 
 ## Convenciones transversales
@@ -408,6 +410,9 @@ La Fase 3.2, con las tres corridas medidas.
 | Todos los costos salen en cero o vacíos | la sesión corre con un proveedor o una pasarela que no reporta tokens de caché | anotar "sin medir" en esa columna y comparar por turnos y duración |
 | El alumno con plan cree que le están cobrando | no se dio la explicación de dónde sale el dólar | es una estimación a tarifa de lista calculada en su máquina; con plan se consume cuota, no dinero |
 | `tokens.py` dice que no encuentra las conversaciones | se corrió desde otra carpeta, o el proyecto tiene otra ruta | correrlo desde la raíz del proyecto. El propio script imprime dónde buscar |
+| El costo de la S1 o de la S2 no dice de qué bloque salió | se midió con la versión anterior del script, que inflaba el gasto y sumaba la conversación entera | **Paso 3 de la ruta (condicional)** de los prompts: `tokens.py --patron` las busca por el texto del enunciado y se reemplazan esas celdas |
+| `--patron` no encuentra ninguna corrida | el enunciado no es uno de los tres de `TAREA_PATRON.md` §1, o esas conversaciones se borraron del disco | primero pasarle el enunciado entre comillas. Si tampoco aparece, el paso 3 del mismo apartado: revertir el laboratorio 2 completo en orden inverso y repetirlo. Abrir un chat nuevo **no** borra el anterior, así que esto solo pasa si se borraron a propósito |
+| Después de revertir, el `CLAUDE.md` sigue en la raíz | nunca se commiteó, y `revert` no toca lo que no está en el historial | renombrarlo antes de correr la S1, y devolverlo a su sitio después. Si no, esa corrida no es "sin reglas" |
 | El alumno no tiene la fila S2 | la medición de la sesión 2 quedó pendiente y no se hizo en casa | hace la sesión igual: su comparación es S1 contra S3, y lo anota en la bitácora |
 | El alumno quiere comparar su cifra con la del docente o la del compañero | cada app es distinta | la comparación es **consigo misma**, tres veces. Nunca contra el ejemplar ni contra el compañero |
 
@@ -451,6 +456,9 @@ dólares que la respaldan, y la tabla de tres filas del curso completa.
 * Entre corrida y corrida hubo un revert, y el historial lo muestra.
 * La fila S3 de `docs/MEDICIONES.md` está completa, medida con `tokens.py`, y
   ningún dato está estimado.
+* Las tres filas tienen su costo **medido por bloque** y con el mismo script, y
+  al pie de la tabla queda dicho de qué bloque salió cada una. Tres filas
+  medidas con dos versiones del instrumento no se comparan.
 * La hipótesis de la 3.1 está escrita, y está escrito si se cumplió o no.
 
 ## Registro de cambios
@@ -478,6 +486,21 @@ donde se va a trabajar.
 **Lo que no hizo falta cambiar:** esta sesión toma el enunciado **del pie de la
 tabla del alumno**, no de `TAREA_PATRON.md` §1, así que el tercer enunciado que
 nació en la sesión 2 se propaga solo.
+
+**2026-11-13 — versión 1.2.** El instrumento de medición se arregló y la sesión
+se ajusta a eso (hallazgo 10). `tokens.py` contaba cada respuesta tantas veces
+como pedazos tiene en el disco, así que inflaba el gasto entre 1,9 y 4,2 veces,
+y además daba el total de la conversación en vez del de la tarea. Ahora cuenta
+cada respuesta una vez y da el gasto **por bloque**, y sabe buscar las corridas
+de la tarea patrón por el texto del enunciado, con `--patron`. Los prompts
+ganan un **Paso 3 de la ruta (condicional)** que vuelve a medir las filas S1 y S2 antes de
+comparar nada, con su camino de repuesto para el caso de que esas
+conversaciones ya no estén en el disco: revertir el laboratorio 2 completo en
+orden inverso —que se lleva el `CLAUDE.md` con él, y por eso la S1 vuelve a
+medirse sin reglas— y repetirlo. El Prompt 0 gana la comprobación de si esas
+filas dicen de qué bloque salieron, y la Fase 3.2 anota el bloque, no la
+conversación. La verificación de la 3.2 en el mapa de fases decía "tres totales
+de `/usage`", que contradecía el hallazgo 2: ahora dice `tokens.py`.
 
 **Pendiente antes de dar la clase.** La presentación `Ed5_sesion3.pptx` todavía
 dice "lab 35" y "seis datos", su lámina 6 asume dos filas de mediciones, y no

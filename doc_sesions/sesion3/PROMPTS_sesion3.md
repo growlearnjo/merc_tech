@@ -33,12 +33,13 @@ lugar.
 |---|---|---|
 | 1 | **Prompt 0** — verificar el terreno | chat nuevo |
 | 2 | **Prompt 1** — leer la spec | chat nuevo |
-| 3 | **Fase 3.1** — tu factura y la hipótesis | chat nuevo. Ahí mismo escribes `/usage` |
-| 4 | **Fase 3.2, corrida A** | chat nuevo, con **dos pasos dentro** |
-| 5 | **Fase 3.2, corrida B** | **otro** chat nuevo, con dos pasos dentro |
-| 6 | **Fase 3.2, corrida C** | **otro** chat nuevo, con dos pasos dentro |
-| 7 | **Fase 3.3** — `docs/COSTOS.md` y la regla | chat nuevo |
-| 8 | **Cierre** — bitácora y push | chat nuevo |
+| 3 | **Paso 3 de la ruta (condicional)** — volver a medir las filas S1 y S2 | **en la terminal**, y solo si el Prompt 0 lo pidió |
+| 4 | **Fase 3.1** — tu factura y la hipótesis | chat nuevo. Ahí mismo escribes `/usage` |
+| 5 | **Fase 3.2, corrida A** | chat nuevo, con **dos pasos dentro** |
+| 6 | **Fase 3.2, corrida B** | **otro** chat nuevo, con dos pasos dentro |
+| 7 | **Fase 3.2, corrida C** | **otro** chat nuevo, con dos pasos dentro |
+| 8 | **Fase 3.3** — `docs/COSTOS.md` y la regla | chat nuevo |
+| 9 | **Cierre** — bitácora y push | chat nuevo |
 
 **Por qué cada corrida en su propio chat, y no es prolijidad:** cada
 conversación es una fila distinta en la herramienta de medición, así que cada
@@ -78,7 +79,7 @@ cuál le toca.
 
 | Dato | Lo consigue | Lo escribe en el archivo |
 |---|---|---|
-| El costo de cada corrida | **tú**, con `python doc_sesions/sesion3/tokens.py`, en tokens y en dólares | el agente, cuando se lo dictas |
+| El costo de cada corrida | **tú**, con `python doc_sesions/sesion3/tokens.py`, **la fila del bloque de tu enunciado**, en tokens y en dólares | el agente, cuando se lo dictas |
 | Duración | **tú**, con el reloj | el agente |
 | Turnos en que lo corregiste | **tú**, contándolos | el agente |
 | Dónde quedó el estado | el agente, mirando su código; **tú lo confirmas en la barra de direcciones** | el agente |
@@ -88,6 +89,13 @@ cuál le toca.
 midieron con él, así que las tres corridas de hoy también. Y se anotan **los
 tokens y los dólares**, no solo los dólares: los precios cambian y los tokens
 no, así que una tabla con tokens sigue sirviendo el año que viene.
+
+**Y se anota el bloque, no la conversación.** `tokens.py` te da una fila por
+conversación y, debajo, una por bloque: tu mensaje y todas las respuestas que
+vinieron después, hasta tu mensaje siguiente. El costo de la tarea es el del
+bloque. Si el chat de la corrida lleva solo la tarea, los dos números coinciden
+y no hay nada que elegir; si además le pediste otra cosa en ese mismo chat, la
+fila de la conversación ya no es el costo de la tarea.
 
 **`/usage` no desaparece, pero no es el instrumento de la tabla.** Es la
 pantalla de clase, y sirve para una cosa que `tokens.py` no puede: decir si la
@@ -101,6 +109,8 @@ a la tabla.
 * `docs/00-ANTES.md` con su sección **FACTURA**.
 * `docs/MEDICIONES.md` con la fila **S1** llena, la **S2** llena o la
   constancia de que falta, y al pie el enunciado de la tarea patrón.
+* El costo de esas filas, **medido por bloque** y con el `tokens.py` corregido.
+  Si no, se vuelve a medir en el Paso 3 de la ruta, y eso va antes de la Fase 3.1.
 * El `CLAUDE.md` escrito y auditado en la sesión 2.
 * El **commit de la tarea patrón** aislado y reversible.
 * **Claude Code 2.1.283 o superior.**
@@ -132,14 +142,20 @@ docs/MEDICIONES.md, mi CLAUDE.md y un commit aislado con la tarea patrón.
 4. Que docs/MEDICIONES.md exista y dime cuántas filas están llenas: la S1, la
    S2, las dos, o ninguna. Si la S2 está vacía, dímelo claro, porque cambia
    con qué se compara hoy.
-5. Cítame entre comillas el enunciado de la tarea patrón que está al pie de
+5. Mira la celda de costo de las filas S1 y S2 y dime si al pie de la tabla
+   queda escrito de qué BLOQUE de conversación salió cada una y que se midió
+   con tokens.py ya corregido. Si alguna de las dos no lo dice, avísame: ese
+   número puede venir inflado y hay que volver a medirlo con el Paso 3 de la ruta antes
+   de comparar nada. No lo midas tú.
+6. Cítame entre comillas el enunciado de la tarea patrón que está al pie de
    esa tabla. Es el que voy a repetir hoy tres veces sin cambiar una palabra.
-6. Que el commit de la tarea patrón esté en el historial y sea reversible:
+7. Que el commit de la tarea patrón esté en el historial y sea reversible:
    encuéntralo con git log --oneline, dime su mensaje y qué archivos tocó con
    git show --stat.
-7. Que exista mi CLAUDE.md en la raíz, y cuántas líneas tiene.
-8. Que python pueda correr la herramienta de medición: comprueba que
-   doc_sesions/sesion3/tokens.py existe y es legible. No la ejecutes: la corro yo.
+8. Que exista mi CLAUDE.md en la raíz, y cuántas líneas tiene.
+9. Que python pueda correr la herramienta de medición: comprueba que
+   doc_sesions/sesion3/tokens.py existe y es legible, y que contiene la palabra
+   "vistos", que es la marca de la versión corregida. No la ejecutes: la corro yo.
 
 [RESTRICCIONES]
 - No escribas ni modifiques ningún archivo. Ni uno.
@@ -154,9 +170,11 @@ anterior, dime qué camino de repuesto da la spec en vez de improvisar uno.
 
 [FORMATO DE SALIDA] (1) tabla de comprobación × comando × resultado; (2) los
 cuatro datos de la FACTURA, citados; (3) qué filas de la tabla están llenas;
-(4) el enunciado de la tarea patrón entre comillas; (5) el commit de la tarea
-con sus archivos; (6) veredicto en una línea: "terreno listo, adelante con la
-lectura" o el bloqueo encontrado. Sin commit.
+(4) si el costo de la S1 y de la S2 dice de qué bloque salió, una línea por
+fila; (5) el enunciado de la tarea patrón entre comillas; (6) el commit de la
+tarea con sus archivos; (7) veredicto en una línea: "terreno listo, adelante
+con la lectura", "hay que volver a medir las filas S1 o S2 con el Paso 3 de la ruta", o el
+bloqueo encontrado. Sin commit.
 ```
 
 ---
@@ -193,6 +211,100 @@ algo que mi versión de Claude Code no puede hacer, dímelo también.
 hoy, con su sesión; (3) qué cambia y qué no entre A, B y C; (4) para qué sirve
 el revert; (5) las dos líneas del costo; (6) tus dudas, si hay. Sin commit.
 ```
+
+---
+
+## Paso 3 de la ruta (condicional) — Volver a medir las filas S1 y S2
+
+> **En la terminal, no en el chat.** Y solo si el Prompt 0 te dijo que el costo
+> de la S1 o de la S2 no dice de qué bloque salió.
+
+**Qué pasaba.** La versión anterior de `tokens.py` daba el número mal, por dos
+motivos a la vez:
+
+| El problema | Qué salía |
+|---|---|
+| Contaba cada respuesta tantas veces como pedazos tiene en el disco | El gasto inflado, entre **1,9 y 4,2 veces** el real |
+| Sumaba la conversación completa | El costo de todo lo que hiciste en ese chat, no el de la tarea |
+
+Claude Code guarda una misma respuesta en varias líneas —una por el texto y una
+por cada comando que corrió—, y repite el mismo contador en todas. El script
+sumaba cada línea.
+
+**Y el error no se arregla dividiendo**, porque no es parejo: una respuesta que
+corre seis comandos se cuenta siete veces y una que solo escribe, una. Así que
+infla más las corridas en las que el agente investigó más. Eso es exactamente
+lo que esta sesión compara.
+
+**Qué cambió.** El `tokens.py` de esta carpeta cuenta cada respuesta una sola
+vez y te da el gasto **por bloque**. Un bloque es cada cosa que pediste: tu
+mensaje y todas las respuestas que vinieron después, hasta tu mensaje siguiente.
+
+### Primero — busca tus corridas
+
+Desde la raíz del proyecto:
+
+```bash
+python doc_sesions/sesion3/tokens.py --patron
+```
+
+Busca, en todas tus conversaciones guardadas, los bloques que empiezan con el
+enunciado de la tarea patrón, y te los muestra en orden. No tienes que acordarte
+de qué chat fue cada corrida.
+
+### Después — mira qué te salió
+
+| Lo que ves | Qué haces |
+|---|---|
+| Aparecen tus dos corridas | Copias cada fila a `docs/MEDICIONES.md`, **reemplazando** el costo y la duración que hubiera. La más antigua es la S1 y la siguiente la S2 |
+| Aparece una sola | Copias esa. La otra fila se queda como esté: no se repite un laboratorio por una celda |
+| Aparecen con **dos enunciados distintos** | Usas solo el grupo del enunciado que tienes anotado al pie de tu tabla, y dejas el otro fuera |
+| **No aparece ninguna** | Esas conversaciones ya no están en tu disco. Pasa al apartado de abajo |
+
+Abrir un chat nuevo no borra el anterior: el archivo se queda en el disco. Así
+que lo último solo pasa si borraste las sesiones a propósito.
+
+### Solo si no apareció ninguna — repetir el laboratorio 2
+
+**Solo si no apareció ninguna corrida.** Es más largo, pero no rompe nada: el
+enunciado es el mismo y los datos viejos se reemplazan, no se mezclan.
+
+1. **Revierte todos los commits del laboratorio 2, en orden inverso**: el más
+   reciente primero. Con `git revert`, nunca con `reset --hard`, que reescribe
+   la historia.
+
+   ```bash
+   git log --oneline
+   ```
+
+   Uno de esos commits es el que creó tu `CLAUDE.md`, así que al revertirlo el
+   contrato se va con él. Y eso es justo lo que la S1 necesita: medirse **sin
+   reglas**. Si revirtieras solo el commit de la tarea patrón, el `CLAUDE.md`
+   se quedaría puesto y esa corrida ya no sería una S1.
+
+2. **Comprueba que el `CLAUDE.md` ya no está.** Un archivo que nunca se
+   commiteó no se va con ningún `revert`, así que si sigue ahí, renómbralo a
+   `CLAUDE.md.guardado` y lo devuelves a su sitio en el punto 4.
+
+   ```bash
+   git status --short
+   ```
+
+3. **Corre la corrida sin reglas**, que es tu S1: conversación nueva, el mismo
+   enunciado del pie de tu tabla, y lo mides con el comando de más arriba.
+
+4. **Corre el laboratorio 2 completo**, desde su Fase 2.1, que es la que vuelve
+   a escribir el `CLAUDE.md`. Su Fase 2.3 es tu S2, y la mides igual. Sigue
+   hasta el prompt de cierre del laboratorio 2.
+
+5. **Vuelve aquí** y sigue con la Fase 3.1.
+
+### Y queda anotado
+
+Al pie de `docs/MEDICIONES.md`, una línea: que esas filas se volvieron a medir,
+en qué fecha, porque las conversaciones originales no estaban en el disco. Es lo
+que te deja explicar, dentro de tres semanas, por qué la S1 se midió después de
+la S2.
 
 ---
 
@@ -309,7 +421,9 @@ no sirve y hay que repetirla:
 3. **Enunciado idéntico**, el mismo de la sesión 1, copiado del pie de tu
    tabla. Ni una palabra distinta.
 4. **Mide con `tokens.py` antes de cerrar** cada conversación, y anota tokens
-   y dólares. Es el mismo instrumento con el que se midieron tus filas S1 y S2.
+   y dólares **del bloque del enunciado**. Es el mismo instrumento con el que
+   se midieron tus filas S1 y S2. Si el chat lleva solo la tarea, el bloque y
+   la conversación dan el mismo número, que es lo que buscamos.
 
 > **Un aviso honesto que conviene tener claro:** cada conversación nueva paga
 > su propia escritura de caché. Está incluido en el precio de cada corrida, y
@@ -376,10 +490,11 @@ proyecto:
 python doc_sesions/sesion3/tokens.py
 ```
 
-La fila de esta corrida es **la última de la tabla**, la más reciente. Anota sus
-cuatro contadores de tokens y los dólares. Y si quieres ver la caché en vivo,
-escribe `/usage` en el chat antes de cerrarlo: eso se mira, no se copia a la
-tabla.
+Debajo de la tabla sale el desglose de esta conversación, que es la más
+reciente. Anota los cuatro contadores de tokens, los dólares y los minutos
+**del bloque del enunciado**, que si hiciste bien la corrida es el único que
+hay. Y si quieres ver la caché en vivo, escribe `/usage` en el chat antes de
+cerrarlo: eso se mira, no se copia a la tabla.
 
 ### En cada corrida — Paso 2
 
@@ -400,8 +515,10 @@ la configuración de hoy es modelo [NOMBRE] con effort [NIVEL].
    hipótesis. Los datos que te doy yo:
    - resultado: [a la primera / tras corregir / no pasa / rompió algo]
    - turnos en que tuve que corregirte: [N]
-   - costo: [PEGA AQUÍ la fila de esta corrida en tokens.py: los cuatro
-     contadores de tokens y los dólares]
+   - costo: [PEGA AQUÍ la fila del BLOQUE del enunciado en tokens.py: los
+     cuatro contadores de tokens y los dólares. No es la fila de la
+     conversación: si en este chat hubo algo más que la tarea, esa fila mide de
+     más]
    - duración: [N] minutos
 
 [RESTRICCIONES]

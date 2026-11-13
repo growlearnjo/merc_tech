@@ -128,7 +128,7 @@ propio `docs/MEDICIONES.md`, que nace en la sesión 1.
 | Turnos de corrección | Cuántas veces hubo que volver a pedirle algo |
 | Dónde quedó el estado del filtro | `useState` · almacenamiento del navegador · la URL — se mira la URL de la pestaña, no el código |
 | **Decisiones no pedidas** | Cuántas cosas decidió el agente que el enunciado no pedía, y cuántas de ellas marcarías con ⚠️. Se las pides al cerrar la conversación: *"enumera lo que decidiste y que yo no te pedí"* |
-| Costo | `tokens.py` de la carpeta de la sesión, fila de esa conversación: los cuatro contadores de tokens y el equivalente en dólares |
+| Costo | `tokens.py` de la carpeta de la sesión, **la fila del bloque del enunciado**: los cuatro contadores de tokens y el equivalente en dólares. Un bloque es tu mensaje con las respuestas que vinieron después, hasta tu mensaje siguiente; si el chat lleva solo la tarea, coincide con la fila de la conversación. Con `--patron` el script busca esas corridas por el texto del enunciado |
 | Duración | Reloj de pared, de pegar el enunciado a terminar el paso 5 |
 
 ### La tabla que el alumno habrá llenado al terminar la sesión 3
@@ -175,6 +175,21 @@ No el plugin: la tabla.
   no enseña nada. La comparación es **consigo misma**, tres veces.
 * **Lo que no se midió se declara sin medir.** Si el alumno olvidó el reloj,
   la celda va vacía, no estimada.
+* **El chat de la corrida lleva solo la corrida.** Se pega el enunciado, se
+  verifican los cinco pasos, se mide y se cierra. Si en ese mismo chat se le
+  pide algo más, el costo de la tarea deja de ser la fila de la conversación y
+  hay que ir a buscar su bloque.
+* **El mismo instrumento, y la misma versión, en las tres filas.** El costo se
+  mide siempre con el `tokens.py` de la carpeta de la sesión, que cuenta cada
+  respuesta una sola vez y reporta por bloque. Tres filas medidas con dos
+  versiones distintas del script no se comparan: la versión vieja inflaba el
+  gasto, y con un factor distinto en cada conversación.
+* **Si una fila hay que volver a medirla, se mide de la conversación guardada,
+  no repitiendo la tarea.** Las conversaciones se quedan en el disco, así que
+  el dato sigue ahí semanas después. Repetir la corrida solo se justifica si
+  esa conversación ya no existe, y entonces hay que reponer también las
+  condiciones: una S1 se mide **sin** `CLAUDE.md` en la raíz. Queda anotado al
+  pie de la tabla con la fecha.
 
 ---
 
