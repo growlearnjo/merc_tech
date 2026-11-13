@@ -59,6 +59,12 @@ pásalo entre comillas:
 Si no aparece ninguna corrida, esa conversación ya no está en tu disco, y el
 camino de repuesto lo explica la spec de la sesión 3.
 
+DÓNDE QUEDA LA SALIDA
+---------------------
+Cada corrida deja lo que imprimió en `docs/SALIDA_TOKENS.txt`, dentro de tu
+proyecto, y se agrega al final sin borrar lo anterior. Así el agente puede leer
+los números de ahí, y tú no tienes que copiar filas a mano.
+
 QUÉ SIGNIFICA CADA COLUMNA
 --------------------------
 entrada     Tokens nuevos que el modelo leyó por primera vez. Se pagan completos.
@@ -98,6 +104,12 @@ TARIFAS = {
     "claude-haiku-5-5": {"in": 0.10, "cache_write": 0.125, "cache_read": 0.01, "out": 0.50},
 }
 POR_DEFECTO = TARIFAS["claude-opus-5-5"]
+
+# Cada corrida deja su salida aqui, dentro del proyecto medido, para que el
+# agente pueda leerla despues sin que tengas que copiar nada a mano. Se AGREGA
+# al final: no se borra lo que midio la corrida anterior.
+SALIDA = os.path.join("docs", "SALIDA_TOKENS.txt")
+RUTA_MEDIDA = None
 
 # Claude Code guarda, con el mismo formato que tus mensajes, avisos que tú no
 # escribiste: el archivo que abriste en el editor, recordatorios del sistema,
@@ -188,6 +200,13 @@ def resumen_prompt(texto, ancho=66):
     return s if len(s) <= ancho else s[:ancho - 1] + "…"
 
 
+def config(modelos, efforts):
+    """Modelo y effort con los que se corrio. Salen del archivo, no se anotan."""
+    ms = sorted(m.replace("claude-", "") for m in modelos) or ["sin dato"]
+    es = sorted(efforts) or ["sin dato"]
+    return "%s · %s" % ("/".join(ms), "/".join(es))
+
+
 def cero():
     return {"in": 0, "cw": 0, "cr": 0, "out": 0}
 
@@ -203,6 +222,7 @@ CAMPOS = (
 def leer(archivo):
     """Devuelve el total de la conversación y la lista de sus bloques."""
     tot, turnos, modelos, marcas = cero(), 0, set(), []
+    efforts = set()
     bloques, actual = [], None
     # Claude Code parte una misma respuesta en varias líneas (una por bloque de
     # texto o por herramienta) y todas repiten el mismo "usage". Se cuenta cada
@@ -225,6 +245,7 @@ def leer(archivo):
                     "tot": cero(),
                     "turnos": 0,
                     "modelos": set(),
+                    "efforts": set(),
                     # La duración del bloque va de tu mensaje a la última
                     # respuesta, no hasta tu mensaje siguiente: lo que tardaste
                     # en leer no es tiempo de trabajo del agente.
@@ -245,19 +266,23 @@ def leer(archivo):
                     tot[clave] += uso.get(campo) or 0
                 if msg.get("model"):
                     modelos.add(msg["model"])
+                if o.get("effort"):
+                    efforts.add(o["effort"])
                 if actual:
                     actual["turnos"] += 1
                     for clave, campo in CAMPOS:
                         actual["tot"][clave] += uso.get(campo) or 0
                     if msg.get("model"):
                         actual["modelos"].add(msg["model"])
+                    if o.get("effort"):
+                        actual["efforts"].add(o["effort"])
                     if o.get("timestamp"):
                         actual["marcas"].append(o["timestamp"])
 
             if o.get("timestamp"):
                 marcas.append(o["timestamp"])
 
-    return tot, turnos, modelos, marcas, bloques
+    return tot, turnos, modelos, marcas, bloques, efforts
 
 
 def minutos(marcas):
@@ -294,6 +319,7 @@ def imprimir_bloques(nombre, bloques, invocacion):
     for b in bloques:
         t = b["tot"]
         print('\n  Bloque %d — %s — "%s"' % (b["n"], b["hora"], resumen_prompt(b["prompt"])))
+        print("     configuración: %s" % config(b["modelos"], b["efforts"]))
         print(
             "     turnos %d · entrada %s · caché esc %s · caché lec %s · salida %s · %s · US$ %.2f"
             % (
@@ -344,9 +370,9 @@ def imprimir_patron(filas, enunciado):
         grupos,
         key=lambda e: min(x[1]["marcas"][0] for x in grupos[e] if x[1]["marcas"]),
     )
-    cab = "    %-14s%8s%18s%8s%9s%12s%12s%9s%16s%8s" % (
-        "conversación", "bloque", "cuándo", "turnos", "entrada", "caché esc",
-        "caché lec", "salida", "duración", "~USD")
+    cab = "    %-14s%7s%18s  %-24s%7s%9s%12s%12s%9s%15s%8s" % (
+        "conversación", "bloque", "cuándo", "configuración", "turnos", "entrada",
+        "caché esc", "caché lec", "salida", "duración", "~USD")
     for e in orden:
         corridas = sorted(grupos[e], key=lambda x: x[1]["marcas"][0] if x[1]["marcas"] else "")
         etiqueta = "Enunciado %d" % (ENUNCIADOS.index(e) + 1) if e in ENUNCIADOS else "Tu enunciado"
@@ -355,9 +381,9 @@ def imprimir_patron(filas, enunciado):
         print("    " + "-" * (len(cab) - 4))
         for nombre, b in corridas:
             t = b["tot"]
-            print("    %-14s%8d%18s%8d%9s%12s%12s%9s%16s%8.2f" % (
-                nombre, b["n"], b["fecha_hora"], b["turnos"],
-                "{:,}".format(t["in"]), "{:,}".format(t["cw"]),
+            print("    %-14s%7d%18s  %-24s%7d%9s%12s%12s%9s%15s%8.2f" % (
+                nombre, b["n"], b["fecha_hora"], config(b["modelos"], b["efforts"]),
+                b["turnos"], "{:,}".format(t["in"]), "{:,}".format(t["cw"]),
                 "{:,}".format(t["cr"]), "{:,}".format(t["out"]),
                 minutos(b["marcas"]) or "sin dato", dolares(t, b["modelos"])))
     if len(orden) > 1:
@@ -389,6 +415,8 @@ def main():
         else:
             pedido = "todas"
     ruta = args[0] if args else os.getcwd()
+    global RUTA_MEDIDA
+    RUTA_MEDIDA = os.path.abspath(ruta)
     try:
         invocacion = "python " + os.path.relpath(
             os.path.abspath(__file__), os.getcwd()
@@ -409,7 +437,7 @@ def main():
     filas, total, total_usd, total_turnos = [], cero(), 0.0, 0
     todos_modelos = set()
     for archivo in sorted(glob.glob(os.path.join(carpeta, "*.jsonl")), key=os.path.getmtime):
-        tot, turnos, modelos, marcas, bloques = leer(archivo)
+        tot, turnos, modelos, marcas, bloques, efforts = leer(archivo)
         if turnos == 0:
             continue
         usd = dolares(tot, modelos)
@@ -468,9 +496,64 @@ def main():
         imprimir_bloques(nombre, bloques, invocacion)
 
     print("\nModelos: %s" % (", ".join(sorted(todos_modelos)) or "sin dato"))
+    print("La columna configuración dice con qué modelo y qué effort corrió cada bloque.")
     print("Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.")
     return 0
 
 
+class _Doble(object):
+    """Escribe en la consola y, a la vez, en un buffer que se guarda al final."""
+
+    def __init__(self, *destinos):
+        self.destinos = destinos
+
+    def write(self, texto):
+        for d in self.destinos:
+            d.write(texto)
+        return len(texto)
+
+    def flush(self):
+        for d in self.destinos:
+            try:
+                d.flush()
+            except Exception:
+                pass
+
+
+def guardar(texto):
+    """Agrega la salida de esta corrida a docs/SALIDA_TOKENS.txt del proyecto."""
+    if not texto.strip():
+        return None
+    base = RUTA_MEDIDA or os.getcwd()
+    destino = os.path.join(base, SALIDA)
+    salto = chr(10)
+    try:
+        os.makedirs(os.path.dirname(destino), exist_ok=True)
+        cabecera = "%s  ·  %s" % (
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+            " ".join([os.path.basename(sys.argv[0])] + sys.argv[1:]),
+        )
+        raya = "=" * 78
+        with open(destino, "a", encoding="utf-8") as f:
+            f.write(raya + salto + cabecera + salto + raya + salto)
+            f.write(texto.rstrip() + salto + salto)
+        return destino
+    except OSError:
+        return None
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    import io
+
+    _buffer = io.StringIO()
+    _real = sys.stdout
+    sys.stdout = _Doble(_real, _buffer)
+    try:
+        _codigo = main()
+    finally:
+        sys.stdout = _real
+    _destino = guardar(_buffer.getvalue())
+    if _destino:
+        print(chr(10) + "Esta salida quedó guardada en %s" % SALIDA.replace(os.sep, "/"))
+        print("Se agrega al final, así que lo de la corrida anterior sigue ahí.")
+    sys.exit(_codigo)
