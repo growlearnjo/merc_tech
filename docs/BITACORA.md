@@ -46,6 +46,50 @@ En el cierre (esta conversación), el agente además:
 - Reescribió el `.gitignore` que había dejado la generación (ver "Cierre").
 - Corrió `curso-ed5/tokens.py` para tener tokens medidos en vez de "sin dato".
 
+### Decisiones que tomé sin que me las pidieran
+
+> Recuperada el **2026-11-11 (sesión 2)** de la conversación original de la
+> Fase 1.2 (`b1471b87`), no escrita en el momento. Es la lista que el agente
+> dio en el chat al cerrar esa fase, copiada sin rehacerla desde el código.
+
+Marca **⚠ APROBAR** = el agente cree que habrías querido aprobarla antes. Es una
+propuesta con el criterio de `00-ANTES.md` §2 (datos, arquitectura, seguridad),
+con el riesgo aceptado en §3 (instalaciones no pedidas) y con lo que ve el
+cliente. La decisión final es tuya.
+
+| # | Decisión (tal como se dijo entonces) | ¿Aprobar antes? |
+|---|---|---|
+| | **Estructura y datos** | |
+| 1 | Usé `node:sqlite` (el SQLite que trae Node) en lugar de `better-sqlite3` o Prisma: sin módulos nativos ni nada que instalar, pero Node lo marca como experimental y exige Node ≥ 22.13. | **⚠ APROBAR**: elige el motor de datos y depende de un módulo experimental. |
+| 2 | Separé la lógica de datos en `src/lib/` y la del servidor en un solo `actions.ts`; sin API REST, solo Server Actions. | **⚠ APROBAR**: es la arquitectura de toda la app. |
+| 3 | La base no se sube a git (`data/` en `.gitignore`), se crea sola al arrancar; agregué `npm run db:reset`. | — |
+| 4 | Precios guardados en céntimos (enteros), no decimales. | — |
+| 5 | Bajé TypeScript de la 7 a la 5 por compatibilidad con Next.js. | **⚠ APROBAR**: una instalación no pedida, el riesgo exacto de §3. |
+| 6 | Cambié el orden del catálogo para que empiece por las laptops, por cómo se ve. | — |
+| | **Permisos de la base de datos** | |
+| 7 | No hay ninguno: SQLite no tiene usuarios ni roles; la app lee y escribe todo con el mismo proceso y quien tenga la carpeta tiene el archivo completo. | **⚠ APROBAR**: es seguridad de los datos. |
+| 8 | La base queda dentro de OneDrive; la sincronización podría bloquear el archivo o crear copias en conflicto. | **⚠ APROBAR**: riesgo de corromper o perder datos. |
+| 9 | `/admin` y la acción que crea productos están abiertas a cualquiera (pedido así), y la acción se puede llamar sin abrir la página. | **⚠ APROBAR**: lo abierto llega más lejos que la página que pediste. |
+| | **Reglas de negocio que inventé** | |
+| 10 | Para comprar hay que haber iniciado sesión. | **⚠ APROBAR**: cambia el flujo que verá el cliente en la demo. |
+| 11 | Cada pedido pide dirección y teléfono. | — |
+| 12 | Cada usuario solo ve sus propios pedidos. | — |
+| 13 | El servidor rechaza la sobreventa y toma el precio de la base, no del navegador. | — |
+| 14 | Agregué la página "Mis pedidos", que no estaba en el pedido. | — |
+| | **Contenido** | |
+| 15 | El nombre de la tienda es "VoltTech" (no coincide con "MercadoTech Lite"). | **⚠ APROBAR**: es la marca que ve el cliente. |
+| 16 | Textos de envío gratis, garantía y cambios inventados; en el carrito el envío siempre dice "Gratis". | **⚠ APROBAR**: son promesas comerciales a nombre del cliente. |
+| 17 | Ilustración por categoría en lugar de fotos. | — |
+| | **Pruebas** | |
+| 18 | Escribí una prueba E2E con Chrome headless (31/31), pero el script quedó en la carpeta temporal: en el repo no hay pruebas ni `npm test`. | **⚠ APROBAR**: deja sin pruebas el repo y cambia lo que se mide. |
+| | **Cosas débiles que no arreglé** (dichas en la misma lista) | |
+| 19 | El login no limita los intentos. | **⚠ APROBAR**: es seguridad de las cuentas. |
+| 20 | Las sesiones vencidas nunca se borran de la base. | — |
+| 21 | Si un precio cambia, el carrito puede mostrar el precio viejo (se cobra el de la base). | — |
+
+**Total: 21 puntos**: 18 decisiones y 3 debilidades que se nombraron en la
+misma lista. **11 marcadas ⚠ APROBAR** (1, 2, 5, 7, 8, 9, 10, 15, 16, 18, 19).
+
 ### Qué costó
 
 Plan Max: **US$ 0 cobrados.** La columna ~USD es el valor a tarifa pública
