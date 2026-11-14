@@ -1,38 +1,26 @@
 import Link from "next/link";
 import { listCategories, listProducts } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
-import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string }>;
 }) {
-  const { q = "", cat = "", page = "" } = await searchParams;
+  const { q = "", cat = "" } = await searchParams;
   const query = q.trim().slice(0, 80);
   const products = listProducts({ q: query || undefined, category: cat || undefined });
   const categories = listCategories();
 
-  const totalPages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
-  const requested = Number.parseInt(page, 10);
-  const currentPage = Number.isFinite(requested)
-    ? Math.min(Math.max(requested, 1), totalPages)
-    : 1;
-  const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const pageProducts = products.slice(start, start + PRODUCTS_PER_PAGE);
-
-  const catalogHref = (c: string, pageNumber = 1) => {
+  const chipHref = (c: string) => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
     if (c) p.set("cat", c);
-    if (pageNumber > 1) p.set("page", String(pageNumber));
     const s = p.toString();
     return s ? `/?${s}` : "/";
   };
-  const chipHref = (c: string) => catalogHref(c);
-  const pageHref = (n: number) => catalogHref(cat, n);
 
   return (
     <>
@@ -107,61 +95,11 @@ export default async function CatalogPage({
             </Link>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-              {pageProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <nav aria-label="Paginación" className="mt-8 flex items-center justify-center gap-2">
-                {currentPage > 1 ? (
-                  <Link
-                    href={pageHref(currentPage - 1)}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400"
-                  >
-                    ← Anterior
-                  </Link>
-                ) : (
-                  <span className="rounded-full border border-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    ← Anterior
-                  </span>
-                )}
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) =>
-                  n === currentPage ? (
-                    <span
-                      key={n}
-                      aria-current="page"
-                      className="rounded-full border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white"
-                    >
-                      {n}
-                    </span>
-                  ) : (
-                    <Link
-                      key={n}
-                      href={pageHref(n)}
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400"
-                    >
-                      {n}
-                    </Link>
-                  )
-                )}
-                {currentPage < totalPages ? (
-                  <Link
-                    href={pageHref(currentPage + 1)}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400"
-                  >
-                    Siguiente →
-                  </Link>
-                ) : (
-                  <span className="rounded-full border border-slate-100 px-4 py-2 text-sm font-medium text-slate-300">
-                    Siguiente →
-                  </span>
-                )}
-              </nav>
-            )}
-          </>
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
         )}
       </section>
     </>
