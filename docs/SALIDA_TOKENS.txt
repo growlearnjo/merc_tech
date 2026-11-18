@@ -639,3 +639,161 @@ Modelos: <synthetic>, claude-haiku-5-5, claude-opus-5-5
 La columna configuración dice con qué modelo y qué effort corrió cada bloque.
 Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
 
+==============================================================================
+2026-11-18 12:27  ·  tokens.py
+==============================================================================
+Proyecto: C:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+a4ba9384          4         8      42,564     228,228     1,809           1 min     0.29
+cec08533          3         6      43,144     173,498     2,460           1 min     0.30
+f1a9712d          7        16      49,064     469,540     4,113          12 min     0.42
+a8c876dc         10        22      53,515     717,501     8,477           3 min     0.58
+239a98a6          4         8      59,735     242,267     4,714           1 min     0.44
+e3057731         24        52      88,112   2,199,449    22,589           9 min     1.33
+038ca068          1         0           0           0         0  menos de 1 min     0.00
+7b38fed1          1         0           0           0         0  menos de 1 min     0.00
+bb36a102         10        24      58,901     742,358     9,139           4 min     0.63
+62a45952          4         8      53,834     281,541    14,336           2 min     0.61
+dc815f9a         11        26      78,776     957,304    20,511          12 min     1.00
+2eb47498          6        12      44,932     392,042     5,618         100 min     0.42
+4645ba59         15        32      74,097   1,215,218    18,477           5 min     0.98
+74c24711         10        22      81,241     991,397    19,346          15 min     0.99
+cbe00827          9        20      58,406     668,069    15,318           6 min     0.73
+ec1208d4         11        22      95,831   1,040,668    28,363           5 min     1.25
+fb674015          5        12      34,643     302,400     1,881           1 min     0.27
+862ca721         28        60     128,699   3,090,021    52,736          13 min     2.32
+b7def264          6        14      37,968     379,332     3,961           1 min     0.34
+eb2835fc         15        34      62,328   1,152,066     9,373           9 min     0.73
+a1b08a29         10        24      45,962     690,674     5,504           9 min     0.48
+f13b308b          8        18      55,781     598,592    18,498           3 min     0.77
+0e2b75c9         32        64     277,341   5,652,880   171,503          16 min     0.18
+ec23fcdd          4         8      44,774     251,395    16,785           3 min     0.61
+3954107f          5        10      43,991     314,551     4,141           1 min     0.01
+----------------------------------------------------------------------------------------
+TOTAL           472     1,032   2,844,744  44,049,516   672,557                    30.36
+
+Lo que hizo la caché: esos 44,049,516 tokens leídos costaron US$ 8.81.
+Sin caché, como entrada nueva, habrían costado US$ 176.20.
+
+Desglose de la conversación 3954107f: un bloque por cada cosa que pediste.
+
+  Bloque 1 — 12:16 — "Muestra solo 6 productos por página, con enlaces para pasar de pá…"
+     configuración: sin dato · sin dato
+     turnos 0 · entrada 0 · caché esc 0 · caché lec 0 · salida 0 · menos de 1 min · US$ 0.00
+
+  Bloque 2 — 12:16 — "[Request interrupted by user]"
+     configuración: sin dato · sin dato
+     turnos 0 · entrada 0 · caché esc 0 · caché lec 0 · salida 0 · menos de 1 min · US$ 0.00
+
+  Bloque 3 — 12:17 — "Muestra solo 6 productos por página, con enlaces para pasar de pá…"
+     configuración: haiku-5-5 · low
+     turnos 5 · entrada 10 · caché esc 43,991 · caché lec 314,551 · salida 4,141 · 1 min · US$ 0.01
+
+  Los bloques suman el total de la fila de arriba.
+  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.
+  Desglose de otra conversación: python doc_sesions/sesion3/tokens.py --bloques <conversación>
+  Desglose de todas:             python doc_sesions/sesion3/tokens.py --bloques todas
+  Solo las corridas del patrón:  python doc_sesions/sesion3/tokens.py --patron
+
+Modelos: <synthetic>, claude-haiku-5-5, claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+
+==============================================================================
+2026-11-18 12:28  ·  tokens.py --bloques 3954107f
+==============================================================================
+Proyecto: C:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+a4ba9384          4         8      42,564     228,228     1,809           1 min     0.29
+cec08533          3         6      43,144     173,498     2,460           1 min     0.30
+f1a9712d          7        16      49,064     469,540     4,113          12 min     0.42
+a8c876dc         10        22      53,515     717,501     8,477           3 min     0.58
+239a98a6          4         8      59,735     242,267     4,714           1 min     0.44
+e3057731         24        52      88,112   2,199,449    22,589           9 min     1.33
+038ca068          1         0           0           0         0  menos de 1 min     0.00
+7b38fed1          1         0           0           0         0  menos de 1 min     0.00
+bb36a102         10        24      58,901     742,358     9,139           4 min     0.63
+62a45952          4         8      53,834     281,541    14,336           2 min     0.61
+dc815f9a         11        26      78,776     957,304    20,511          12 min     1.00
+2eb47498          6        12      44,932     392,042     5,618         100 min     0.42
+4645ba59         15        32      74,097   1,215,218    18,477           5 min     0.98
+74c24711         10        22      81,241     991,397    19,346          15 min     0.99
+cbe00827          9        20      58,406     668,069    15,318           6 min     0.73
+ec1208d4         11        22      95,831   1,040,668    28,363           5 min     1.25
+fb674015          5        12      34,643     302,400     1,881           1 min     0.27
+862ca721         28        60     128,699   3,090,021    52,736          13 min     2.32
+b7def264          6        14      37,968     379,332     3,961           1 min     0.34
+eb2835fc         15        34      62,328   1,152,066     9,373           9 min     0.73
+a1b08a29         10        24      45,962     690,674     5,504           9 min     0.48
+f13b308b          8        18      55,781     598,592    18,498           3 min     0.77
+0e2b75c9         32        64     277,341   5,652,880   171,503          16 min     0.18
+ec23fcdd          4         8      44,774     251,395    16,785           3 min     0.61
+3954107f          8        16      55,734     546,314     5,701          12 min     0.02
+----------------------------------------------------------------------------------------
+TOTAL           475     1,038   2,856,487  44,281,279   674,117                    30.37
+
+Lo que hizo la caché: esos 44,281,279 tokens leídos costaron US$ 0.44.
+Sin caché, como entrada nueva, habrían costado US$ 4.43.
+
+Desglose de la conversación 3954107f: un bloque por cada cosa que pediste.
+
+  Bloque 1 — 12:16 — "Muestra solo 6 productos por página, con enlaces para pasar de pá…"
+     configuración: sin dato · sin dato
+     turnos 0 · entrada 0 · caché esc 0 · caché lec 0 · salida 0 · menos de 1 min · US$ 0.00
+
+  Bloque 2 — 12:16 — "[Request interrupted by user]"
+     configuración: sin dato · sin dato
+     turnos 0 · entrada 0 · caché esc 0 · caché lec 0 · salida 0 · menos de 1 min · US$ 0.00
+
+  Bloque 3 — 12:17 — "Muestra solo 6 productos por página, con enlaces para pasar de pá…"
+     configuración: haiku-5-5 · low
+     turnos 5 · entrada 10 · caché esc 43,991 · caché lec 314,551 · salida 4,141 · 1 min · US$ 0.01
+
+  Bloque 4 — 12:28 — "[CONTEXTO] Proyecto en <RUTA_PROYECTO>. Acabas de hacer la tarea …"
+     configuración: haiku-5-5 · low
+     turnos 3 · entrada 6 · caché esc 11,743 · caché lec 231,763 · salida 1,560 · menos de 1 min · US$ 0.00
+
+  Los bloques suman el total de la fila de arriba.
+  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.
+  Desglose de otra conversación: python doc_sesions/sesion3/tokens.py --bloques <conversación>
+  Desglose de todas:             python doc_sesions/sesion3/tokens.py --bloques todas
+  Solo las corridas del patrón:  python doc_sesions/sesion3/tokens.py --patron
+
+Modelos: <synthetic>, claude-haiku-5-5, claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+
