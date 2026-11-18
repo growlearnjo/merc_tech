@@ -159,6 +159,7 @@ diferencias.
 | 8 | Un prompt vago sí sale caro, pero **no por sus tokens**: por los turnos de corrección que provoca | El costo se mide **por tarea terminada**, y eso es lo que mide la columna de turnos | 3.1, 3.3 |
 | 9 | En la corrida de preparación, la mayor parte del consumo entró **por lectura de caché**, y leerlo costó una fracción de lo que habría costado como entrada nueva | La caché se enseña **con el número del propio alumno**. Ese número lo guarda el paso 2 de `PROMPTS_sesion2.md` en la sección FACTURA, así que esta fase **solo lo lee**: no vuelve a medir | 3.1 |
 | 10 | **El `tokens.py` de las sesiones 1 y 2 medía mal, por dos motivos a la vez.** Contaba cada respuesta tantas veces como pedazos tiene en el disco —Claude Code parte una respuesta en una línea por el texto y una por cada herramienta, y repite el contador en todas—, así que inflaba el gasto entre **1,9 y 4,2 veces**, con un factor distinto en cada conversación. Y daba el total de la conversación, no el de la tarea: un chat con tres trabajos dentro reportaba los tres sumados | **El script cuenta cada respuesta una sola vez, por su `message.id`, y da el gasto por bloque**: cada mensaje del alumno con las respuestas que vinieron después. Los tres costos viejos —el consumo de la FACTURA, la fila S1 y la fila S2— se vuelven a medir en el **Paso 2 de la ruta (condicional)** de los prompts, que va **justo después del Prompt 0 y antes de leer la spec**, porque la hipótesis de la 3.1 nace de la FACTURA y la comparación de la 3.3 nace de las filas. Las corridas se buscan por el texto del enunciado con `--patron`. El factor de inflado **no es constante**, así que no se corrige dividiendo: o se vuelve a medir, o la comparación de esta sesión no vale | 3.2, 3.3 |
+| 11 | **El Paso 2 de la ruta corregía la FACTURA en `docs/00-ANTES.md`, pero la Fase 3.1 la lee de `docs/VERIFICACION_S3.md`**, que el Prompt 0 escribe antes de esa medición. Todo alumno que pasaba por el Paso 2 llegaba a la 3.1 con "sin dato", o peor, con el número inflado de la sesión 2, que la 3.1 usaba sin avisar. Salió en el ensayo del 2026-11-18 | **El prompt del Paso 2 pone al día `docs/VERIFICACION_S3.md`**: los cuatro datos de la FACTURA, las líneas de bloque de los datos que reescribió, y el veredicto. El archivo sigue sin commit hasta la Fase 3.1, como dice el Prompt 0 | 3.1 |
 
 ---
 
@@ -248,13 +249,14 @@ comprueban o se desmienten en la fase siguiente, y las dos cosas enseñan.
 ### Depende de
 
 El Prompt 0, que deja los datos de la FACTURA ya citados en
-`docs/VERIFICACION_S3.md`.
+`docs/VERIFICACION_S3.md`, y el Paso 2 de la ruta si te tocó, que los pone al
+día en ese mismo archivo (hallazgo 11).
 
 ### Archivos
 
 | Archivo | Rol |
 |---|---|
-| `docs/VERIFICACION_S3.md` | Lo escribió el Prompt 0. De aquí salen los cuatro datos de la FACTURA, ya citados. **Hoy solo se lee.** |
+| `docs/VERIFICACION_S3.md` | Lo escribió el Prompt 0, y lo puso al día el Paso 2 de la ruta si te tocó. De aquí salen los cuatro datos de la FACTURA, ya citados. **Hoy solo se lee.** |
 | `docs/SALIDA_TOKENS.txt` | Lo escribe `tokens.py` solo, cada vez que se corre, agregando al final. De aquí lee el agente los números, en vez de que el alumno los pegue a mano. |
 | `docs/00-ANTES.md` | La fuente de esos datos. **No se modifica**: es la fotografía de la sesión 1. |
 | `docs/COSTOS.md` | Nace aquí con las tres hipótesis y nada más. La tabla la empieza la 3.2 y la cierra la 3.3. |
@@ -469,8 +471,9 @@ La Fase 3.2, con las corridas medidas.
 
 ## Entregables
 
-1. `docs/VERIFICACION_S3.md`, escrito por el Prompt 0: el terreno comprobado,
-   el enunciado de la tarea patrón citado y el commit que hay que revertir.
+1. `docs/VERIFICACION_S3.md`, escrito por el Prompt 0 y puesto al día por el
+   Paso 2 de la ruta si te tocó: el terreno comprobado, la FACTURA citada, el
+   enunciado de la tarea patrón citado y el commit que hay que revertir.
 2. `docs/COSTOS.md` con las configuraciones corridas, su costo en dólares, la fecha
    de consulta de los precios y la regla escrita por el alumno.
 3. La tercera fila de `docs/MEDICIONES.md`, completa.
@@ -606,6 +609,16 @@ frase de `TAREA_PATRON.md`, el guion y la presentación `Ed5_sesion3.pptx`: la
 lámina 29 pasa a las cinco configuraciones A–E, la 28 a las tres hipótesis, la
 lista de datos a siete, y la lámina 6 ya no da por hecho que el alumno tenga la
 fila S2. La presentación quedó alineada con esta spec.
+
+**2026-11-18 — versión 1.4.** El Paso 2 de la ruta pone al día
+`docs/VERIFICACION_S3.md` (hallazgo 11). Antes corregía la FACTURA solo en
+`docs/00-ANTES.md`, y la Fase 3.1, que la lee de `docs/VERIFICACION_S3.md`,
+recibía el dato de antes de la medición: "sin dato", o el número inflado de la
+sesión 2. Cambian el prompt del Paso 2 (un punto 4 en el objetivo, una
+restricción y una línea en el formato), su recuadro de entrada, su "Antes de
+seguir" y la tabla de la ruta. En esta spec cambian el "Depende de" y la tabla
+de archivos de la Fase 3.1, y el entregable 1. La Fase 3.1 no cambia. La
+versión anterior quedó en `../_backup_sesion3_pre_paso2_20261118/`.
 
 **Pendiente antes de dar la clase.** Volver a mirar la tabla de precios de
 §"Las tarifas", consultada el 11 de noviembre: los modelos y sus tarifas no los

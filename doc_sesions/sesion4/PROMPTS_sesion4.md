@@ -252,12 +252,24 @@ Abre un chat nuevo y escribe:
 Tu Skill tiene que aparecer en la lista. Si no aparece, el problema es la
 carpeta o el nombre del archivo, no la descripción.
 
-Después, **las dos peticiones**. Escríbelas tal cual, sin nombrar la Skill:
+**Antes de escribir las peticiones, pon el modo plan** con Shift+Tab, hasta que
+diga "plan mode". Las dos peticiones son tareas de verdad: fuera del modo plan
+el agente las hace, y te deja código que la sesión no pide. En el ensayo, la
+petición 1 terminó con una función nueva programada en tres archivos, que hubo
+que descartar. En modo plan el agente lee y planea, la Skill se carga igual, y
+no cambia nada.
+
+Después, **las dos peticiones, cada una en su propio chat**. Si la primera
+carga la Skill, en ese mismo chat ya la tiene delante, y la segunda no puede
+mostrar que "no se carga". Escríbelas tal cual, sin nombrar la Skill:
 
 | | Qué escribes | Qué tiene que pasar |
 |---|---|---|
 | **1** | Una petición que coincide con tu descripción | La Skill **se carga sola** |
-| **2** | Una petición que no tiene nada que ver | La Skill **no se carga** |
+| **2** | En otro chat nuevo, también en modo plan: una petición que no tiene nada que ver | La Skill **no se carga** |
+
+Al terminar, `git status --short` no tiene que mostrar nada. Si el agente
+cambió algún archivo, descártalo antes de seguir con la 4.2.
 
 **Las dos, no solo la primera.** Una descripción amplísima también se activa en
 la primera, y falla en la segunda. Si la segunda se activa, vuelve a la
@@ -283,13 +295,19 @@ Te dice cuánto ocupa cada Skill en contexto y cuáles no se invocan nunca.
 
 ### Paso 1 — qué vas a conectar, y por qué ese
 
-El agente solo puede leer dentro de la carpeta de tu proyecto. Tus
-conversaciones guardadas **no están ahí**: viven en otra carpeta de tu máquina,
-la que `tokens.py` imprime cada vez que lo corres y la que quedó anotada en
-`docs/VERIFICACION_S4.md`.
+Tus conversaciones guardadas **no están en tu proyecto**: viven en otra
+carpeta de tu máquina, la que `tokens.py` imprime cada vez que lo corres y la
+que quedó anotada en `docs/VERIFICACION_S4.md`.
 
-Eso es lo que hace MCP: **una puerta controlada a un sistema que el agente no
-alcanza**. Y hoy la abres en una sola dirección, de lectura.
+**Ojo con lo que esperas.** Es probable que el agente pueda leer esa carpeta
+sin ningún servidor: está dentro de tu usuario, y sus herramientas normales
+(`ls`, leer archivos) llegan a ella si tus permisos lo dejan. En el ensayo
+llegó sin problema. Así que el servidor de hoy no abre una puerta que estaba
+cerrada: abre **un canal que solo llega a esa carpeta y que no puede
+escribir**, en lugar de una terminal que llega a todo tu disco y escribe. Eso
+es lo que hace MCP: **una puerta controlada**, y hoy la abres en una sola
+dirección, de lectura. Cerrar el otro camino, el de la terminal, es cosa de
+los permisos, en la sesión 6.
 
 ### Paso 2 — lo conectas tú, en la terminal
 
@@ -297,15 +315,21 @@ Copia la ruta de la sección "La carpeta de mis conversaciones" de
 `docs/VERIFICACION_S4.md` y pégala al final de este comando, entre comillas:
 
 ```bash
-claude mcp add --scope project conversaciones -- npx -y @modelcontextprotocol/server-filesystem --read-only "<CARPETA_DE_CONVERSACIONES>"
+claude mcp add --scope project conversaciones -- npx -y @modelcontextprotocol/server-filesystem --read-only --confine-roots "<CARPETA_DE_CONVERSACIONES>"
 ```
 
-Tres cosas de ese comando, que son la lección de la fase:
+> **En Windows, si usas PowerShell, escribe `claude.cmd` en lugar de
+> `claude`**, en este comando y en los dos de abajo. En PowerShell, `claude`
+> abre un script que se come el `--`, y el comando falla con
+> `error: unknown option '-y'`. En Git Bash o en `cmd` no pasa.
+
+Cuatro cosas de ese comando, que son la lección de la fase:
 
 | Parte | Qué hace |
 |---|---|
-| `--scope project` | Lo escribe en `.mcp.json`, en la raíz, y se commitea: el equipo lo tiene al clonar |
+| `--scope project` | Lo escribe en `.mcp.json`, en la raíz, y se commitea. Ojo: la ruta queda escrita entera, con tu usuario de la máquina, así que en la máquina de otra persona hay que cambiarla |
 | `--read-only` | El servidor registra **solo** sus herramientas de lectura. Las de escribir no existen para el agente |
+| `--confine-roots` | **Sin esto, el servidor ignora tu ruta.** Claude Code le manda la carpeta del proyecto como "raíz", y el servidor la usa **en lugar** de la que le pasaste. Con esta opción, la raíz del cliente solo puede achicar tu carpeta, nunca reemplazarla |
 | La ruta, al final | Es la única carpeta que el servidor puede tocar. Apuntar más arriba sería darle acceso a lo que no es tuyo |
 
 Comprueba que quedó:
@@ -314,18 +338,33 @@ Comprueba que quedó:
 claude mcp list
 ```
 
-Y en el chat, escribe tú:
+Va a decir `Pending approval`. Abre un chat nuevo: Claude Code te pide aprobar
+el servidor del proyecto, y lo apruebas. Si en esa pantalla aparece algún otro
+servidor que no conectaste hoy, no lo apruebes.
+
+Después, en el chat, escribe tú:
 
 ```
 /mcp
 ```
 
 Tiene que decir `Connected`. La primera vez tarda, porque `npx` está
-descargando el servidor.
+descargando el servidor. Entra en `conversaciones` y mira sus herramientas:
+todas tienen que ser de lectura (`read_…`, `list_…`, `search_…`,
+`get_file_info`, `directory_tree`). Si ves `write_file` o `edit_file`, el
+`--read-only` no quedó puesto.
+
+**Y comprueba a qué carpeta apunta de verdad.** Pídele al agente, sin nada
+más: "Usa la herramienta list_allowed_directories del servidor conversaciones
+y dime exactamente qué devuelve." Tiene que devolver la carpeta de
+conversaciones. Si devuelve tu proyecto, falta `--confine-roots`.
 
 > Si dice `Failed to connect`, mira la ruta: es el fallo más común, y casi
 > siempre es una barra invertida o un espacio sin comillas. `claude mcp get
 > conversaciones` te dice qué quedó configurado.
+>
+> Para cambiar algo del comando, primero lo quitas con
+> `claude mcp remove conversaciones --scope project` y lo vuelves a agregar.
 
 ### Paso 3 — la consulta, en un chat nuevo
 
@@ -333,7 +372,7 @@ descargando el servidor.
 [CONTEXTO] Mi proyecto está en <RUTA_PROYECTO>. Acabo de conectar un servidor
 MCP llamado "conversaciones", en solo lectura, apuntado a la carpeta donde
 Claude Code guarda las conversaciones de este proyecto. Esa carpeta está fuera
-de mi proyecto, así que sin el servidor no la alcanzas.
+de mi proyecto.
 
 [OBJETIVO] Tres cosas, en este orden.
 1. Sin usar el servidor, dime si puedes leer esa carpeta. Inténtalo y cuéntame
@@ -359,6 +398,16 @@ herramienta que usaste para cada uno; (3) qué te respondió al intentar
 escribir; (4) una línea: qué puedes hacer ahora que antes no podías;
 (5) commit propuesto: "chore: connect the conversations MCP server, read-only".
 ```
+
+Qué esperar, para que no te sorprenda:
+
+* **En el punto 1, lo más probable es que sí pueda leer la carpeta** sin el
+  servidor. No es un fallo tuyo: es lo que se explicó en el Paso 1.
+* **En el punto 2, el número de conversaciones no va a coincidir con el de
+  `tokens.py`**: la carpeta tiene más archivos que conversaciones medibles.
+* **En el punto 3, si el agente intenta escribir con otra herramienta**
+  —escribir un archivo o la terminal—, recházalo. Lo que se prueba es el
+  servidor, no tus permisos.
 
 ### Lo que cuesta, y conviene verlo
 
