@@ -11,3 +11,4 @@ Fecha: 2026-11-18
 | Corrida | Modelo | Effort | Resultado | Turnos | Decisiones no pedidas | Costo | Duración |
 |---|---|---|---|---|---|---|---|
 | A | opus-5-5 | medium | ✅ a la primera | 0 | 13, de ellas 4 con ⚠️ | entrada 10 · caché esc 40,207 · caché lec 313,782 · salida 3,716 · US$ 0.34 | 1 min |
+| B | opus-5-5 | max | ✅ a la primera | 0 | 10, de ellas 4 con ⚠️ | entrada 34 · caché esc 82,245 · caché lec 1,579,013 · salida 26,438 · US$ 1.26 | 5 min |
