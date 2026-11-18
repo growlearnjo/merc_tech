@@ -1,46 +1,26 @@
 import Link from "next/link";
 import { listCategories, listProducts } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
-import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string }>;
 }) {
-  const { q = "", cat = "", page = "" } = await searchParams;
+  const { q = "", cat = "" } = await searchParams;
   const query = q.trim().slice(0, 80);
   const products = listProducts({ q: query || undefined, category: cat || undefined });
   const categories = listCategories();
 
-  // Página pedida en la URL, acotada al rango válido. Un valor inválido cae en la 1.
-  const totalPages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
-  const requested = Number.parseInt(page, 10);
-  const currentPage = Number.isNaN(requested) ? 1 : Math.min(Math.max(requested, 1), totalPages);
-  const pageProducts = products.slice(
-    (currentPage - 1) * PRODUCTS_PER_PAGE,
-    currentPage * PRODUCTS_PER_PAGE
-  );
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-  // Enlace al catálogo con los filtros vigentes. La página solo va en la URL si no es la 1,
-  // así que recargar la dirección vuelve a la misma página.
-  const catalogHref = (opts: { cat?: string; page?: number }) => {
+  const chipHref = (c: string) => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
-    if (opts.cat) p.set("cat", opts.cat);
-    if (opts.page && opts.page > 1) p.set("page", String(opts.page));
+    if (c) p.set("cat", c);
     const s = p.toString();
     return s ? `/?${s}` : "/";
   };
-
-  const pageBase =
-    "inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm font-medium transition";
-  const pageLinkCls = `${pageBase} border-slate-200 bg-white text-slate-700 hover:border-slate-400`;
-  const pageOffCls = `${pageBase} border-slate-200 bg-white text-slate-300`;
-  const pageOnCls = `${pageBase} border-slate-900 bg-slate-900 text-white`;
 
   return (
     <>
@@ -84,7 +64,7 @@ export default async function CatalogPage({
             return (
               <Link
                 key={c || "todos"}
-                href={catalogHref({ cat: c })}
+                href={chipHref(c)}
                 className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
                   active
                     ? "border-slate-900 bg-slate-900 text-white"
@@ -116,47 +96,10 @@ export default async function CatalogPage({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-            {pageProducts.map((p) => (
+            {products.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
-        )}
-
-        {totalPages > 1 && (
-          <nav
-            aria-label="Páginas del catálogo"
-            className="mt-10 flex flex-wrap items-center justify-center gap-2"
-          >
-            {currentPage > 1 ? (
-              <Link href={catalogHref({ cat, page: currentPage - 1 })} className={pageLinkCls}>
-                Anterior
-              </Link>
-            ) : (
-              <span aria-disabled="true" className={pageOffCls}>
-                Anterior
-              </span>
-            )}
-            {pages.map((n) =>
-              n === currentPage ? (
-                <span key={n} aria-current="page" className={pageOnCls}>
-                  {n}
-                </span>
-              ) : (
-                <Link key={n} href={catalogHref({ cat, page: n })} className={pageLinkCls}>
-                  {n}
-                </Link>
-              )
-            )}
-            {currentPage < totalPages ? (
-              <Link href={catalogHref({ cat, page: currentPage + 1 })} className={pageLinkCls}>
-                Siguiente
-              </Link>
-            ) : (
-              <span aria-disabled="true" className={pageOffCls}>
-                Siguiente
-              </span>
-            )}
-          </nav>
         )}
       </section>
     </>
