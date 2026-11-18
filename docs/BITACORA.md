@@ -448,3 +448,155 @@ no sobre todas las conversaciones de hoy.
 - [x] Hacer el push y comprobar con `git status -sb` que no diga `ahead`.
       Hecho en el cierre: `0ad9804..462bc8c main -> main`, y `git status -sb`
       dice `## main...origin/main`.
+
+---
+
+## Sesión 4 — 2026-11-18 — Una regla pasa a Skill y un servidor MCP
+
+### Qué se hizo, en orden
+
+| Hora | Commit | Fase |
+|---|---|---|
+| 13:13 | (entra en `85f2927`) | Prompt 0 · `docs/VERIFICACION_S4.md`: versiones, reglas numeradas, terreno listo |
+| 14:39 | `85f2927` | 4.1 · Skill `carrito-localstorage`; la regla sale del `CLAUDE.md` |
+| 14:40–15:08 | — | 4.1 · pruebas de la Skill (sin commit) |
+| 15:32 | `384e9c3` | 4.2 · servidor MCP `conversaciones` en `.mcp.json` |
+| 15:37 | `5859386` | 4.3 · `docs/DECISIONES.md` |
+
+### La regla que salió del contrato
+
+- **Cuál:** la regla 7 de `VERIFICACION_S4.md`: «`localStorage` solo guarda
+  el carrito (`CartProvider.tsx`); no hay tabla `cart_items`». Eran las
+  líneas 31–33 del `CLAUDE.md`, con su verificación.
+- **Por qué:** en `VERIFICACION_S4.md` quedó como "a veces": solo hace falta
+  en tareas sobre el carrito o sobre qué se guarda, no en cada conversación.
+  Por qué la 7 y no otra de las "a veces" no quedó escrito.
+- **Antes de moverla se comprobó que se cumple:** `grep -rln localStorage src`
+  devolvió solo `src/components/CartProvider.tsx`, y `cart_items` no aparece
+  en `src/`. Por eso la Skill la escribe como regla vigente, sin "hoy no se
+  cumple".
+- **Salió entera.** El `CLAUDE.md` pasó de 39 a 36 líneas y ya no menciona
+  `localStorage` ni `cart_items`.
+
+### La descripción de la Skill
+
+Archivo: `.claude/skills/carrito-localstorage/SKILL.md` (40 líneas). Nombre
+elegido entre tres (`carrito-localstorage`, `persistencia-carrito`,
+`regla-carrito`); descripción B de tres, con un ejemplo más que pedí: «guarda
+el carrito en la base de datos», para cubrir la mitad de "no crear
+`cart_items`". Quedó así (484 caracteres):
+
+> Decide dónde se guarda un dato en esta tienda: en `localStorage` solo va el
+> carrito (`CartProvider.tsx`) y no hay tabla `cart_items`. Úsala cuando la
+> tarea quiera recordar algo entre recargas o entre dispositivos: «guarda mis
+> productos favoritos en el navegador», «que el carrito no se pierda al
+> cambiar de navegador», «recuerda lo último que agregué», «guarda el carrito
+> en la base de datos». No cubre la sesión de login, los filtros del catálogo
+> ni los datos de productos y pedidos.
+
+El cuerpo trae la regla, cómo está hoy (`CartProvider.tsx:35` y `:46`,
+sesión en cookie), tres pasos ("pregunta antes" sale de las reglas 3 y 7) y
+la verificación copiada del contrato.
+
+### Las dos peticiones de prueba
+
+Cada una en chat nuevo, y cada una repetida una vez.
+
+| Petición | Debía | Qué pasó |
+|---|---|---|
+| «Quiero que los favoritos se guarden aunque cierre el navegador» | activarla | **Se activó las dos veces** (llamada a `Skill` como primer paso). La primera vez (`fb200b68`) preguntó, porque la regla no deja poner favoritos en `localStorage`; elegí "Guardarlos en la base" y construyó la función entera: tabla `favorites` en `db.ts`, `src/lib/favorites.ts` nuevo, `toggleFavoriteAction` en `actions.ts` y un botón en la ficha. `typecheck` y `build` sin error; no se probó en el navegador. La segunda vez (`64401c1e`) encontró ese trabajo sin commit y no cambió nada. |
+| «Cambia el texto del título del catálogo» | no activarla | **No se activó** ninguna de las dos veces (`6198fe91`, `64401c1e`). No cambió nada: preguntó qué título y qué texto, citando la regla del `CLAUDE.md` que prohíbe inventar textos comerciales. |
+
+- El código de favoritos **no se subió y ya no existe**: estaba sin commit a
+  las 15:07 y a las 15:22 el árbol solo tenía `?? .mcp.json`. Se descartó
+  fuera de las conversaciones; no hay stash ni commit.
+- `/skill-doctor` (en `6198fe91`) listó la Skill así:
+  `carrito-localstorage  projectSettings  ~170  848.9k  1×  today`.
+
+### El servidor MCP
+
+- **Cuál:** `conversaciones`, `@modelcontextprotocol/server-filesystem` con
+  `--read-only` y `--confine-roots`, apuntado a la carpeta donde Claude Code
+  guarda las conversaciones de este proyecto
+  (`C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3`).
+- **El primer intento falló** (`7dddfd37`): sin `--confine-roots`,
+  `list_allowed_directories` devolvió la carpeta **del proyecto**, y
+  `list_directory_with_sizes` sobre la de conversaciones dio
+  `Access denied - path outside allowed directories`. Se agregó
+  `--confine-roots` a `.mcp.json`; ese cambio no está en ninguna
+  conversación. Después (`ce19753b`) devolvió la carpeta de conversaciones.
+- **Qué respondió** (`333950a4`):
+  - `list_directory_with_sizes`: 48 `.jsonl`, 41.70 MB; el más grande,
+    `b1471b87`, 4.93 MB (la generación de la app, 11-nov).
+  - `get_file_info`, una llamada por archivo, para las fechas: las tres más
+    recientes eran del 18-nov (la propia conversación, `ce19753b` y
+    `7dddfd37`).
+  - Escribir: el servidor no expone ninguna herramienta de escritura. La
+    llamada a `write_file` respondió `No such tool available`, y
+    `search_files` no encontró el archivo de prueba.
+- **Lo que "antes no podía": no se cumplió.** Sin el servidor, `ls` con Bash
+  leyó la misma carpeta en los dos intentos; el Prompt 1 lo había avisado
+  antes de empezar. El servidor no da acceso nuevo: da un canal limitado a
+  esa carpeta y sin escritura. Con Bash, la escritura ahí no está bloqueada
+  (no se probó).
+
+### La tabla de decisión
+
+`docs/DECISIONES.md`, cinco filas:
+
+| si necesitas | usas | mi caso |
+|---|---|---|
+| Una regla que vale siempre | `CLAUDE.md` | «`actions.ts` no ejecuta SQL: el acceso a `users` pasa por `auth.ts`» |
+| Un procedimiento que vale a veces | Skill | `carrito-localstorage` |
+| Datos o acciones de un sistema externo | MCP | `conversaciones`, en solo lectura |
+| Trabajo largo que no debe ensuciar mi contexto | subagente | sesión 5 |
+| Algo que se cumpla aunque el modelo no obedezca | hook | sesión 6 |
+
+El criterio junta dos de las tres redacciones propuestas (B y C): «Me
+pregunto cuándo lo necesito y quién lo hace cumplir, porque cada pieza la
+pago distinto: el contrato en cada conversación, la Skill cuando la uso, el
+MCP cuando consulto afuera, el subagente en otro contexto y el hook aunque el
+modelo no quiera.»
+
+La celda de la fila 3 la redactó el agente desde `.mcp.json`, no desde un
+uso; lo avisó y no se cambió.
+
+### Costo de la sesión 4
+
+Sin medir. `tokens.py` se corrió solo en el Prompt 0, como comprobación.
+
+### Qué salió mal
+
+1. Correr `tokens.py` agrega su salida a `docs/SALIDA_TOKENS.txt`. En el
+   Prompt 0 eso tocó un archivo que no tocaba; se revirtió con
+   `git checkout`.
+2. El Prompt 0 y el Prompt 1 se corrieron en el mismo chat; la guía pide uno
+   nuevo para cada uno.
+3. La primera prueba de la Skill terminó en una función completa que no
+   estaba en el plan de la sesión, y se borró a mano sin dejar registro.
+4. El `.mcp.json` inicial no apuntaba donde decía: el servidor usó la carpeta
+   del proyecto hasta que se agregó `--confine-roots`.
+5. La premisa de la 4.2 ("sin el servidor no la alcanzas") es falsa en esta
+   máquina.
+6. El `SKILL.md` dice «sale del CLAUDE.md, regla 7», y esa regla ya no está
+   en el `CLAUDE.md`. No se cambió.
+
+### Pendiente para la sesión 5
+
+- [ ] Fila 4 de `docs/DECISIONES.md`: el subagente.
+- [ ] Las cuatro afirmaciones obsoletas del `CLAUDE.md`, sin cambios desde la
+      sesión 2. Siguen en las líneas 21 (`constants.ts` "todavía no
+      existe"), 23 (`page.tsx:13`), 25 (`page.tsx:32`) y 30 ("La paginación
+      hoy no existe").
+- [ ] Decidir si la regla de la línea 16 se reescribe (pasa por auditoría).
+- [ ] Decidir qué hacer con la referencia a "regla 7" del `SKILL.md` (punto 6
+      de arriba).
+- [ ] `.mcp.json`: la ruta lleva mi usuario de Windows y no sirve en otra
+      máquina; `npx -y` baja la última versión del servidor cada vez.
+      Decidir si se fija la versión.
+- [ ] Los pendientes de la sesión 3 que no se tocaron hoy: avisos de la
+      auditoría de la sesión 2, fecha de las tarifas de `tokens.py` y las dos
+      precisiones de `docs/COSTOS.md`.
+- [ ] Los defectos 1–4 del inventario siguen sin corregir (sesiones 5, 6 y 7).
+- [ ] Si el push de este cierre quedó pendiente, hacerlo antes de empezar y
+      comprobar con `git status -sb` que no diga `ahead`.
