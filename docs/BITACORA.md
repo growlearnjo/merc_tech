@@ -287,3 +287,107 @@ la sesión, solo sobre el bloque de la corrida S2.
 - [ ] Correr la S3 y llenar su fila en `docs/MEDICIONES.md`.
 - [ ] Si el push de este cierre quedó pendiente, hacerlo antes de empezar y
       comprobar con `git status -sb` que no diga `ahead`.
+
+---
+
+## Sesión 3 — 2026-11-18 — Cinco corridas y la regla de costo
+
+### Qué se hizo, en orden
+
+| Hora | Commit | Fase |
+|---|---|---|
+| 11-13 19:51 | `ff12c58` | Preparación · se revierte la tarea patrón S2 (`1389e03`) antes de la A |
+| 10:22 | `b4e7a5c` | Paso 2 · se vuelven a medir la FACTURA, la S1 y la S2 con el `tokens.py` corregido |
+| 10:50 | `04ebbf1` | 3.1 · las tres hipótesis, en `docs/COSTOS.md` |
+| 11:02 | `0bd5a7f` · `e02de2b` | 3.2 · corrida A y su fila; revert `2574201` |
+| 11:26 | `788a239` · `47b0720` | 3.2 · corrida B y su fila; revert `5ba826b` |
+| 11:42 | `1e57ef2` · `d58f8e2` | 3.2 · corrida C y su fila; revert `5472c4b` |
+| 12:04 | `aa1e362` · `6a8a5c8` · `e56275d` | 3.2 · corrida D y su fila; revert `1282fdc` |
+| 12:34 | `9108dd6` · `7d97d0d` | 3.2 · corrida E y su fila (sin revert: su código queda en `main`) |
+| — | ver `git log` | 3.3 · regla en `docs/COSTOS.md` y fila S3 en `docs/MEDICIONES.md` |
+
+### Las cinco corridas
+
+Detalle completo, tarifas con su fecha y la regla en `docs/COSTOS.md`.
+
+| Corrida | Configuración | Resultado | Turnos | ~USD | Duración |
+|---|---|---|---|---|---|
+| A | opus-5-5 · medium (referencia: repite la S2) | ✅ a la primera | 0 | 0.34 | 1 min |
+| B | opus-5-5 · max | ✅ a la primera | 0 | 1.26 | 5 min |
+| C | opus-5-5 · low | ✅ a la primera | 0 | 0.26 | 1 min |
+| D | haiku-5-5 · max | ✅ a la primera | 0 | 0.05 (piso) | 4 min |
+| E | haiku-5-5 · low | ✅ a la primera | 0 | 0.01 | 1 min |
+
+La A (US$ 0.34) es la referencia que repite la S2 (US$ 0.36), con las mismas
+13 decisiones no pedidas y 4 ⚠️: el ruido entre días es chico al lado de las
+diferencias entre configuraciones.
+
+### Las hipótesis y si se cumplieron
+
+1. "Manda el modelo, más que el effort, en las dos comparaciones." **Se
+   cumplió.** Con el mismo effort, cambiar de modelo movió el costo unas 25
+   veces (B–D, C–E); con el mismo modelo, cambiar el effort lo movió unas 5
+   (B–C, D–E).
+2. "El effort pesa más con Opus; Haiku hará casi lo mismo con margen o sin
+   él." **Se desmintió.** De max a low el costo bajó unas 5 veces en los dos
+   modelos (B–C y D–E). Haiku con max escribió 54,634 tokens de salida contra
+   4,141 con low.
+3. "B costará más de 10 veces lo que E." **Se cumplió.** US$ 1.26 contra
+   US$ 0.01 (B–E).
+
+### La regla
+
+Para tareas chicas y bien definidas como esta, uso Haiku con effort low,
+porque costó US$ 0.01 contra US$ 1.26 de Opus con effort max y las dos pasaron
+a la primera, sin turnos de corrección. Para lo que toque la base de datos, el
+dinero o la seguridad vuelvo a Opus: eso no lo medí, pero un error ahí me
+cuesta más que esa diferencia.
+
+La fila S3 de `docs/MEDICIONES.md` es la corrida E.
+
+### Una regla del `CLAUDE.md` que estorba
+
+Las cinco corridas de hoy paginaron en memoria (`slice` en
+`src/app/page.tsx`), con los dos modelos y los tres niveles de effort, igual
+que la S2. La S1, sin contrato, paginó en la base. Eso confirma lo anotado en
+la sesión 2: la decisión la empuja la regla de la línea 16 ("no agregues
+funciones que la tarea no pida"), no el modelo ni el effort. No se cambió:
+la sesión prohíbe reescribir el `CLAUDE.md`.
+
+### Costo de la sesión 3
+
+Sin medir como sesión: `tokens.py` se corrió por bloque sobre cada corrida,
+no sobre todas las conversaciones de hoy.
+
+### Qué salió mal
+
+1. Las filas D y E se anotaron primero con 1 turno de corrección, y la E con
+   "⚠️ tras corregir" y duración "sin medir". Sus conversaciones no tienen
+   ningún mensaje de corrección: se corrigieron a 0 y ✅ en `7d97d0d`.
+2. El costo de la D es un piso: 7 de sus 14 llamadas pasaron los 100,000
+   tokens de prompt, donde la tarifa de Haiku 5.5 sube, y `tokens.py` las
+   cobra a la tarifa base. La spec no da la tarifa de ese tramo.
+3. `tokens.py` dice que las tarifas se consultaron el 2026-11-09 y la spec
+   dice 2026-11-11. Los valores son los mismos; en `docs/COSTOS.md` se cita
+   la fecha de la spec.
+4. La duración de la tabla es el tiempo del bloque según `tokens.py`, no el
+   reloj de pared hasta el paso 5 de la verificación. Nadie tomó ese reloj.
+5. "Estado de la página" solo se comprobó en la app para la E. En A–D sale
+   del código de cada commit.
+6. El commit de la E llevaba `Co-Authored-By: Claude Opus 5.5` y la corrida
+   fue con Haiku. Se reescribió (`9108dd6`, `7d97d0d`) con el mismo contenido.
+7. Al comprobar la E, un `next start` viejo en el puerto 3123 servía el build
+   de otra corrida y contestó primero. La comprobación se repitió con
+   `next dev` sobre el código actual.
+
+### Pendiente para la sesión 4
+
+- [ ] Decidir las cuatro afirmaciones del `CLAUDE.md` que quedaron obsoletas
+      en la sesión 2 (líneas 21, 23, 25 y 30). Siguen igual: la línea 30
+      dice "La paginación hoy no existe", y desde la E vuelve a existir.
+- [ ] Decidir si la regla de la línea 16 se reescribe (pasa por auditoría).
+- [ ] Los avisos de la auditoría de la sesión 2 que quedaron fuera del
+      contrato siguen abiertos.
+- [ ] Decidir de dónde sale la fecha de las tarifas de `tokens.py`
+      (2026-11-09) o si se iguala a la de la spec (2026-11-11).
+- [ ] Hacer el push y comprobar con `git status -sb` que no diga `ahead`.
