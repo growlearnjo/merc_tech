@@ -64,7 +64,7 @@ medir desde la sesión, aparece "sin dato" y no un número estimado.
 | Concepto | Valor | De dónde sale |
 |---|---|---|
 | Costo en dinero | **S/ 0 / US$ 0 extra** | Plan Max (sección 2): no se paga por token. |
-| Consumo del plan (tokens / % de la ventana) | **sin dato** | El agente no ve su propio consumo. Correr `/cost` (o `/usage`) en la sesión y pegar aquí la salida. |
+| Consumo del plan (tokens / % de la ventana) | **entrada 72 · caché esc 116,281 · caché lec 3,970,633 · salida 62,414 · US$ 2.62** (tarifa de API; el plan Max no lo cobra) · % de la ventana: **sin medir** | `tokens.py --bloques b1471b87`, bloque 1 (el del encargo). Caché del proyecto entero, corrida sin argumentos: "esos 28,917,471 tokens leídos costaron US$ 5.78" · "Sin caché, como entrada nueva, habrían costado US$ 115.67". |
 | Duración del trabajo | **≈ 12 min** (15:03:57 → 15:15:55) | Desde que se creó `package.json` hasta el último build (`.next/BUILD_ID`). No incluye el tiempo de lectura previo ni este informe. |
 | Aprobaciones pedidas | **sin dato exacto** | En modo `auto` decide el clasificador y el agente no ve qué le mostró al usuario. Lo seguro: el agente no hizo ninguna pregunta directa (0 `AskUserQuestion`) y no le rechazaron ninguna llamada. Las ventanas de permiso que hayas visto, cuéntalas tú. |
 
@@ -136,3 +136,5 @@ permiso de `/admin` y de `createProductAction`.
 solo devuelve `src/app/actions.ts:27` y `:46`, que leen el campo del formulario
 (no son claves). `find . -path ./node_modules -prune -o -name ".env*" -print`
 no devuelve nada. **No se encontró ninguna clave en el proyecto.**
+
+Re-medición de la FACTURA (§4), 2026-11-18: consumo de la conversación `b1471b87`, bloque 1 (el del encargo), medido con `tokens.py` ya corregido (`--bloques b1471b87`, 10:06); caché del proyecto entero tomada de la corrida sin argumentos (10:05).

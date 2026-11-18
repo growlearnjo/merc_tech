@@ -67,3 +67,5 @@ responsable del producto querría enterarse.
 | 11 | Accesibilidad: `aria-label` y `aria-current` (sin `rel="prev"`/`rel="next"`) | |
 | 12 | Reescribir `chipHref` sobre una función común (`catalogHref`), tocando código del filtro que ya funcionaba | |
 | 13 | Un comentario nuevo en español en `constants.ts` | |
+
+Verificado el 2026-11-18: S1 (`b498fb0d`, bloque 1) y S2 (`6fd44299`, bloque 1) coinciden con `tokens.py --patron` (ya corregido) del 2026-11-16 16:25; no se cambió ningún valor.
