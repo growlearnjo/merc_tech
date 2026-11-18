@@ -1,26 +1,42 @@
 import Link from "next/link";
 import { listCategories, listProducts } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
+import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string; page?: string }>;
 }) {
-  const { q = "", cat = "" } = await searchParams;
+  const { q = "", cat = "", page: pageParam = "" } = await searchParams;
   const query = q.trim().slice(0, 80);
   const products = listProducts({ q: query || undefined, category: cat || undefined });
   const categories = listCategories();
 
-  const chipHref = (c: string) => {
+  // La página vive en la URL (?page=N), así que recargar no la pierde.
+  // Un valor que no es un entero ≥ 1 cae en la primera; uno que se pasa, en la última.
+  const totalPages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
+  const requested = Number(pageParam);
+  const currentPage =
+    Number.isInteger(requested) && requested >= 1 ? Math.min(requested, totalPages) : 1;
+  const pageProducts = products.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+
+  // Conserva la búsqueda. Sin `page` el enlace va a la primera página,
+  // así que cambiar de categoría reinicia la paginación.
+  const catalogHref = (c: string, page = 1) => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
     if (c) p.set("cat", c);
+    if (page > 1) p.set("page", String(page));
     const s = p.toString();
     return s ? `/?${s}` : "/";
   };
+  const pagerClass = "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition";
 
   return (
     <>
@@ -64,7 +80,7 @@ export default async function CatalogPage({
             return (
               <Link
                 key={c || "todos"}
-                href={chipHref(c)}
+                href={catalogHref(c)}
                 className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
                   active
                     ? "border-slate-900 bg-slate-900 text-white"
@@ -96,10 +112,42 @@ export default async function CatalogPage({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((p) => (
+            {pageProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
+        )}
+
+        {totalPages > 1 && (
+          <nav aria-label="Paginación" className="mt-8 flex items-center gap-2">
+            {currentPage > 1 ? (
+              <Link
+                href={catalogHref(cat, currentPage - 1)}
+                className={`${pagerClass} border-slate-200 bg-white text-slate-700 hover:border-slate-400`}
+              >
+                ← Anterior
+              </Link>
+            ) : (
+              <span aria-hidden="true" className={`${pagerClass} border-slate-100 text-slate-300`}>
+                ← Anterior
+              </span>
+            )}
+            <p className="flex-1 text-center text-sm text-slate-500">
+              Página {currentPage} de {totalPages}
+            </p>
+            {currentPage < totalPages ? (
+              <Link
+                href={catalogHref(cat, currentPage + 1)}
+                className={`${pagerClass} border-slate-200 bg-white text-slate-700 hover:border-slate-400`}
+              >
+                Siguiente →
+              </Link>
+            ) : (
+              <span aria-hidden="true" className={`${pagerClass} border-slate-100 text-slate-300`}>
+                Siguiente →
+              </span>
+            )}
+          </nav>
         )}
       </section>
     </>
