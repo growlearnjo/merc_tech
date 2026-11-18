@@ -81,13 +81,17 @@ exactamente lo que mide la columna "turnos" del lab.
 | 16–18 | Qué es el effort · Qué nivel conviene a cada tarea | 03 |
 | 19–21 | **Lo que cuesta un millón de tokens** (diagrama) · Criterio de elección | 04 |
 | 22–25 | La pantalla que vas a leer · Qué es y qué no es ese número · Por qué sube el consumo solo | 05 |
-| 26–33 | El lab · Fase 3.1 · **Las tres configuraciones** (diagrama) · Fases 3.2 y 3.3 · La tabla que te llevas · La próxima sesión | lab |
+| 26–33 | El lab · Fase 3.1 · **Las cinco configuraciones** (diagrama) · Fases 3.2 y 3.3 · La tabla que te llevas · La próxima sesión | lab |
 | 34–35 | ¡Gracias! · Modo de evaluación | — |
 
-**Reloj de 2 h:** recap 10 · 01 → 15 · 02 → 25 · 03 → 10 · 04 → 10 · 05 → 10 ·
-**lab 35** · cierre 5.
-Si el reloj aprieta se recorta el bloque 05 (la pantalla se enseña dentro del
-lab), **nunca el lab**: el lab *es* la sesión.
+**El laboratorio se corre aparte de esta clase de teoría** (hallazgo 1 de la
+spec): esta clase lleva la teoría de la 3 y el laboratorio pendiente de la 2; el
+de la 3 va en su propia clase, porque son cinco corridas y diez chats.
+
+**Reloj de 2 h de teoría:** recap 10 · 01 → 15 · 02 → 25 · 03 → 15 · 04 → 15 ·
+05 → 15 · cierre 5 (suma 100; el resto, para el laboratorio pendiente de la 2).
+Si el reloj aprieta se recorta el bloque 05, **nunca el 02**: es el que sostiene
+el laboratorio.
 
 ---
 
@@ -95,24 +99,32 @@ lab), **nunca el lab**: el lab *es* la sesión.
 
 ### Fase 3.1 — Tu factura (≈10 min)
 
-El alumno abre `docs/00-ANTES.md`, relee la sección FACTURA y escribe **una
-hipótesis en una línea**: qué palanca cree que explica ese número. La hipótesis
-se comprueba o se desmiente en la fase siguiente, y las dos cosas enseñan.
+El alumno abre `docs/00-ANTES.md`, relee la sección FACTURA y escribe **tres
+hipótesis, una línea cada una**: qué palanca cree que manda, si el effort paga
+igual con los dos modelos, y cuánto hay entre su configuración más cara y la más
+barata. Se comprueban o se desmienten en la fase siguiente, y las dos cosas
+enseñan.
 
 Quien no tenga la factura —porque cerró la conversación sin mirarla en la
 sesión 1— usa la corrida A como línea base y lo anota así. Eso también es la
 lección de la sesión 1, cobrada tarde.
 
-### Fase 3.2 — Tres corridas, una tarea (≈25 min)
+### Fase 3.2 — Cinco corridas, una tarea
 
 **Antes de empezar:** `git revert` del commit del filtro, igual que en la
-sesión 2. Las tres corridas parten del mismo código.
+sesión 2, y un revert antes de cada corrida. Las cinco parten del mismo código.
 
-| | Modelo | Effort | Qué mide |
+| | Modelo | Effort | Qué es |
 |---|---|---|---|
-| **A** | el de la sesión 2 | el de la sesión 2 | tu línea base |
-| **B** | el mismo | un nivel más abajo | cuánto paga el effort |
-| **C** | uno más barato | el de A | cuánto paga el modelo |
+| **A** | el de la sesión 2 | el de la sesión 2 | la referencia: repite tu fila S2 |
+| **B** | el más capaz | el más alto | el techo |
+| **C** | el más capaz | el más bajo | |
+| **D** | el más barato | el más alto | |
+| **E** | el más barato | el más bajo | el piso |
+
+De la B a la E son las cuatro combinaciones de dos modelos por dos niveles de
+effort: cada palanca se mide dos veces, y aparece si el effort paga distinto
+según el modelo. La A da el ruido del agente entre dos días.
 
 Reglas de la medición, las mismas de `TAREA_PATRON.md`:
 
@@ -122,14 +134,17 @@ Reglas de la medición, las mismas de `TAREA_PATRON.md`:
 * **`/usage` antes de cerrar** cada conversación. Después, el dato se recupera mal.
 * **Revertir entre corridas.** Es el error que arruina la medición: si la
   segunda arranca con el filtro ya hecho, sale baratísima y no mide nada.
-* Se anotan los seis datos de `TAREA_PATRON.md` §3, con el costo en dólares.
+* Se anotan los siete datos de `TAREA_PATRON.md` §3, con el costo en dólares.
+  El séptimo es **decisiones no pedidas**: un modelo más barato puede decidir
+  más por su cuenta, y eso no aparece en el dólar.
 
 > **Aviso honesto que hay que dar en clase:** cada conversación nueva paga su
 > propia escritura de caché. Está incluido en el precio de cada corrida, y es
 > correcto que lo esté: es lo que cuesta hacer esa tarea desde cero.
 
-Si el grupo va lento, **la corrida C es la única prescindible** y puede quedar
-para casa.
+Si el grupo va lento se sacrifican en orden: primero la A —reemplazable por la
+fila S2— y luego la C o la D. **La B y la E no se tocan**, que son el rango. Lo
+que no se corra queda para casa.
 
 ### Fase 3.3 — `docs/COSTOS.md` (≈10 min)
 
@@ -143,7 +158,7 @@ Nace el archivo que la Ed. 4 nunca llegó a tener. Es corto a propósito:
 La fila elegida se copia a `docs/MEDICIONES.md` como **S3**, y con eso la tabla
 de tres filas del curso queda completa.
 
-> **Si las tres corridas salen casi iguales, esa también es una regla**, y hay
+> **Si las corridas salen casi iguales, esa también es una regla**, y hay
 > que decirlo antes de que alguien lo viva como un fracaso: significa que para
 > *esa* tarea la configuración cara no aporta nada. Es justo lo que querías saber.
 
@@ -171,7 +186,7 @@ de tres filas del curso queda completa.
 
 ## Entregables de la sesión
 
-1. `docs/COSTOS.md` con las tres configuraciones, su costo en dólares y la regla.
+1. `docs/COSTOS.md` con las cinco configuraciones, su costo en dólares y la regla.
 2. La tercera fila de `docs/MEDICIONES.md`, completa.
 3. Un commit por fase.
 

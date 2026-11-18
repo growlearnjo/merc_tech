@@ -18,7 +18,7 @@ disparador autocontenido.
 | Cierre | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | — | — |
 
 La Fase 3.2 no lleva rol ni razonamiento, y es a propósito: en esa fase el
-agente **no tiene que pensar nada**, tiene que hacer la misma tarea tres veces
+agente **no tiene que pensar nada**, tiene que hacer la misma tarea cinco veces
 igual. Lo que cambia entre corridas lo cambias tú, fuera del prompt.
 
 ---
@@ -55,7 +55,8 @@ cuál le toca.
 ## Cómo usar estos prompts
 
 1. **Cada fase empieza en una conversación nueva**, en orden. La **3.2** son
-   **tres conversaciones**, una por corrida, y cada una tiene dos pasos dentro.
+   **cinco corridas**, diez chats en total, y cada chat de corrida tiene dos
+   pasos dentro.
 2. **Los comandos que empiezan con `/` los escribes tú en el chat, no el
    agente.** `/usage`, `/clear`, `/model` y `/effort` son comandos de Claude
    Code: se escriben en la misma caja donde escribes tus mensajes, y el agente
@@ -155,7 +156,7 @@ docs/MEDICIONES.md, mi CLAUDE.md y un commit aislado con la tarea patrón.
    la S2— no lo dice, avísame: ese número puede venir inflado, y hay que volver
    a medirlo con el Paso 2 de la ruta antes de comparar nada. No lo midas tú.
 6. Cítame entre comillas el enunciado de la tarea patrón que está al pie de
-   esa tabla. Es el que voy a repetir hoy tres veces sin cambiar una palabra.
+   esa tabla. Es el que voy a repetir hoy cinco veces sin cambiar una palabra.
 7. Que el commit de la tarea patrón esté en el historial y sea reversible:
    encuéntralo con git log --oneline, dime su mensaje y qué archivos tocó con
    git show --stat.
@@ -408,7 +409,7 @@ sin decir de dónde salió.
 
 [OBJETIVO] Lee completo doc_sesions/sesion3/Ed5_sesion3.md y también
 doc_sesions/sesion3/TAREA_PATRON.md, porque la Fase 3.2 repite esa misma tarea
-tres veces. Devuélveme lo que entendiste:
+cinco veces. Devuélveme lo que entendiste:
 1. Las 3 fases en orden, con qué entrega cada una.
 2. Qué NO se hace hoy, y en qué sesión se hace cada una de esas cosas.
 3. Qué cambia entre las cinco corridas, y qué tiene que quedar idéntico.
@@ -597,8 +598,9 @@ no sirve y hay que repetirla:
 
 ### El revert, antes de cada corrida — y va en su propio chat
 
-Son **tres reverts**: uno antes de cada corrida. Los hace el agente, con este
-prompt, y siempre en un **chat corto aparte**.
+Son **cinco reverts**: uno antes de cada corrida, y el de antes de la A deshace
+la tarea patrón de la sesión 2. Los hace el agente, con este prompt, y siempre
+en un **chat corto aparte**.
 
 > **No lo pegues en el chat de la corrida.** Ese chat lleva solo la tarea: si
 > antes le pides que deshaga la corrida anterior, el agente llega sabiendo qué

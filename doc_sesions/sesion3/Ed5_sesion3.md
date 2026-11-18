@@ -54,15 +54,15 @@ sino de cuánto contexto arrastras y de a qué precio se te cobra ese arrastre.
 La caché es el descuento que se aplica a lo que se reenvía sin cambios. Cuando
 funciona, ese arrastre cuesta una fracción. Cuando se rompe, se paga entero.
 
-Y después se mide. La misma tarea de las dos sesiones anteriores, tres veces,
-cambiando una sola cosa cada vez: primero tu configuración actual, después el
-effort más abajo, después un modelo más barato. Tres números, y la decisión de
-cuál usar la tomas tú.
+Y después se mide. La misma tarea de las dos sesiones anteriores, cinco veces:
+una con tu configuración actual, y las otras cuatro con las combinaciones de dos
+modelos por dos niveles de effort. Cinco números, y la decisión de cuál usar la
+tomas tú.
 
 ```mermaid
 flowchart TD
-    A["docs/00-ANTES.md<br/>la FACTURA de la sesión 1"] --> B["Fase 3.1<br/>leer la factura con tokens.py<br/>+ una hipótesis en una línea"]
-    B --> C["Fase 3.2<br/>la misma tarea, tres veces<br/>A base · B menos effort · C modelo más barato"]
+    A["docs/00-ANTES.md<br/>la FACTURA de la sesión 1"] --> B["Fase 3.1<br/>leer la factura con tokens.py<br/>+ tres hipótesis, una línea cada una"]
+    B --> C["Fase 3.2<br/>la misma tarea, cinco veces<br/>A base · B-E: dos modelos × dos niveles de effort"]
     C --> D["Fase 3.3<br/>docs/COSTOS.md<br/>la tabla y LA REGLA"]
     D --> E["docs/MEDICIONES.md<br/>fila S3: la configuración elegida"]
     F["filas S1 y S2<br/>(sesiones 1 y 2)"] -.cierra la tabla.-> E
@@ -150,8 +150,8 @@ diferencias.
 | # | Hallazgo | Resolución | Fase |
 |---|---|---|---|
 | 1 | **El laboratorio no entra en la misma clase que la teoría de esta sesión**, sobre todo porque la sesión llega con la medición de la sesión 2 pendiente | **El laboratorio de esta sesión se corre aparte de su clase de teoría.** La clase lleva la teoría y el laboratorio pendiente de la sesión 2; el de la 3 se corre cuando el docente lo programe, igual que pasó con el de la 2. Aparte, se recorta el bloque 05, que la propia presentación nombra como primero en caerse | toda |
-| 2 | **El instrumento de medición cambiaba entre sesiones.** Las sesiones 1 y 2 miden el costo con `tokens.py`; la presentación de esta medía con `/usage`. Tres filas de una misma tabla con dos instrumentos distintos no se comparan | **Un solo instrumento para la tabla: `tokens.py`**, también en las tres corridas de esta sesión, y se anotan **tokens y dólares**, no solo dólares, porque los precios cambian y los tokens no. `/usage` se queda como pantalla de clase, para lo único que la herramienta no puede decir: si la caché está caliente ahora. Se mira, no se copia a la tabla | 3.1, 3.2 |
-| 3 | La presentación dice que se anotan **seis** datos y `TAREA_PATRON.md` §3 dice **siete** | Son siete. El que falta es **decisiones no pedidas**, que es justamente el que en la corrida de preparación no empató. Se pide en las tres corridas: un modelo más barato puede decidir más cosas por su cuenta, y eso es un costo que no aparece en dólares | 3.2 |
+| 2 | **El instrumento de medición cambiaba entre sesiones.** Las sesiones 1 y 2 miden el costo con `tokens.py`; la presentación de esta medía con `/usage`. Tres filas de una misma tabla con dos instrumentos distintos no se comparan | **Un solo instrumento para la tabla: `tokens.py`**, también en las cinco corridas de esta sesión, y se anotan **tokens y dólares**, no solo dólares, porque los precios cambian y los tokens no. `/usage` se queda como pantalla de clase, para lo único que la herramienta no puede decir: si la caché está caliente ahora. Se mira, no se copia a la tabla | 3.1, 3.2 |
+| 3 | La presentación dice que se anotan **seis** datos y `TAREA_PATRON.md` §3 dice **siete** | Son siete. El que falta es **decisiones no pedidas**, que es justamente el que en la corrida de preparación no empató. Se pide en las cinco corridas: un modelo más barato puede decidir más cosas por su cuenta, y eso es un costo que no aparece en dólares | 3.2 |
 | 4 | **`/cost` es un alias de `/usage`.** El comando que el alumno localizó en la sesión 1 sigue funcionando, pero la pantalla que hay que leer se llama `/usage` | Se nombran los dos para evitar la pregunta en clase | 3.1 |
 | 5 | **Cambiar el effort ya no invalida la caché** en los modelos de la generación 5.5 y en Fable 5.1 o posterior, con clave de API o plan de Claude. En los demás sí, y Claude Code avisa antes | Hace que la corrida B salga barata, y va dicho con asterisco: en un modelo más viejo esa corrida cuesta más | 3.2 |
 | 6 | **Editar el `CLAUDE.md` a mitad de sesión no rompe la caché, porque tampoco se aplica** hasta el siguiente `/clear`, `/compact` o reinicio | Cierra un cabo suelto de la sesión 2, y explica por qué las corridas tienen que empezar en conversación nueva | 3.2 |
@@ -293,28 +293,36 @@ El Prompt 0, que deja los datos de la FACTURA ya citados en
 
 ---
 
-## Fase 3.2 — Tres corridas, una tarea
+## Fase 3.2 — Cinco corridas, una tarea
 
 **Prompt sugerido:** "Ejecuta la Fase 3.2 de `Ed5_sesion3.md`."
 
 ### Qué se construye
 
-La misma tarea patrón de las sesiones 1 y 2, corrida tres veces, cambiando una
-sola cosa cada vez.
+La misma tarea patrón de las sesiones 1 y 2, corrida cinco veces: una repite la
+configuración de la sesión 2, y las otras cuatro son las combinaciones de dos
+modelos por dos niveles de effort.
 
-| | Modelo | Effort | Qué mide |
+| | Modelo | Effort | Qué es |
 |---|---|---|---|
-| **A** | el de la sesión 2 | el de la sesión 2 | tu línea base de hoy |
-| **B** | el mismo | un nivel más abajo | cuánto te paga el effort |
-| **C** | uno más barato | el de A | cuánto te paga el modelo |
+| **A** | el de la sesión 2 | el de la sesión 2 | la referencia: repite tu fila S2 |
+| **B** | el más capaz | el más alto | el techo |
+| **C** | el más capaz | el más bajo | |
+| **D** | el más barato | el más alto | |
+| **E** | el más barato | el más bajo | el piso |
+
+De la B a la E son las cuatro combinaciones de dos palancas: la B contra la C y
+la D contra la E dicen cuánto paga el effort, y la B contra la D y la C contra
+la E dicen cuánto paga el modelo. Es lo que tres corridas no podían dar.
 
 **La corrida A repite la configuración de la sesión 2, y se mide igual.** No
 porque la fila S2 esté mal, sino porque se midió otro día: entre ese día y hoy
 pueden haber cambiado la versión de Claude Code, el modelo que hay detrás del
 mismo nombre y el propio código del alumno, y además el agente no es
-determinista. La A es la **referencia del día** contra la que se leen la B y la
-C, para que la única diferencia entre las corridas sea la palanca que se movió. La
-fila S2 no se toca: sirve para lo suyo, comparar con contrato y sin contrato.
+determinista. Lo que separe la A de la fila S2 no es ninguna palanca: es el
+ruido del agente entre dos días, y dice cuánta diferencia entre las otras
+corridas es señal. La fila S2 no se toca: sirve para lo suyo, comparar con
+contrato y sin contrato.
 
 ### Depende de
 
@@ -324,19 +332,19 @@ La Fase 3.1, y que el commit de la tarea patrón esté aislado y reversible.
 
 | Archivo | Rol |
 |---|---|
-| Los que toca la tarea patrón | Se escriben y se revierten tres veces. Cada corrida en su propio commit. |
+| Los que toca la tarea patrón | Se escriben y se revierten cinco veces. Cada corrida en su propio commit. |
 | `docs/COSTOS.md` | Recibe los datos de las cinco corridas. |
 
 ### Reglas
 
-* **Antes de cada corrida, `git revert` del commit de la corrida anterior.**
-  Lo ejecuta el agente, con un prompt propio y en un chat aparte: en el chat
-  de la corrida no cabe, porque le adelantaría la tarea que viene. Son seis
-  conversaciones en la fase, tres de revert y tres de corrida.
+* **Antes de cada corrida, `git revert` del commit de la corrida anterior**, y
+  antes de la A, el de la tarea patrón de la sesión 2. Lo ejecuta el agente, con
+  un prompt propio y en un chat aparte: en el chat de la corrida no cabe, porque
+  le adelantaría la tarea que viene. Son diez conversaciones en la fase, cinco
+  de revert y cinco de corrida. **Es el error que arruina la medición**: si una
+  corrida arranca con la tarea ya hecha, sale baratísima y no mide nada.
 * **El reloj se para al terminar el paso 5 de la verificación**, no cuando el
   agente deja de escribir. Las cinco corridas se cronometran igual.
-  Las tres parten del mismo código. **Es el error que arruina la medición**: si
-  la segunda arranca con la tarea ya hecha, sale baratísima y no mide nada.
 * **Conversación nueva cada vez.** Los totales de `/usage` se reinician con
   `/clear`, así que cada corrida tiene su propio total limpio. Y es además lo
   que hace que un cambio en el `CLAUDE.md` se aplique: editado a mitad de
@@ -356,14 +364,14 @@ La Fase 3.1, y que el commit de la tarea patrón esté aislado y reversible.
   antes de hacerlo.
 * **Si el grupo va lento**, se sacrifican en este orden: primero la A, que se
   puede reemplazar por la fila S2 aceptando que se midió otro día; después la C
-  o la D. La B y la E no, porque son el techo y el piso. Lo que no se corra
-  quedar para casa. La A y la B no.
+  o la D, que deja la cuadrícula coja pero conserva el techo y el piso. La B y
+  la E no se tocan. Lo que no se corra queda para casa, anotado como pendiente.
 * **No se cambia el comportamiento de la tarea** para que una corrida luzca
   mejor en la tabla.
 
 ### Cómo verificar al terminar
 
-1. `git log --oneline` → tres commits de la tarea y sus reverts entre medio,
+1. `git log --oneline` → cinco commits de la tarea y sus reverts entre medio,
    en orden.
 2. Las corridas tienen anotado su costo en tokens y en dólares, medido
    con `tokens.py` antes de cerrar cada conversación.
@@ -563,8 +571,8 @@ y entra en el commit de la Fase 3.1.
 
 En la **Fase 3.2**, el revert deja de ser un "revierte la corrida anterior" sin
 comandos y pasa a ser un prompt propio, que ejecuta el agente **en un chat
-aparte**: en el de la corrida no cabe, porque le adelantaría la tarea. Son seis
-conversaciones en la fase, tres de revert y tres de corrida. Y queda dicho
+aparte**: en el de la corrida no cabe, porque le adelantaría la tarea. Son diez
+conversaciones en la fase, cinco de revert y cinco de corrida. Y queda dicho
 cuándo se para el reloj —al terminar el paso 5 de la verificación, no cuando el
 agente deja de escribir—, que antes solo estaba en `TAREA_PATRON.md` §3.
 
@@ -591,7 +599,14 @@ se comprueba cada una. Y el paso 2 de cada corrida ya no pregunta con qué
 modelo y effort se corrió: lo lee de la columna "configuración" del archivo
 de salida, y si no coincide con la que esa corrida debía tener, se detiene.
 
-**Pendiente antes de dar la clase.** La presentación `Ed5_sesion3.pptx` todavía
-dice "lab 35" y "seis datos", su lámina 6 asume dos filas de mediciones, y no
-refleja que el laboratorio se corre aparte de la clase de teoría. Hay que alinearla
-con esta spec.
+**2026-11-16 — versión 1.3.** La Fase 3.2 queda escrita en cinco corridas en
+todo el material. Se terminó de migrar el cuerpo de la spec (tabla A–E, cuenta
+de reverts y de commits, "siete datos"), los dos leftover de los prompts, la
+frase de `TAREA_PATRON.md`, el guion y la presentación `Ed5_sesion3.pptx`: la
+lámina 29 pasa a las cinco configuraciones A–E, la 28 a las tres hipótesis, la
+lista de datos a siete, y la lámina 6 ya no da por hecho que el alumno tenga la
+fila S2. La presentación quedó alineada con esta spec.
+
+**Pendiente antes de dar la clase.** Volver a mirar la tabla de precios de
+§"Las tarifas", consultada el 11 de noviembre: los modelos y sus tarifas no los
+verifica este material.

@@ -1,0 +1,259 @@
+==============================================================================
+2026-11-13 19:26  ·  tokens.py
+==============================================================================
+Proyecto: C:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+f1a9712d          4         8      43,150     242,879     2,613           1 min     0.32
+----------------------------------------------------------------------------------------
+TOTAL           233       518   1,274,255  21,541,404   215,518                    14.99
+
+Lo que hizo la caché: esos 21,541,404 tokens leídos costaron US$ 4.31.
+Sin caché, como entrada nueva, habrían costado US$ 86.17.
+
+Desglose de la conversación f1a9712d: un bloque por cada cosa que pediste.
+
+  Bloque 1 — 19:20 — "[ROL] Actúa como ingeniero que revisa el instrumental antes de un…"
+     configuración: opus-5-5 · medium
+     turnos 4 · entrada 8 · caché esc 43,150 · caché lec 242,879 · salida 2,613 · 1 min · US$ 0.32
+
+  Los bloques suman el total de la fila de arriba.
+  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.
+  Desglose de otra conversación: python doc_sesions/sesion3/tokens.py --bloques <conversación>
+  Desglose de todas:             python doc_sesions/sesion3/tokens.py --bloques todas
+  Solo las corridas del patrón:  python doc_sesions/sesion3/tokens.py --patron
+
+Modelos: claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+
+==============================================================================
+2026-11-13 19:31  ·  tokens.py --bloques b1471b87
+==============================================================================
+Proyecto: c:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+f1a9712d          6        14      47,272     391,814     3,283          12 min     0.38
+----------------------------------------------------------------------------------------
+TOTAL           235       524   1,278,377  21,690,339   216,188                    15.06
+
+Lo que hizo la caché: esos 21,690,339 tokens leídos costaron US$ 4.34.
+Sin caché, como entrada nueva, habrían costado US$ 86.76.
+
+Desglose de la conversación b1471b87: un bloque por cada cosa que pediste.
+
+  Bloque 1 — 15:02 — "Necesito una tienda web para vender productos de tecnología. Que …"
+     configuración: opus-5-5 · medium
+     turnos 36 · entrada 72 · caché esc 116,281 · caché lec 3,970,633 · salida 62,414 · 14 min · US$ 2.62
+
+  Bloque 2 — 15:31 — "[OBJETIVO] Antes de cerrar: dime qué construiste, en qué archivos…"
+     configuración: opus-5-5 · medium
+     turnos 3 · entrada 8 · caché esc 3,169 · caché lec 452,320 · salida 4,165 · 1 min · US$ 0.19
+
+  Bloque 3 — 19:38 — "[CONTEXTO] Esta es la conversación en la que generaste mi app, en…"
+     configuración: opus-5-5 · medium
+     turnos 4 · entrada 8 · caché esc 132,051 · caché lec 515,959 · salida 6,328 · 1 min · US$ 0.89
+
+  Los bloques suman el total de la fila de arriba.
+  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.
+  Desglose de otra conversación: python doc_sesions/sesion3/tokens.py --bloques <conversación>
+  Desglose de todas:             python doc_sesions/sesion3/tokens.py --bloques todas
+  Solo las corridas del patrón:  python doc_sesions/sesion3/tokens.py --patron
+
+Modelos: claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+
+==============================================================================
+2026-11-13 19:57  ·  tokens.py
+==============================================================================
+Proyecto: C:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+f1a9712d          7        16      49,064     469,540     4,113          12 min     0.42
+cec08533          3         6      43,144     173,498     2,460           1 min     0.30
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+239a98a6          4         8      59,735     242,267     4,714           1 min     0.44
+a4ba9384          4         8      42,564     228,228     1,809           1 min     0.29
+a8c876dc         10        22      53,515     717,501     8,477           3 min     0.58
+e3057731         15        32      67,720   1,192,434    13,305           4 min     0.84
+----------------------------------------------------------------------------------------
+TOTAL           272       602   1,546,847  24,321,993   247,783                    17.56
+
+Lo que hizo la caché: esos 24,321,993 tokens leídos costaron US$ 4.86.
+Sin caché, como entrada nueva, habrían costado US$ 97.29.
+
+Desglose de la conversación e3057731: un bloque por cada cosa que pediste.
+
+  Bloque 1 — 19:52 — "Muestra solo 6 productos por página, con enlaces para pasar de pá…"
+     configuración: opus-5-5 · xhigh
+     turnos 15 · entrada 32 · caché esc 67,720 · caché lec 1,192,434 · salida 13,305 · 4 min · US$ 0.84
+
+  Los bloques suman el total de la fila de arriba.
+  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.
+  Desglose de otra conversación: python doc_sesions/sesion3/tokens.py --bloques <conversación>
+  Desglose de todas:             python doc_sesions/sesion3/tokens.py --bloques todas
+  Solo las corridas del patrón:  python doc_sesions/sesion3/tokens.py --patron
+
+Modelos: claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+
+==============================================================================
+2026-11-16 16:25  ·  tokens.py
+==============================================================================
+Proyecto: C:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+a4ba9384          4         8      42,564     228,228     1,809           1 min     0.29
+cec08533          3         6      43,144     173,498     2,460           1 min     0.30
+f1a9712d          7        16      49,064     469,540     4,113          12 min     0.42
+a8c876dc         10        22      53,515     717,501     8,477           3 min     0.58
+239a98a6          4         8      59,735     242,267     4,714           1 min     0.44
+e3057731         24        52      88,112   2,199,449    22,589           9 min     1.33
+038ca068          1         0           0           0         0  menos de 1 min     0.00
+7b38fed1          1         0           0           0         0  menos de 1 min     0.00
+----------------------------------------------------------------------------------------
+TOTAL           283       622   1,567,239  25,329,008   257,067                    18.05
+
+Lo que hizo la caché: esos 25,329,008 tokens leídos costaron US$ 5.07.
+Sin caché, como entrada nueva, habrían costado US$ 101.32.
+
+Desglose de la conversación 7b38fed1: un bloque por cada cosa que pediste.
+
+  Bloque 1 — 15:07 — "hola"
+     configuración: <synthetic> · sin dato
+     turnos 1 · entrada 0 · caché esc 0 · caché lec 0 · salida 0 · menos de 1 min · US$ 0.00
+
+  Los bloques suman el total de la fila de arriba.
+  A la tabla de MEDICIONES va el bloque de tu enunciado, no la conversación entera.
+  Desglose de otra conversación: python doc_sesions/sesion3/tokens.py --bloques <conversación>
+  Desglose de todas:             python doc_sesions/sesion3/tokens.py --bloques todas
+  Solo las corridas del patrón:  python doc_sesions/sesion3/tokens.py --patron
+
+Modelos: <synthetic>, claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+
+==============================================================================
+2026-11-16 16:25  ·  tokens.py --patron
+==============================================================================
+Proyecto: C:\Users\jhono\OneDrive\Documents\datapath_esp\merc_tech3
+Conversaciones en: C:\Users\jhono\.claude\projects\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3
+
+conversación turnos   entrada   caché esc   caché lec    salida        duración     ~USD
+----------------------------------------------------------------------------------------
+b7543045         11        24      45,459     732,606     4,711           2 min     0.47
+d995c786          2         4      50,109      98,592     4,256           1 min     0.36
+d43a8b5b         17        36      64,804   1,384,966    11,481           5 min     0.83
+3af62490         12        26      57,196     903,255     5,584           4 min     0.58
+b1471b87         43        88     251,501   4,938,912    72,907         277 min     3.70
+b71d60b8         19        40      73,308   1,703,497    13,248           5 min     0.97
+0b8ebad1          8        18      60,689     616,928     6,961           9 min     0.57
+b498fb0d         32        74     149,553   2,630,435    18,790        2368 min     1.65
+c0a95d65         18        42      71,433   1,547,795    14,041          17 min     0.95
+c2c28b0f         25        62     165,969   3,585,393    25,544          27 min     2.06
+6fd44299         18        44      62,108   1,394,969    12,751          14 min     0.84
+3641d2f7         10        22      71,781     795,090    10,533           2 min     0.73
+24dd56fc          6        12      62,403     435,305     6,606           2 min     0.53
+cd03a2c0          8        18      44,792     530,782     5,492           3 min     0.44
+a4ba9384          4         8      42,564     228,228     1,809           1 min     0.29
+cec08533          3         6      43,144     173,498     2,460           1 min     0.30
+f1a9712d          7        16      49,064     469,540     4,113          12 min     0.42
+a8c876dc         10        22      53,515     717,501     8,477           3 min     0.58
+239a98a6          4         8      59,735     242,267     4,714           1 min     0.44
+e3057731         24        52      88,112   2,199,449    22,589           9 min     1.33
+038ca068          1         0           0           0         0  menos de 1 min     0.00
+7b38fed1          1         0           0           0         0  menos de 1 min     0.00
+----------------------------------------------------------------------------------------
+TOTAL           283       622   1,567,239  25,329,008   257,067                    18.05
+
+Lo que hizo la caché: esos 25,329,008 tokens leídos costaron US$ 5.07.
+Sin caché, como entrada nueva, habrían costado US$ 101.32.
+
+Corridas de la tarea patrón en este proyecto
+
+  Enunciado 1 — "Agrega al catálogo un filtro por categoría. Que se pueda el…"
+    conversación   bloque            cuándo  configuración            turnos  entrada   caché esc   caché lec   salida       duración    ~USD
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    3af62490            1  2026-11-11 15:57  opus-5-5 · medium             8       16      50,577     558,961    2,646          1 min    0.42
+
+  Enunciado 2 — "Muestra solo 6 productos por página, con enlaces para pasar…"
+    conversación   bloque            cuándo  configuración            turnos  entrada   caché esc   caché lec   salida       duración    ~USD
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    b498fb0d            1  2026-11-11 19:54  opus-5-5 · medium             9       18      44,089     610,325    4,682          2 min    0.44
+    6fd44299            1  2026-11-13 12:23  opus-5-5 · medium             6       12      41,025     385,561    4,098          1 min    0.36
+    e3057731            1  2026-11-13 19:52  opus-5-5 · xhigh             15       32      67,720   1,192,434   13,305          4 min    0.84
+
+  AVISO: hay corridas con enunciados distintos, y esas no se comparan entre sí.
+  Usa solo el grupo del enunciado que tienes anotado al pie de tu
+  docs/MEDICIONES.md, y deja el otro fuera de la tabla.
+  Cada fila va tal cual a docs/MEDICIONES.md, con sus tokens y sus dólares.
+
+Modelos: <synthetic>, claude-opus-5-5
+La columna configuración dice con qué modelo y qué effort corrió cada bloque.
+Tarifas públicas consultadas el 2026-11-09; verifícalas si el número importa.
+

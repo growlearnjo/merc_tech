@@ -142,7 +142,7 @@ propio `docs/MEDICIONES.md`, que nace en la sesión 1.
 > **Sobre la fila de la sesión 3.** En esa sesión la tarea se corre **cinco
 > veces**: una repite la configuración de la sesión 2, y las otras cuatro son
 > las combinaciones de dos modelos por dos niveles de effort. La fila
-> de aquí es la **configuración elegida**; la comparación de las tres vive en el
+> de aquí es la **configuración elegida**; la comparación de las cinco vive en el
 > `docs/COSTOS.md` que nace en esa misma sesión. Así esta tabla sigue teniendo
 > tres filas comparables entre sí.
 
