@@ -1,36 +1,18 @@
 import Link from "next/link";
 import { listCategories, listProducts } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
-import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string }>;
 }) {
-  const { q = "", cat = "", page = "1" } = await searchParams;
+  const { q = "", cat = "" } = await searchParams;
   const query = q.trim().slice(0, 80);
   const products = listProducts({ q: query || undefined, category: cat || undefined });
   const categories = listCategories();
-
-  const totalPages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
-  const requested = Number.parseInt(page, 10);
-  const currentPage = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), totalPages) : 1;
-  const pageProducts = products.slice(
-    (currentPage - 1) * PRODUCTS_PER_PAGE,
-    currentPage * PRODUCTS_PER_PAGE
-  );
-
-  const pageHref = (n: number) => {
-    const p = new URLSearchParams();
-    if (query) p.set("q", query);
-    if (cat) p.set("cat", cat);
-    if (n > 1) p.set("page", String(n));
-    const s = p.toString();
-    return s ? `/?${s}` : "/";
-  };
 
   const chipHref = (c: string) => {
     const p = new URLSearchParams();
@@ -114,45 +96,10 @@ export default async function CatalogPage({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-            {pageProducts.map((p) => (
+            {products.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
-        )}
-
-        {totalPages > 1 && (
-          <nav aria-label="Paginación" className="mt-8 flex flex-wrap items-center justify-center gap-2">
-            {currentPage > 1 && (
-              <Link
-                href={pageHref(currentPage - 1)}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400"
-              >
-                Anterior
-              </Link>
-            )}
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-              <Link
-                key={n}
-                href={pageHref(n)}
-                aria-current={n === currentPage ? "page" : undefined}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                  n === currentPage
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
-                }`}
-              >
-                {n}
-              </Link>
-            ))}
-            {currentPage < totalPages && (
-              <Link
-                href={pageHref(currentPage + 1)}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400"
-              >
-                Siguiente
-              </Link>
-            )}
-          </nav>
         )}
       </section>
     </>
