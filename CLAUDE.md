@@ -28,9 +28,6 @@ Tienda de práctica del curso; cada regla de abajo sale del inventario de `docs/
 ## Estado de la interfaz
 - Filtros, búsqueda y paginación del catálogo viven en la URL (`searchParams`), no en `useState`.
   La paginación hoy no existe (se revirtió en la Fase 2.2). Verificación: `grep -n "useState\|use client" src/app/page.tsx` debe devolver vacío.
-- `localStorage` solo guarda el carrito (`CartProvider.tsx`); no hay tabla `cart_items`.
-  No la crees ni muevas el carrito sin que se pida.
-  Verificación: `grep -rln localStorage src` devuelve solo `src/components/CartProvider.tsx`.
 
 ## Seguridad
 - `/admin` y `createProductAction` exigen un usuario administrador. Hoy no se cumple:
