@@ -1,26 +1,34 @@
 import Link from "next/link";
 import { listCategories, listProducts } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
+import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string }>;
+  searchParams: Promise<{ q?: string; cat?: string; page?: string }>;
 }) {
-  const { q = "", cat = "" } = await searchParams;
+  const { q = "", cat = "", page = "" } = await searchParams;
   const query = q.trim().slice(0, 80);
-  const products = listProducts({ q: query || undefined, category: cat || undefined });
+  const all = listProducts({ q: query || undefined, category: cat || undefined });
   const categories = listCategories();
 
-  const chipHref = (c: string) => {
+  const totalPages = Math.max(1, Math.ceil(all.length / PRODUCTS_PER_PAGE));
+  const requested = Math.floor(Number(page));
+  const current = Math.min(Math.max(1, Number.isFinite(requested) ? requested : 1), totalPages);
+  const products = all.slice((current - 1) * PRODUCTS_PER_PAGE, current * PRODUCTS_PER_PAGE);
+
+  const buildHref = (c: string, n: number) => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
     if (c) p.set("cat", c);
+    if (n > 1) p.set("page", String(n));
     const s = p.toString();
     return s ? `/?${s}` : "/";
   };
+  const chipHref = (c: string) => buildHref(c, 1);
 
   return (
     <>
@@ -83,11 +91,11 @@ export default async function CatalogPage({
             {query && <span className="font-normal text-slate-500"> · “{query}”</span>}
           </h2>
           <span className="text-sm text-slate-500">
-            {products.length} {products.length === 1 ? "producto" : "productos"}
+            {all.length} {all.length === 1 ? "producto" : "productos"}
           </span>
         </div>
 
-        {products.length === 0 ? (
+        {all.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
             <p className="font-medium">No encontramos productos con ese criterio.</p>
             <Link href="/" className="mt-2 inline-block text-sm font-semibold text-indigo-600 hover:underline">
@@ -100,6 +108,34 @@ export default async function CatalogPage({
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
+        )}
+
+        {totalPages > 1 && (
+          <nav aria-label="Paginación" className="mt-8 flex items-center justify-center gap-2 text-sm">
+            {current > 1 ? (
+              <Link
+                href={buildHref(cat, current - 1)}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 hover:border-slate-400"
+              >
+                ← Anterior
+              </Link>
+            ) : (
+              <span className="rounded-full border border-slate-100 px-4 py-2 text-slate-300">← Anterior</span>
+            )}
+            <span className="px-2 text-slate-500">
+              Página {current} de {totalPages}
+            </span>
+            {current < totalPages ? (
+              <Link
+                href={buildHref(cat, current + 1)}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 hover:border-slate-400"
+              >
+                Siguiente →
+              </Link>
+            ) : (
+              <span className="rounded-full border border-slate-100 px-4 py-2 text-slate-300">Siguiente →</span>
+            )}
+          </nav>
         )}
       </section>
     </>
