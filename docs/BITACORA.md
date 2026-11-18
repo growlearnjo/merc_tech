@@ -335,6 +335,22 @@ diferencias entre configuraciones.
 3. "B costará más de 10 veces lo que E." **Se cumplió.** US$ 1.26 contra
    US$ 0.01 (B–E).
 
+### Corridas pendientes
+
+Ninguna: las cinco corrieron y las cinco pasaron a la primera. Lo que quedó
+sin medir dentro de ellas:
+
+- El costo real de la D: US$ 0.05 es un piso (ver "Qué salió mal", punto 2).
+- El reloj de pared hasta el paso 5 de la verificación, en las cinco.
+- El estado de la página visto en la app, en A–D (sale del código).
+
+### La fila S3 y por qué
+
+La fila S3 de `docs/MEDICIONES.md` es la corrida E (haiku-5-5 · low). Es la
+configuración que dicta la regla de abajo, la más barata de las cinco
+(US$ 0.01) con el mismo resultado que las otras cuatro (✅, 0 turnos), y la
+única cuyo estado de página se comprobó corriendo la app.
+
 ### La regla
 
 Para tareas chicas y bien definidas como esta, uso Haiku con effort low,
@@ -342,8 +358,6 @@ porque costó US$ 0.01 contra US$ 1.26 de Opus con effort max y las dos pasaron
 a la primera, sin turnos de corrección. Para lo que toque la base de datos, el
 dinero o la seguridad vuelvo a Opus: eso no lo medí, pero un error ahí me
 cuesta más que esa diferencia.
-
-La fila S3 de `docs/MEDICIONES.md` es la corrida E.
 
 ### Una regla del `CLAUDE.md` que estorba
 
@@ -353,6 +367,38 @@ que la S2. La S1, sin contrato, paginó en la base. Eso confirma lo anotado en
 la sesión 2: la decisión la empuja la regla de la línea 16 ("no agregues
 funciones que la tarea no pida"), no el modelo ni el effort. No se cambió:
 la sesión prohíbe reescribir el `CLAUDE.md`.
+
+### Las tres filas de `docs/MEDICIONES.md` a lo largo del curso
+
+| | S1 · opus medium, sin reglas | S2 · opus medium, `CLAUDE.md` | S3 · haiku low, `CLAUDE.md` |
+|---|---|---|---|
+| Resultado | ✅ sin intervención | ✅ sin intervención | ✅ sin intervención |
+| Turnos | 0 | 0 | 0 |
+| Estado de la página | La URL (`/?page=2`) | La URL (`/?page=2`) | La URL (`/?page=2`) |
+| Dónde se pagina | En la base | En memoria | En memoria |
+| Decisiones no pedidas | 13, 4 ⚠️ | 13, 4 ⚠️ | 7, 2 ⚠️ |
+| Salida (tokens) | 4,682 | 4,098 | 4,141 |
+| Caché leída (tokens) | 610,325 | 385,561 | 314,551 |
+| ~USD | 0.44 | 0.36 | 0.01 |
+| Duración | 2 min | 1 min | 1 min |
+
+- **Empataron en las tres filas:** resultado, turnos de corrección y estado
+  de la página. Quiere decir que esta tarea no separa una configuración de
+  otra por calidad: todas la resuelven igual a la primera. Lo único que la
+  tarea distingue es el costo, y la regla no se puede extender a tareas
+  más difíciles con estos datos.
+- **Cambió el costo:** de US$ 0.44 a 0.36 a 0.01. La salida casi empató
+  (4,682 · 4,098 · 4,141): la S3 no escribió menos que la S2, cada token
+  costó menos. La bajada de la S2 a la S3 es el precio de Haiku, no un
+  trabajo más corto.
+- **Cambió dónde se pagina, a peor:** la S1 paginó en la base; la S2 y la S3,
+  con contrato, en memoria. No es una mejora.
+- **Decisiones no pedidas, 13 → 13 → 7:** la lista de la S3 la dio el propio
+  agente al cerrar (bloque 4 de `3954107f`); la de la S1 y la S2 no dice cómo
+  se armó. Con una corrida por fila y métodos que pueden ser distintos, la
+  bajada no se atribuye al modelo. Dentro de la Fase 3.2, la C (opus · low)
+  tuvo 14 y la D (haiku · max) 9.
+- Cada fila es una sola corrida.
 
 ### Costo de la sesión 3
 
@@ -390,4 +436,13 @@ no sobre todas las conversaciones de hoy.
       contrato siguen abiertos.
 - [ ] Decidir de dónde sale la fecha de las tarifas de `tokens.py`
       (2026-11-09) o si se iguala a la de la spec (2026-11-11).
+- [ ] Dos precisiones de `docs/COSTOS.md` que salieron al revisar sus
+      números en el cierre (no se cambiaron):
+      - la nota de la D dice que la llamada más grande de la E fue de 94,724
+        tokens; esa llamada es del bloque 4 (la lista de decisiones). Dentro
+        de la corrida (bloque 3) la más grande fue de 74,938. La conclusión
+        no cambia: ninguna pasó de 100,000;
+      - "unas 25 veces" sale de dividir centavos redondeados (1.26 / 0.05 y
+        0.26 / 0.01). Con los tokens de cada bloque y las tarifas de la tabla
+        da 23 (B–D) y 24 (C–E); "unas 5" da 4.9 (B–C) y 5.1 (D–E).
 - [ ] Hacer el push y comprobar con `git status -sb` que no diga `ahead`.
