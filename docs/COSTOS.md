@@ -13,3 +13,4 @@ Fecha: 2026-11-18
 | A | opus-5-5 | medium | ✅ a la primera | 0 | 13, de ellas 4 con ⚠️ | entrada 10 · caché esc 40,207 · caché lec 313,782 · salida 3,716 · US$ 0.34 | 1 min |
 | B | opus-5-5 | max | ✅ a la primera | 0 | 10, de ellas 4 con ⚠️ | entrada 34 · caché esc 82,245 · caché lec 1,579,013 · salida 26,438 · US$ 1.26 | 5 min |
 | C | opus-5-5 | low | ✅ a la primera | 0 | 14, de ellas 4 con ⚠️ | entrada 6 · caché esc 36,155 · caché lec 167,525 · salida 2,170 · US$ 0.26 | 1 min (medido; tú dijiste 6) |
+| D | haiku-5-5 | max | ⚠️ una corrección | 1 | 9, de ellas 3 con ⚠️ | entrada 28 · caché esc 107,669 · caché lec 1,367,146 · salida 54,634 · US$ 0.05 | 4 min (medido; tú dijiste 7) |
