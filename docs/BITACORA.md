@@ -445,4 +445,6 @@ no sobre todas las conversaciones de hoy.
       - "unas 25 veces" sale de dividir centavos redondeados (1.26 / 0.05 y
         0.26 / 0.01). Con los tokens de cada bloque y las tarifas de la tabla
         da 23 (B–D) y 24 (C–E); "unas 5" da 4.9 (B–C) y 5.1 (D–E).
-- [ ] Hacer el push y comprobar con `git status -sb` que no diga `ahead`.
+- [x] Hacer el push y comprobar con `git status -sb` que no diga `ahead`.
+      Hecho en el cierre: `0ad9804..462bc8c main -> main`, y `git status -sb`
+      dice `## main...origin/main`.
