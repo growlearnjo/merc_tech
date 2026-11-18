@@ -4,7 +4,7 @@
 |---|---|---|---|---|---|---|
 | S1 · sin reglas | ✅ sin intervención | 0 | La URL (`/?page=2`). La lee `src/app/page.tsx` de `searchParams`; la consulta vive en `src/lib/products.ts` (`listProductsPage`, `PAGE_SIZE = 6`) | 13, de ellas 4 con ⚠️ (ver abajo) | entrada 18 · caché esc 44,089 · caché lec 610,325 · salida 4,682 · US$ 0.44 | 2 min |
 | S2 · con `CLAUDE.md` | ✅ sin intervención | 0 | La URL (`/?page=2`). La lee `src/app/page.tsx` de `searchParams` y recorta en memoria la lista de `listProducts`; el 6 vive en `src/lib/constants.ts` (`PRODUCTS_PER_PAGE`) | 13, de ellas 4 con ⚠️ (ver abajo) | entrada 12 · caché esc 41,025 · caché lec 385,561 · salida 4,098 · US$ 0.36 | 1 min |
-| S3 · configuración elegida | | | | | | |
+| S3 · haiku-5-5 + effort low | ✅ sin intervención | 0 | La URL (`/?page=2`). La lee `src/app/page.tsx` de `searchParams` y recorta en memoria la lista de `listProducts`; el 6 vive en `src/lib/constants.ts` (`PRODUCTS_PER_PAGE`) | 7, de ellas 2 con ⚠️ (ver abajo) | entrada 10 · caché esc 43,991 · caché lec 314,551 · salida 4,141 · US$ 0.01 | 1 min |
 
 Enunciado usado en las tres corridas (enunciado 2 de `TAREA_PATRON.md` §1, paginación):
 
@@ -25,6 +25,12 @@ corregido para no contar dos veces cada respuesta.
 conversación (`6fd44299`, bloque 1), no de la conversación completa, porque
 ese chat siguió con otros trabajos después. Se midieron con el mismo
 `tokens.py` que la S1 (`--patron`).
+
+**Costo y duración de la S3:** son los de la corrida E de la Fase 3.2, copiados de
+`docs/COSTOS.md`: bloque 3 de la conversación `3954107f` (los bloques 1 y 2 son un
+intento interrumpido antes de cambiar el modelo, sin costo). Se midieron con el
+mismo `tokens.py` que la S1 y la S2 (`--bloques`). La comparación de las cinco
+corridas está en `docs/COSTOS.md`.
 
 ## Decisiones no pedidas en la S1
 
@@ -69,3 +75,19 @@ responsable del producto querría enterarse.
 | 13 | Un comentario nuevo en español en `constants.ts` | |
 
 Verificado el 2026-11-18: S1 (`b498fb0d`, bloque 1) y S2 (`6fd44299`, bloque 1) coinciden con `tokens.py --patron` (ya corregido) del 2026-11-16 16:25; no se cambió ningún valor.
+
+## Decisiones no pedidas en la S3
+
+Lo que el agente decidió y el enunciado no pedía, según su propia lista al
+cerrar la corrida E (conversación `3954107f`, bloque 4). ⚠️ = algo de lo que un
+responsable del producto querría enterarse.
+
+| # | Decisión | ⚠️ |
+|---|---|---|
+| 1 | Crear `src/lib/constants.ts`, un archivo nuevo, para `PRODUCTS_PER_PAGE = 6` | ⚠️ |
+| 2 | El diseño de la barra: "← Anterior", "Siguiente →", "Página X de Y", los extremos deshabilitados y un `aria-label` | |
+| 3 | La paginación no aparece si todo cabe en una página | |
+| 4 | Un número de página inválido o fuera de rango lleva a una página válida, en vez de dar error o una lista vacía | |
+| 5 | El contador "N productos" muestra el total encontrado, no los de la página | ⚠️ |
+| 6 | Buscar o cambiar de categoría vuelve a la página 1 | |
+| 7 | Los enlaces de página conservan `q` y `cat` | |
