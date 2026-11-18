@@ -65,3 +65,28 @@ Los ⚠️ no significan exactamente lo mismo en cada lista. Para el autor es «
 
 - Contexto de mi conversación según `/context`: **36.9k** antes de delegar y **54.0k** cuando volvió el resultado, es decir, 17.1k más.
 - Transcripción del subagente, en `subagents/` de la conversación `4568ff8c-e543-4f6b-9015-4084a5b4fc67`: **`agent-a65fdfdeb9a3de9c6.jsonl`, 369,571 bytes (360.91 KB)**. A su lado está `agent-a65fdfdeb9a3de9c6.meta.json`, de 324 B. No se abrió ninguno de los dos.
+
+## 2. Primera auditoría
+
+**Fecha:** 2026-11-18
+**Módulo:** `src/app/admin/`
+**Encargo al subagente `tech-lead`:** "Audita el panel de administración, en src/app/admin/. Usa tu rúbrica."
+
+El informe va tal como lo devolvió el subagente:
+
+# Informe del Tech Lead — panel de administración (`src/app/admin/page.tsx`, `src/app/admin/ProductForm.tsx` y la acción que usa, `createProductAction` en `src/app/actions.ts`)
+
+## Crítico
+- `src/app/admin/page.tsx:11` · R4 · `AdminPage` lista todo el inventario sin llamar a `getCurrentUser()` ni comprobar un rol. No hay `middleware`/`proxy` que proteja `/admin`, y la tabla `users` (`src/lib/db.ts:13-19`) no tiene columna de rol.
+- `src/app/actions.ts:107` · R4 · `createProductAction` inserta productos sin obtener al usuario ni comprobar permiso: cualquiera, aunque no tenga sesión, puede escribir en el catálogo.
+
+## Importante
+- `src/app/admin/ProductForm.tsx:20` · R2 · El largo máximo del nombre (`120`) está duplicado: `maxLength={120}` aquí y `name.length > 120` en `src/app/actions.ts:115`. No está en `src/lib/constants.ts`.
+- `src/app/admin/page.tsx:49` · R2 · El umbral de stock bajo (`p.stock <= 5`) está duplicado con `src/components/StockBadge.tsx:9` (`stock <= 5`). No está en `src/lib/constants.ts`.
+- `package.json:8` · R3 · No hay archivos `*.test.*`/`*.spec.*` fuera de `node_modules/`, ni script `test`, ni dependencia de pruebas: nada prueba el panel ni `createProductAction`.
+
+## Sugerencia
+- `src/app/admin/ProductForm.tsx:34` · R2 · El stock inicial por defecto `defaultValue={10}` está escrito en línea en vez de vivir en `src/lib/constants.ts`.
+
+## Nota
+10 − 3 × 2 − 1 × 3 − 0,25 × 1 = 0,75
