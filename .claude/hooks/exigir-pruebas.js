@@ -17,7 +17,7 @@ process.stdin.on("end", () => {
   if (e.stop_hook_active) process.exit(0);
 
   // ¿Cambió algo fuera de docs/? Si no, no hay código nuevo que probar.
-  const cwd = process.env.CLAUDE_PROJECT_DIR || e.cwd || process.cwd();
+  const cwd = (process.env.CLAUDE_PROJECT_DIR || e.cwd || process.cwd()).replace(/^[a-z]:/, (u) => u.toUpperCase());
   const cambios = spawnSync("git", ["status", "--porcelain", "--", ".", ":(exclude)docs"], { cwd, encoding: "utf8" });
   if (!String(cambios.stdout || "").trim()) process.exit(0);
 
