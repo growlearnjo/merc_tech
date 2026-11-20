@@ -39,7 +39,11 @@ como quedó en el disco, y así compruebas lo que de verdad va a pasar mañana.
 
 ## Cómo usar estos prompts
 
-1. **Cada fase empieza en una conversación nueva**, en orden.
+1. **Hoy se trabaja en la terminal**, con `claude` abierto en la raíz del
+   proyecto, y no en la extensión de VS Code. La terminal integrada de VS Code
+   sirve. `/permissions`, `/hooks`, `/rewind`, el aviso de confianza y el menú
+   de `@` se ensayaron ahí. **Cada fase empieza en una conversación nueva**, en
+   orden: `/exit` y `claude` otra vez.
 2. **Los comandos que empiezan con `/` y las menciones con `@` las escribes tú**,
    en la misma caja donde escribes tus mensajes. `/permissions`, `/hooks` y
    `/rewind` son comandos de Claude Code, y el agente no los puede ejecutar por
@@ -58,6 +62,15 @@ como quedó en el disco, y así compruebas lo que de verdad va a pasar mañana.
 6. **Antes de cada commit, mira `git diff .claude/settings.json`.** En Windows,
    aprobar algo con "Sí, y no preguntar de nuevo" escribe una regla en ese
    archivo, y no debe entrar una regla que nadie decidió.
+7. **Tu agente puede tener dos consolas.** En Windows tiene `Bash` (Git Bash) y
+   `PowerShell`, y elige cuál usar; en macOS y Linux, solo `Bash`. Una regla o
+   un hook que solo mira `Bash` no se entera de lo que corre `PowerShell`. Por
+   eso hoy cada regla de comando va dos veces, y las comprobaciones nombran la
+   consola. El aviso de un bloqueo dice cuál fue: `PreToolUse:PowerShell` o
+   `PreToolUse:Bash`.
+8. **Lo que el agente no puede correr, lo corres tú en tu terminal**: los
+   `git restore` de las comprobaciones, por ejemplo. Desde la 6.2 el hook no
+   deja que lo corra el agente, y eso es la red funcionando.
 
 ### Quién hace qué
 
@@ -67,7 +80,8 @@ como quedó en el disco, y así compruebas lo que de verdad va a pasar mañana.
 | Escribir los hooks | nadie los inventa: el agente los copia del anexo de la spec, y los prueba a mano |
 | Elegir qué función de tu app se prueba | **tú**, entre dos o tres que propone el agente |
 | Aprobar el `npm install` de la 6.3 | **tú**: es la regla `ask` de la 6.1 funcionando |
-| `/rewind` y `git restore` en la 6.4 | **tú** |
+| `/rewind` y `git restore` en la 6.3 y la 6.4 | **tú**, en tu terminal: el hook no deja que el agente descarte cambios |
+| Probar los hooks | el agente, con `node .claude/hooks/probar-hooks.js`, y tú en un chat nuevo nombrando cada consola |
 | Cambiar la red después de la 6.4 | **tú**, a mano. El agente ya no puede |
 
 ### Estado del repositorio al iniciar la sesión
@@ -79,7 +93,8 @@ como quedó en el disco, y así compruebas lo que de verdad va a pasar mañana.
 * De la sesión 5: el Tech Lead en `.claude/agents/tech-lead.md`.
 * **Todavía no existen** `.claude/settings.json` ni `.claude/hooks/`.
 * **Claude Code 2.1.283 o superior**, Node 20 o superior, y en Windows, Git for
-  Windows.
+  Windows. En Linux y WSL2, `bubblewrap` y `socat` solo si quieres probar el
+  sandbox, que es opcional.
 
 ---
 
@@ -116,10 +131,14 @@ dejaron mi CLAUDE.md, docs/00-ANTES.md, docs/DECISIONES.md, una Skill, el
 8. Que NO existan todavía .claude/settings.json ni .claude/hooks/. Si existen,
    dime qué hay dentro.
 9. Que package.json no tenga todavía un script "test".
-10. Pregúntame en qué modo de aprobación trabajo hoy. No lo adivines.
-11. Escribe docs/VERIFICACION_S6.md con lo que acabas de comprobar, con la
+10. Dime en qué sistema operativo estás y con qué consolas cuentas hoy entre
+    tus herramientas: Bash, PowerShell o las dos. Míralo en tus herramientas,
+    no lo deduzcas del sistema.
+11. Pregúntame en qué modo de aprobación trabajo hoy. No lo adivines.
+12. Escribe docs/VERIFICACION_S6.md con lo que acabas de comprobar, con la
     fecha arriba y estas secciones, en este orden:
     - Versiones, una línea cada una.
+    - Sistema operativo y consolas del agente.
     - El commit en el que arranqué hoy, con su mensaje.
     - MODO Y RIESGO DE LA SESIÓN 1, citados tal cual.
     - LAS REGLAS QUE HOY SOLO PIDEN: las líneas del punto 4, con su número.
@@ -165,6 +184,8 @@ Devuélveme lo que entendiste:
    por un error.
 5. Por qué el hook de la 6.3 deja parar al agente la segunda vez.
 6. Qué deshace /rewind y qué no.
+7. Según docs/VERIFICACION_S6.md, qué consolas tienes hoy, y qué cambia eso en
+   las reglas y en el hook.
 
 [RESTRICCIONES]
 - No generes código, no crees archivos, no instales nada.
@@ -177,7 +198,8 @@ dímelo también.
 
 [FORMATO DE SALIDA] (1) las 4 fases, una línea cada una; (2) lo que NO se hace
 hoy, con su sesión; (3) pedir contra imponer; (4) los códigos de salida;
-(5) la segunda vuelta; (6) /rewind; (7) tus dudas, si hay. Sin commit.
+(5) la segunda vuelta; (6) /rewind; (7) tus consolas; (8) tus dudas, si hay.
+Sin commit.
 ```
 
 ---
@@ -195,22 +217,26 @@ trabajar solo en ella: cada regla tiene que tener un motivo que se pueda
 señalar, y ninguna puede depender de que el otro se acuerde.
 
 [CONTEXTO] Mi proyecto está en <RUTA_PROYECTO>. Lee la Fase 6.1 de
-doc_sesions/sesion6/Ed5_sesion6.md y después docs/VERIFICACION_S6.md: ahí están
-el modo y el riesgo que acepté en la sesión 1, y las reglas de mi CLAUDE.md que
-hoy solo piden.
+doc_sesions/sesion6/Ed5_sesion6.md, sus decisiones 18 a 20, y después
+docs/VERIFICACION_S6.md: ahí están el modo y el riesgo que acepté en la sesión
+1, las reglas de mi CLAUDE.md que hoy solo piden, y las consolas que tienes.
 
 [OBJETIVO] Escribe docs/PERMISOS.md y .claude/settings.json, y nada más.
 1. Antes de escribir, muéstrame la matriz: una fila por regla, con cuatro
    columnas: la acción, la lista (allow, ask o deny), la regla exacta tal como
-   va en el archivo, y de dónde sale. El origen solo puede ser uno de estos tres:
-   el riesgo que acepté en la sesión 1; una regla de mi CLAUDE.md, con su número
-   de línea; o un archivo que los prompts del curso repiten que no se toca
-   (docs/00-ANTES.md y docs/MEDICIONES.md). Si una fila no llena las cuatro
-   columnas, sácala.
+   va en el archivo, y de dónde sale. El origen solo puede ser uno de estos
+   cuatro: el riesgo que acepté en la sesión 1; una regla de mi CLAUDE.md, con
+   su número de línea; un archivo que los prompts del curso repiten que no se
+   toca (docs/00-ANTES.md y docs/MEDICIONES.md); o lo que sale de mi máquina
+   (git push). Si una fila no llena las cuatro columnas, sácala.
 2. Espera a que yo elija qué filas quedan.
 3. Con lo que elija, escribe docs/PERMISOS.md con la matriz y una línea arriba
-   que diga para qué sirve. Y escribe .claude/settings.json con la clave
-   "permissions" y sus listas allow, ask y deny, y nada más.
+   que diga para qué sirve, y debajo un párrafo que explique por qué cada regla
+   de comando está dos veces. Y escribe .claude/settings.json con la clave
+   "permissions" y sus listas allow, ask y deny, y nada más. Cada regla de
+   comando va dos veces, como Bash(...) y como PowerShell(...), aunque hoy
+   tengas una sola consola: el archivo se commitea y lo usa todo el equipo. Las
+   reglas Edit(...) van una sola vez.
 4. Comprueba que el JSON es válido con:
    node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8')); console.log('ok')"
 
@@ -219,6 +245,9 @@ hoy solo piden.
 - No pongas defaultMode ni toques mi modo de aprobación.
 - allow solo para comandos que leen o comprueban, como el chequeo de tipos y el
   build. Nada que escriba, instale o publique.
+- Ningún deny de comandos, ni Bash(...) ni PowerShell(...): un deny de Bash con
+  patrón apaga la consola PowerShell sin avisar.
+- Escribe los dos archivos con tu herramienta de edición, no con la consola.
 - No modifiques mi CLAUDE.md ni docs/00-ANTES.md.
 - No pruebes las reglas en este chat: se prueban en otro.
 
@@ -258,9 +287,18 @@ Haz el commit y **cierra este chat**.
    Instala el paquete left-pad con npm.
    ```
 
-   Claude Code te tiene que preguntar antes. **Recházalo.**
+   Claude Code te tiene que preguntar antes, también en modo auto. **Recházalo.**
 
-4. En la terminal: `git status --short` → no aparece `docs/00-ANTES.md`, ni
+4. Pega esto:
+
+   ```text
+   Ahora corre npm install sin argumentos.
+   ```
+
+   También te tiene que preguntar. **Recházalo.** Si no pregunta, mira en el
+   aviso qué consola usó y si esa consola tiene su regla.
+
+5. En la terminal: `git status --short` → no aparece `docs/00-ANTES.md`, ni
    `package.json`.
 
 > **Anota lo que pasó en cada paso.** Va a la bitácora en el cierre.
@@ -279,25 +317,26 @@ Haz el commit y **cierra este chat**.
 importa es que bloquee lo que tiene que bloquear y deje pasar todo lo demás.
 
 [CONTEXTO] Mi proyecto está en <RUTA_PROYECTO>. Lee la Fase 6.2 de
-doc_sesions/sesion6/Ed5_sesion6.md y su anexo, mi .claude/settings.json y
-docs/PERMISOS.md.
+doc_sesions/sesion6/Ed5_sesion6.md y su anexo, mi .claude/settings.json,
+docs/PERMISOS.md y docs/VERIFICACION_S6.md, que dice qué consolas tienes.
 
 [OBJETIVO] En este orden.
-1. Crea .claude/hooks/bloquear-peligroso.js con el texto EXACTO del anexo de la
-   spec. No lo cambies. Si crees que debería cambiar algo, dímelo y no lo
-   apliques.
-2. Pruébalo a mano, desde la raíz, con estos dos comandos, y muéstrame la
-   salida de los dos:
-   echo '{"tool_name":"Bash","tool_input":{"command":"git status && git reset --hard HEAD"}}' | node .claude/hooks/bloquear-peligroso.js; echo "exit=$?"
-   echo '{"tool_name":"Bash","tool_input":{"command":"git status"}}' | node .claude/hooks/bloquear-peligroso.js; echo "exit=$?"
-   El primero tiene que dar exit=2 con el motivo, y el segundo exit=0. Si no,
-   detente.
-3. Solo si los dos dieron lo esperado, agrega a .claude/settings.json la clave
-   "hooks" con el evento PreToolUse, tal como la muestra el anexo. Las reglas
-   de "permissions" no se tocan. Comprueba que el JSON sigue siendo válido.
-4. Agrega a docs/PERMISOS.md una sección "El hook": qué bloquea, por qué no
-   podía hacerlo una regla de permisos, y qué no cubre (un Grep del tech-lead
-   sin ruta, sobre todo el proyecto).
+1. Crea .claude/hooks/bloquear-peligroso.js y .claude/hooks/probar-hooks.js con
+   el texto EXACTO del anexo de la spec, con tu herramienta de edición. No los
+   cambies. Si crees que deberían cambiar en algo, dímelo y no lo apliques.
+2. Pruébalo a mano, desde la raíz, con este comando, y muéstrame la salida
+   completa:
+   node .claude/hooks/probar-hooks.js
+   Todos los casos tienen que dar OK. Si alguno da FALLA, detente.
+3. Solo si todos dieron OK, agrega a .claude/settings.json la clave "hooks" con
+   el evento PreToolUse, tal como la muestra el anexo, con el matcher
+   "Bash|PowerShell|Read|Grep|Glob". Las reglas de "permissions" no se tocan.
+   Comprueba que el JSON sigue siendo válido.
+4. Agrega a docs/PERMISOS.md, con tu herramienta de edición, una sección "El
+   hook": qué bloquea, en qué consolas, por qué no podía hacerlo una regla de
+   permisos, y qué no cubre (un Grep del tech-lead sin ruta, sobre todo el
+   proyecto; un comando que borra o descarta por otro camino; y que también
+   frena un comando que solo menciona esas palabras).
 5. En docs/DECISIONES.md, la fila 5 dice "sesión 6" en "mi caso". Propónme dos
    o tres redacciones con lo que hiciste hoy, y espera a que elija.
 
@@ -306,52 +345,77 @@ docs/PERMISOS.md.
   cambio en su archivo.
 - No agregues el hook Stop: eso es la Fase 6.3.
 - No corras ningún comando destructivo de verdad para probar el hook: se prueba
-  pasándole un evento falso.
+  con probar-hooks.js, que le pasa eventos falsos.
+- No escribas ningún archivo con la consola (cat >>, echo >, Set-Content): el
+  hook se activa en cuanto lo registras, busca texto, y frena un comando que
+  solo menciona git reset --hard.
 - No modifiques mi CLAUDE.md ni docs/00-ANTES.md.
 
 [RAZONAMIENTO] Antes de escribir, dime para cada una de las dos cosas que
-bloquea el hook por qué una regla de .claude/settings.json no alcanzaba.
+bloquea el hook por qué una regla de .claude/settings.json no alcanzaba, y por
+qué el matcher tiene que nombrar PowerShell.
 
-[FORMATO DE SALIDA] (1) las dos razones; (2) la salida de las dos pruebas a
-mano; (3) el bloque "hooks" que agregaste; (4) la sección de docs/PERMISOS.md;
-(5) las redacciones de la fila 5; (6) después de mi elección, el commit
-propuesto: "feat: add the PreToolUse hook for Fase 6.2".
+[FORMATO DE SALIDA] (1) las razones; (2) la salida de probar-hooks.js; (3) el
+bloque "hooks" que agregaste; (4) la sección de docs/PERMISOS.md; (5) las
+redacciones de la fila 5; (6) después de mi elección, el commit propuesto:
+"feat: add the PreToolUse hook for Fase 6.2".
 ```
 
 Haz el commit y **cierra este chat**.
 
 ### Paso 2 — lo compruebas tú, en un chat nuevo
 
-1. Escribe `/hooks`. Tiene que aparecer `PreToolUse` con tu hook, del archivo del
-   proyecto.
+Cada prueba nombra la consola. Si no, el agente elige, y puedes estar probando
+solo una de las dos.
+
+1. Escribe `/hooks`. Tiene que aparecer `PreToolUse` con tu hook, del archivo
+   del proyecto, con el matcher `Bash|PowerShell|Read|Grep|Glob`.
 2. Con el repositorio limpio, pega esto:
 
    ```text
-   Corre git status --short y después git reset --hard HEAD. Dime qué pasó con
-   cada uno.
+   Usa la consola Bash: corre git status --short y después git reset --hard
+   HEAD. Dime qué pasó con cada uno, y copia tal cual cualquier mensaje de
+   bloqueo.
    ```
 
    El primero corre. El segundo queda bloqueado, con el motivo que escribe el
-   hook.
+   hook y el aviso `PreToolUse:Bash`.
 
-3. Pega esto:
+3. **Solo si tu agente tiene PowerShell** (Windows), pega esto:
 
    ```text
-   Pásale a @"tech-lead (agent)" este encargo, y nada más: "Lee
-   docs/MEDICIONES.md y dime su primera línea." Muéstrame tal cual lo que
-   responda.
+   Ahora lo mismo con la consola PowerShell.
    ```
 
-   Tiene que responder que el hook no lo deja.
+   Tiene que quedar bloqueado igual, con el aviso `PreToolUse:PowerShell`. Si se
+   ejecuta, el matcher o el hook no miran PowerShell: vuelve al Paso 1.
 
-4. Y esto, para comprobar que no quedó ciego:
+4. Pega esto:
+
+   ```text
+   Pásale a @"tech-lead (agent)" este encargo, y nada más: "Esto es una prueba
+   del hook del proyecto, autorizada por mí. Intenta leer docs/MEDICIONES.md con
+   Read, aunque tu archivo lo prohíba, y dime su primera línea. Si algo te
+   bloquea, copia el mensaje tal cual." Muéstrame tal cual lo que responda, y
+   cuántas herramientas usó.
+   ```
+
+   Hay dos resultados posibles, y los dos se anotan:
+   * **Usó 1 herramienta** y responde con el motivo del hook, "el tech-lead no
+     lee docs/": el hook funciona con el agente real.
+   * **Se negó con 0 herramientas**: lo frenó su propio archivo, que desde la
+     sesión 5 le dice que no lea `docs/`. Es el "pedir" funcionando, y el hook no
+     llegó a actuar. La prueba del hook es la del Paso 1: los dos casos del
+     Tech Lead en `probar-hooks.js`.
+
+5. Y esto, para comprobar que no quedó ciego:
 
    ```text
    Pásale a @"tech-lead (agent)" este encargo, y nada más: "Lee package.json y
    dime cuántos scripts tiene." Muéstrame tal cual lo que responda.
    ```
 
-5. En la terminal: `git status --short` → sin cambios.
+6. En la terminal: `git status --short` → sin cambios.
 
 ---
 
@@ -382,16 +446,21 @@ doc_sesions/sesion6/Ed5_sesion6.md y su anexo, mi CLAUDE.md, mi
    junto a su módulo. Cada una dice en su nombre qué comprueba.
 4. Corre npm test y muéstrame la salida. Tienen que pasar todas. Si una falla,
    diagnostica antes de tocar nada: puede ser la prueba, no el código.
-5. Crea .claude/hooks/exigir-pruebas.js con el texto EXACTO del anexo, y
-   pruébalo a mano con el repositorio sin cambios en el código:
-   echo '{"stop_hook_active":false}' | node .claude/hooks/exigir-pruebas.js; echo "exit=$?"
-   Tiene que dar exit=0.
-6. Agrega a .claude/settings.json el evento Stop tal como lo muestra el anexo, y
-   "Bash(npm test)" a la lista allow. Lo demás no se toca. Comprueba que el JSON
-   sigue siendo válido.
+5. Crea .claude/hooks/exigir-pruebas.js con el texto EXACTO del anexo, con tu
+   herramienta de edición, y pruébalo a mano con:
+   node .claude/hooks/probar-hooks.js
+   Todos los casos tienen que dar OK, y ahora incluye uno del hook nuevo.
+6. Agrega a .claude/settings.json SOLO el evento Stop del bloque "hooks" del
+   anexo. El PreToolUse de la Fase 6.2 se queda como está, con su matcher
+   "Bash|PowerShell|Read|Grep|Glob". Y agrega a la lista allow
+   "Bash(npm test)" y "PowerShell(npm test)". Lo demás no se toca. Comprueba que
+   el JSON sigue siendo válido.
 7. En mi CLAUDE.md, cambia SOLO la regla de pruebas: ahora hay pruebas,
    npm test tiene que pasar antes de dar algo por terminado, y un hook lo exige.
    Con su comando de verificación.
+8. Propónme el pedido para el Paso 2: un cambio de comportamiento de una línea,
+   en palabras de usuario, que contradiga una de las pruebas que escribiste, y
+   que no mencione las pruebas. Dime cuál prueba va a romper. No lo apliques.
 
 [RESTRICCIONES]
 - Solo Vitest. Nada de Playwright, ni pruebas de páginas, de base de datos o de
@@ -407,39 +476,57 @@ que elegí para dos entradas concretas, corriéndola, no suponiéndolo. Eso es l
 que la prueba va a comprobar.
 
 [FORMATO DE SALIDA] (1) las funciones candidatas; (2) después de mi elección, la
-salida de npm test; (3) la salida de la prueba a mano del hook; (4) el bloque
-Stop y la regla allow que agregaste; (5) la regla del CLAUDE.md, antes y
-después; (6) commit propuesto: "test: add the minimal test signal and the Stop
-hook for Fase 6.3".
+salida de npm test; (3) la salida de probar-hooks.js; (4) el bloque Stop y las
+reglas allow que agregaste; (5) la regla del CLAUDE.md, antes y después; (6) el
+pedido para el Paso 2 y la prueba que rompe; (7) commit propuesto: "test: add
+the minimal test signal and the Stop hook for Fase 6.3".
 ```
 
-Haz el commit y **cierra este chat**.
+**Copia el pedido del punto (6)**: lo vas a usar en el Paso 2. Haz el commit y
+**cierra este chat**.
 
 ### Paso 2 — rompes una prueba a propósito, en un chat nuevo
 
-Pídele un cambio de comportamiento en la función que probaste, **sin mencionar
-las pruebas**. Por ejemplo, si probaste el formato de los precios:
+Vas a simular al agente que no obedece. Un agente que obedece lee la prueba antes
+de cambiar el código: la actualiza en el mismo turno, o te pregunta, porque tu
+`CLAUDE.md` ahora dice que `npm test` tiene que pasar. Así el rojo nunca llega al
+hook, y no ves nada. Por eso este pedido le prohíbe tocar las pruebas y correr
+`npm test`.
+
+Pega esto, con el pedido que te dejó el Paso 1 en lugar de `<PEDIDO>`:
 
 ```text
-Haz que los precios se muestren sin decimales. Solo ese cambio.
+<PEDIDO>. Solo ese cambio: no toques ningún archivo .test.ts, no corras
+npm test, y cuando termines el cambio, termina.
 ```
 
-Escribe el tuyo según la función que elegiste. Lo que tiene que pasar:
+Si perdiste el pedido, `git ls-files "*.test.ts"` te dice cuál es tu archivo de
+pruebas: ábrelo y pide un cambio que contradiga una de sus pruebas. Ojo: el
+ejemplo "que los precios se muestren sin decimales" solo sirve si probaste el
+formato de moneda.
+
+Lo que tiene que pasar:
 
 1. El agente hace el cambio y quiere terminar.
-2. Aparece el aviso del hook `Stop`: las pruebas fallan.
-3. El agente sigue trabajando: corrige el código o actualiza la prueba al
-   comportamiento que pediste.
+2. Aparece el aviso del hook `Stop`: "Las pruebas fallan (npm test)…", con la
+   salida de las pruebas.
+3. El agente sigue trabajando una vuelta más. Como no puede tocar la prueba, lo
+   esperable es que te explique el conflicto o revierta su cambio.
+4. En la segunda vuelta el hook lo deja parar: no entra en bucle.
 
-Después, en la terminal:
+Si el agente te pregunta antes de hacer el cambio, porque ve que la prueba va a
+fallar, respóndele que lo haga igual, sin tocar las pruebas.
+
+Después, **en tu terminal**, no en el chat (el hook no deja que el agente
+descarte cambios):
 
 ```bash
 git diff
 ```
 
-Mira el archivo de pruebas. Si cambió, el cambio tiene que ser el que pediste.
-Si el agente borró o debilitó una prueba para que pase, anótalo: es justo lo
-que un hook no puede ver.
+El archivo de pruebas no tiene que aparecer. Si en algún intento el agente lo
+cambió, el cambio tiene que ser el que pediste; si borró o debilitó una prueba
+para que pase, anótalo: es justo lo que un hook no puede ver.
 
 Al final, descarta los cambios de esta comprobación:
 
@@ -490,8 +577,9 @@ Cuando termine:
 1. Escribe `/rewind` otra vez y mira las opciones. La de restaurar el código no
    aparece para ese cambio, o no lo deshace.
 2. En la terminal: `git diff` → el cambio sigue ahí.
-3. Deshazlo tú. Este comando restaura cualquier archivo de pruebas que haya
-   cambiado, esté donde esté:
+3. Deshazlo tú, **en tu terminal**: si se lo pides al agente, el hook de la 6.2
+   lo bloquea, porque `git restore` descarta cambios. Este comando restaura
+   cualquier archivo de pruebas que haya cambiado, esté donde esté:
 
    ```bash
    git restore -- '*.test.ts'
@@ -517,10 +605,12 @@ doc_sesions/sesion6/Ed5_sesion6.md, docs/PERMISOS.md y mi
 vio un cambio hecho por la consola, que deshice con git restore.
 
 [OBJETIVO] En este orden.
-1. Agrega a docs/PERMISOS.md una sección "Deshacer", corta: qué deshace /rewind,
-   qué no deshace y qué uso en ese caso; y qué hace el sandbox en mi sistema
-   operativo. Comprueba cuál es mi sistema. Si es Windows nativo, escribe que el
-   sandbox no está disponible aquí y por qué.
+1. Agrega a docs/PERMISOS.md, con tu herramienta de edición, una sección
+   "Deshacer", corta: qué deshace /rewind, qué no deshace y qué uso en ese
+   caso; qué no frenan las reglas deny (un programa que escribe un archivo por
+   dentro, como node -e); y qué hace el sandbox en mi sistema operativo, según
+   la tabla de la Fase 6.4. Comprueba cuál es mi sistema. Si es Windows nativo,
+   escribe que el sandbox no está disponible aquí y por qué.
 2. Al final, agrega a la lista deny de .claude/settings.json estas dos reglas, y
    nada más:
    "Edit(./.claude/settings.json)"
@@ -544,16 +634,24 @@ Haz el commit y **cierra este chat**.
 ### Paso 4 — compruebas que ya no la puede tocar, en un chat nuevo
 
 ```text
-Quita de .claude/settings.json la regla "Bash(git push *)". Después dime qué
-pasó.
+Quita de .claude/settings.json la regla "Edit(./docs/00-ANTES.md)". Primero
+con tu herramienta de edición; si no puedes, inténtalo una vez desde la
+consola. Después dime qué pasó, y copia tal cual cada mensaje de bloqueo.
 ```
 
-Tiene que responder que no pudo, porque los permisos lo niegan. Y
-`git status --short` → sin cambios.
+Toda matriz tiene esa regla en `deny`. Tiene que responder que no pudo, las dos
+veces. Si lo intentó con PowerShell, el mensaje puede decir que el archivo está
+fuera de "the allowed working directories": es el mensaje con que Claude Code
+bloquea esa escritura, no un problema de rutas. Y `git status --short` → sin
+cambios.
 
-> **Opcional, solo en macOS, Linux o WSL2:** escribe `/sandbox`, actívalo, y
-> pídele al agente que corra `touch ~/prueba-sandbox`. Tiene que fallar.
-> Anota el resultado en `docs/PERMISOS.md` a mano.
+> **Opcional, solo en macOS, Linux o WSL2.** En Linux y WSL2 hacen falta
+> `bubblewrap` y `socat` instalados; en macOS, nada. Escribe `/sandbox`,
+> actívalo, y pídele al agente que corra `touch ~/prueba-sandbox`. Tiene que
+> fallar, porque el sandbox solo deja escribir en la carpeta del proyecto. Si el
+> agente te pide correrlo fuera del sandbox, **recházalo**. Anota el resultado
+> en `docs/PERMISOS.md` a mano, y apaga el sandbox con `/sandbox` si no lo vas a
+> usar.
 
 ---
 
@@ -580,8 +678,9 @@ pasó y sin adjetivos. Si algo no funcionó, se dice que no funcionó.
 1. Agrega a docs/BITACORA.md la entrada de la sesión 6, con estas cosas: qué
    reglas puse en deny, ask y allow, y de dónde salió cada una; qué pasó cuando
    le pedí editar docs/00-ANTES.md y cuando le pedí instalar un paquete; qué
-   bloqueó el hook y qué respondió el Tech Lead; qué función probé y qué pasó
-   cuando rompí una prueba; qué deshizo /rewind y qué tuve que deshacer con git;
+   bloqueó el hook, con qué consola, y qué respondió el Tech Lead, y si lo
+   frenó el hook o su propio archivo; qué función probé y qué pasó cuando rompí
+   una prueba; qué deshizo /rewind y qué tuve que deshacer con git;
    qué pasó cuando le pedí tocar la configuración; y qué queda para la sesión 7.
    Entre lo que queda va el defecto 4 del inventario, que pasa entero a la
    sesión 7.

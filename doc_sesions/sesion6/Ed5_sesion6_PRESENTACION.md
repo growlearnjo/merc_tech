@@ -7,8 +7,10 @@
 >
 > El material del laboratorio está escrito desde el 18 de noviembre:
 > [`Ed5_sesion6.md`](Ed5_sesion6.md) y [`PROMPTS_sesion6.md`](PROMPTS_sesion6.md).
-> Lo no interactivo se ejecutó ese día con Claude Code real. Las láminas 30 a
-> 34 dicen lo mismo que la spec.
+> Lo no interactivo se ejecutó ese día con Claude Code real. El 20 de noviembre
+> se corrió el laboratorio como alumno, en la terminal, y salió la versión 2 de
+> la spec (sección "Ensayo del 20 de noviembre", abajo). Las láminas 30 a 34
+> dicen lo mismo que la spec.
 
 Los datos técnicos están verificados contra la documentación oficial el
 18 de noviembre de 2026. Las fuentes y la fecha están al final, como pide
@@ -40,7 +42,8 @@ más:
 | Un hook sale con **2 para bloquear**; el motivo va por stderr y lo lee el agente. **Cualquier otro código deja pasar.** | Lámina 18. Un hook que se rompe abre la puerta: por eso los dos hooks se dan escritos y probados. |
 | Los hooks del proyecto **corren dentro de los subagentes**, y el evento trae `agent_type`. | Es lo que cierra el hueco de la sesión 5: el hook frena al Tech Lead sin tocar su archivo. |
 | Un hook `Stop` con exit 2 manda al agente a seguir. El evento trae `stop_hook_active`. | El hook de la 6.3 deja parar la segunda vez. Es una vuelta obligatoria, no infinitas. |
-| En Windows, los hooks corren con Git Bash, o con PowerShell si no hay Git Bash. | Los dos hooks están en Node para que funcionen igual en todos los sistemas. |
+| Los hooks los corre `sh` en macOS y Linux, Git Bash en Windows, o PowerShell si no hay Git Bash. | Los hooks están en Node para que funcionen igual en todos los sistemas. |
+| **En Windows el agente tiene dos consolas, `Bash` y `PowerShell`**, y trata a PowerShell como la principal. Una regla `Bash(...)` no alcanza a PowerShell, y un hook con matcher `Bash` no se dispara. En macOS y Linux PowerShell es opcional. | Láminas 15 y 32. Es el hallazgo más caro del 20 de noviembre: un `git reset --hard` pasó. |
 | **El sandbox no existe en Windows nativo**: corre en macOS, Linux y WSL2. | Lámina 25. En la 6.4 es opcional. La red de hoy no depende de él. |
 | `/rewind` (alias `/undo`, o Esc dos veces) **solo deshace lo que el agente editó con sus herramientas de archivo**. No lo que cambió por la consola, ni lo de un subagente, ni lo que editaste a mano. Guarda los últimos 100 puntos, unos 30 días. | Lámina 24, y la 6.4 lo demuestra rompiendo algo dos veces. |
 | En Windows, aprobar con "Sí, y no preguntar de nuevo" **escribe en `.claude/settings.json`**, el archivo que se commitea. | Lámina 12. Antes de cada commit, `git diff .claude/settings.json`. |
@@ -72,6 +75,24 @@ ensayo, sobre Windows:
 `formatSoles` falló con `Expected "S/ 3,499.00"` y `Received "S/ 3,499.00"`:
 dos textos que parecen iguales. El formato de moneda separa el símbolo con un
 espacio no separable. Si sale, no es código roto: es la prueba.
+
+## Ensayo del 20 de noviembre — el laboratorio corrido como alumno
+
+En la terminal, en modo auto, sobre Windows, con Claude Code 2.1.327. Las
+decisiones 18 a 28 de la spec salen de aquí.
+
+| Qué pasó | Qué cambió en el material |
+|---|---|
+| En la 6.2 el agente corrió `git reset --hard HEAD` con **PowerShell**, y se ejecutó: el matcher y el hook solo miraban `Bash` | Matcher `Bash\|PowerShell\|Read\|Grep\|Glob`, hook que revisa las dos consolas, reglas `PowerShell(...)` gemelas. Con la corrección, quedó bloqueado |
+| Con el hook recién registrado, el propio agente quedó bloqueado al escribir `docs/PERMISOS.md` con `cat >>`: el texto mencionaba `git reset --hard` | Los archivos se escriben con la herramienta de edición |
+| El Tech Lead se negó a leer `docs/` con **0 herramientas**: lo frenó su `tech-lead.md`, no el hook | La comprobación le pide intentarlo, y se mira cuántas herramientas usó |
+| En la 6.3, el ejemplo "precios sin decimales" no rompió nada (se había probado otra función); con un pedido que sí rompía, el agente actualizó la prueba antes de terminar, o preguntó | El Paso 1 deja el pedido; el Paso 2 no le deja tocar pruebas ni correr `npm test`. Así el hook lo mandó de vuelta |
+| La comprobación de la 6.4 pedía quitar `Bash(git push *)`, y la matriz no la tenía | Se pide quitar `Edit(./docs/00-ANTES.md)` |
+| `ask` preguntó en modo auto, con `npm install left-pad` y con `npm install` solo | Se confirma; se agrega el segundo caso |
+| Después, en una copia: el `deny` de `Edit` frenó `Add-Content` y `>>` de PowerShell, con un mensaje que habla de "allowed working directories" | Va a la tabla de fallos: no es un problema de rutas |
+
+**Lo que sigue sin ensayar:** `/rewind` y la 6.4 completa, y todo en macOS y
+Linux.
 
 ---
 
@@ -120,26 +141,34 @@ elige. Quedan en `docs/PERMISOS.md` y en `.claude/settings.json`.
 | Lista | Qué entra, en el ensayo |
 |---|---|
 | deny | `Edit(./docs/00-ANTES.md)` · `Edit(./docs/MEDICIONES.md)` |
-| ask | `Bash(npm install *)` (el riesgo de la sesión 1) · `Bash(npm run db:reset)` · `Bash(git push *)` |
-| allow | `Bash(npm run typecheck)` · `Bash(npm run build)` |
+| ask | `Bash(npm install *)` (el riesgo de la sesión 1) · `Bash(npm run db:reset)` · `Bash(git push *)` (lo que sale de la máquina), y cada una también como `PowerShell(...)` |
+| allow | `Bash(npm run typecheck)` · `Bash(npm run build)`, y sus gemelas `PowerShell(...)` |
+
+Cada regla de comando va dos veces aunque el alumno tenga una sola consola: el
+archivo se commitea y lo usa todo el equipo. Ningún `deny` de comandos: un
+`deny` de `Bash` con patrón apaga PowerShell sin avisar.
 
 Se comprueba en un chat nuevo: editar `docs/00-ANTES.md` falla, e instalar un
 paquete pregunta.
 
 ### Fase 6.2 — El hook que bloquea
 
-`.claude/hooks/bloquear-peligroso.js`, copiado del anexo de la spec. Bloquea
-`git reset --hard`, `git push --force`, `git clean -f` y `rm -rf` en cualquier
-parte de un comando, y al `tech-lead` si intenta leer `docs/`. Se prueba a mano
-antes de registrarlo. Llena la fila 5 de la tabla.
+`.claude/hooks/bloquear-peligroso.js`, copiado del anexo de la spec. Bloquea,
+en `Bash` y en `PowerShell`, `git reset --hard`, `git checkout --`,
+`git restore`, `git push --force` o con `+rama`, `git clean -f` y borrar
+carpetas enteras (`rm -rf` y sus variantes, `Remove-Item -Recurse`, `rd /s`),
+en cualquier parte de un comando; y al `tech-lead` si intenta leer `docs/`. Se
+prueba con `node .claude/hooks/probar-hooks.js` antes de registrarlo, y en un
+chat nuevo nombrando cada consola. Llena la fila 5 de la tabla.
 
 ### Fase 6.3 — Las pruebas como señal
 
 Vitest, el script `npm test` y dos o tres pruebas de una función pura que
 elige el alumno. El `npm install` pasa por la regla ask: lo aprueba el alumno.
 El hook `Stop` del anexo. El `CLAUDE.md` deja de decir que no hay pruebas: se
-cierra el defecto 3. En un chat nuevo se rompe una prueba a propósito y se
-mira el diff.
+cierra el defecto 3. El agente deja propuesto un pedido que rompe una de sus
+pruebas; en un chat nuevo se le hace ese pedido sin dejarle tocar las pruebas,
+y se ve al hook mandarlo de vuelta.
 
 ### Fase 6.4 — Deshacer, y cerrar la red
 
@@ -174,14 +203,19 @@ deshace con `git restore`. Al final, deny sobre `.claude/settings.json` y
 |---|---|
 | "Ignoring … permissions.allow entries … not been trusted" | Aceptar la confianza del proyecto al abrir Claude Code. deny y ask ya funcionaban |
 | El agente editó un archivo que estaba en deny | La ruta no coincide: `./docs/…` y `/docs/…` no son lo mismo. `/permissions` la muestra |
-| El hook no bloquea nada | `/hooks` para ver qué quedó registrado; probar el hook a mano |
-| El hook bloquea todo | Probarlo a mano. Si se rompe al leer el evento, sale con 1 y deja pasar |
-| `node: command not found` en un hook | Node no está en el PATH de Git Bash |
+| El hook no bloquea nada | `/hooks` para ver qué quedó registrado; `node .claude/hooks/probar-hooks.js` |
+| Un comando pasó y el aviso dice `PowerShell` | La regla o el matcher solo dicen `Bash`: agregar la gemela `PowerShell(...)` y `PowerShell` al matcher |
+| El hook bloquea un `cat >>` que solo menciona `git reset --hard` | Escribir ese archivo con la herramienta de edición |
+| El hook bloquea un `git restore` | Correrlo el alumno en su terminal |
+| `node: command not found` en un hook | Node no está en el PATH de la consola de los hooks |
+| Windows sin Git Bash: el hook no hace nada | Instalar Git for Windows, o registrar el hook en forma exec (spec, "Si algo falla") |
+| El Tech Lead se niega con 0 herramientas | Lo frenó su archivo, no el hook. Pedirle que lo intente; si no, vale `probar-hooks.js` |
 | El Tech Lead lee `docs/` igual | El `name:` de su archivo tiene que ser `tech-lead` |
+| No aparece el aviso del hook `Stop` | Usar el pedido que dejó el Paso 1, sin dejarle tocar pruebas ni correr `npm test` |
 | `Expected` y `Received` parecen iguales | Espacio no separable en el formato de moneda |
 | El agente borró una prueba para que pase | `git restore`, y pedirle que corrija el código |
 | `/rewind` no ofrece restaurar el código | El cambio fue por la consola: `git restore` |
-| `/sandbox` no está disponible | Windows nativo. Es lo esperado |
+| `/sandbox` no está disponible | Windows nativo o WSL1: es lo esperado. En Linux, faltan `bubblewrap` y `socat` |
 
 La tabla completa está en la spec.
 
@@ -200,7 +234,7 @@ La tabla completa está en la spec.
 ## Entregables de la sesión
 
 1. `.claude/settings.json` con permisos y dos hooks.
-2. `.claude/hooks/` con los dos scripts.
+2. `.claude/hooks/` con los dos hooks y `probar-hooks.js`.
 3. `docs/PERMISOS.md`.
 4. Vitest, `npm test` y un archivo de pruebas en verde.
 5. El `CLAUDE.md` con la regla de pruebas al día.
@@ -220,7 +254,7 @@ La tabla completa está en la spec.
 
 ## Fuentes y fecha de consulta
 
-Consultadas el 18 de noviembre de 2026:
+Consultadas el 18 de noviembre de 2026, y de nuevo el 20 (PowerShell, hooks por sistema, sandbox):
 
 * Permisos: <https://code.claude.com/docs/en/permissions>
 * Modos de permisos: <https://code.claude.com/docs/en/permission-modes>
@@ -228,3 +262,4 @@ Consultadas el 18 de noviembre de 2026:
 * Hooks: <https://code.claude.com/docs/en/hooks> y <https://code.claude.com/docs/en/hooks-guide>
 * Sandbox: <https://code.claude.com/docs/en/sandboxing>
 * Checkpoints: <https://code.claude.com/docs/en/checkpointing>
+* Herramientas, sección PowerShell: <https://code.claude.com/docs/en/tools-reference>
