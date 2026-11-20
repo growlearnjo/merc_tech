@@ -1,0 +1,35 @@
+# CI: corre en cada push a main y en cada pull request.
+# CERO SECRETOS: este workflow no necesita ninguna clave para probar la app.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # La versión de npm que generó tu package-lock.json: la que imprime `npm --version`.
+  NPM_VERSION: "11.6.2"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install -g npm@${{ env.NPM_VERSION }}
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
