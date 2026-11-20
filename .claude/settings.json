@@ -29,7 +29,9 @@
       "Edit(./docs/00-ANTES.md)",
       "Edit(./docs/MEDICIONES.md)",
       "Edit(./.claude/settings.json)",
-      "Edit(./.claude/hooks/**)"
+      "Edit(./.claude/hooks/**)",
+      "Read(./.env)",
+      "Read(./.env.*)"
     ]
   },
   "hooks": {
