@@ -600,3 +600,213 @@ Sin medir. `tokens.py` se corrió solo en el Prompt 0, como comprobación.
 - [ ] Los defectos 1–4 del inventario siguen sin corregir (sesiones 5, 6 y 7).
 - [ ] Si el push de este cierre quedó pendiente, hacerlo antes de empezar y
       comprobar con `git status -sb` que no diga `ahead`.
+
+---
+
+## Sesión 5 — 2026-11-18 y 2026-11-20 — Un revisor que no escribió el código
+
+Todas las cifras de esta entrada salen de `docs/REVISION.md`. Lo que no está
+ahí no se cuenta aquí.
+
+### Qué se hizo, en orden
+
+| Día | Commit | Fase |
+|---|---|---|
+| 2026-11-18 | `419b31f` | 5.1 · el autor contra un revisor nuevo (`docs/REVISION.md` §1) y fila 4 de `docs/DECISIONES.md` |
+| 2026-11-18 | `4d7a5a2` | Prompt 0 · `docs/VERIFICACION_S5.md` |
+| 2026-11-18 | `64ed041` | 5.2 · `.claude/agents/tech-lead.md` |
+| 2026-11-18 | `4dd7cf8` | 5.2 · primera auditoría (`docs/REVISION.md` §2) |
+| 2026-11-20 | `66b573d` | 5.3 · corrección de tres hallazgos y segunda auditoría (§3) |
+
+### El autor contra el revisor (Fase 5.1)
+
+Se revisó la corrida S2 de la tarea patrón, commit `1389e03`. El revisor fue
+un subagente general-purpose nuevo que no vio `docs/`.
+
+- **El autor declaró 13** decisiones no pedidas, **4 con ⚠️** («querría
+  enterarse»).
+- **El revisor encontró 14**, **5 con ⚠️** («querría aprobar antes»).
+- **Coincidieron 12 de cada lado.** Solo las declaró el autor: 1 (A1, el panel
+  de admin sigue sin paginar). Solo las encontró el revisor: 2 (R2, la
+  navegación sin `flex-wrap` se desborda en el celular; R5, la cuadrícula de
+  `lg:grid-cols-4` deja 4 + 2 en escritorio).
+- **⚠️ sobre el mismo punto: 1** (A4 ↔ R4, la página fuera de rango se
+  corrige en silencio). ⚠️ solo del autor: 3. ⚠️ solo del revisor: 4.
+- Los dos no cortan el código en piezas del mismo tamaño: la A10 del autor son
+  cuatro puntos del revisor. Por eso cada lado se cuenta sobre sus propios
+  puntos, y los ⚠️ no significan lo mismo en las dos listas.
+- Lo que solo vio el revisor son dos problemas de pantalla. El autor no los
+  nombró.
+- **Costo de delegar:** mi contexto pasó de 36.9k a 54.0k (17.1k más). La
+  transcripción del subagente ocupa 360.91 KB y no se abrió. Con eso se llenó
+  la fila 4 de `docs/DECISIONES.md`.
+
+### El Tech Lead (Fase 5.2)
+
+**La description.** Se propusieron tres redacciones y se eligió la que el
+agente recomendó para la 5.3, porque nombra la segunda auditoría y dice qué
+hacer si le piden corregir:
+
+> Da una segunda mirada a código que escribió otra conversación: lo revisa con
+> la rúbrica de la tienda y entrega hallazgos por severidad, con archivo, línea
+> y nota. Úsalo cuando pidan «audita el módulo de admin», «dame una segunda
+> opinión sobre la paginación» o «vuelve a auditar el módulo después de la
+> corrección». No corrige: si le piden arreglar algo, responde que solo reporta.
+
+**El resto del frontmatter:**
+
+- `tools: Read, Grep, Glob`. Sin Edit, Write ni Bash, y sin `permissionMode`.
+- **`skills`: vacío.** `carrito-localstorage` se podía cargar (no tiene
+  `disable-model-invocation: true`), pero no sirve para revisar. Está escrita
+  para quien hace el cambio, cubre una sola regla y cita rutas y líneas del
+  inventario. Como `skills` carga la Skill entera, esas rutas le llegarían al
+  revisor. Es lo mismo que ya decía `docs/VERIFICACION_S5.md`.
+- **`model: inherit`.** Mi regla de costos habla de tareas chicas (Haiku) y
+  de cambios que tocan base de datos, dinero o seguridad (Opus), pero no de
+  revisar. El prompt decía que en ese caso va `inherit`. La conversación
+  principal corría en Opus, así que el revisor usó Opus, y eso calza con la
+  parte de seguridad de la regla, porque la R4 trata de permisos.
+
+**La rúbrica:** cuatro preguntas, R1 a R4, una por cada defecto que apareció.
+El problema 6 (sin `cart_items`) quedó fuera porque la Skill lo protege como
+decisión.
+
+**Un aviso que se dio al escribirlo y no se resolvió:** los subagentes reciben
+el `CLAUDE.md`, y el mío cita rutas y líneas del inventario. Ver «Qué encontró
+sin que nadie le dijera dónde».
+
+### Qué respondió cuando le pedí corregir
+
+Encargo: «Corrige el primer hallazgo de tu informe.» Respuesta completa:
+
+> Solo reporto; la corrección la hace la conversación principal.
+>
+> No cambié ningún archivo. Para quien haga la corrección, el primer hallazgo
+> es este: `src/app/admin/page.tsx:11` · R4 · `AdminPage` no llama a
+> `getCurrentUser()` ni comprueba un rol antes de leer el inventario. Tampoco
+> hay un middleware o proxy que proteja `/admin`.
+>
+> No basta con que la página exija una sesión. La tabla `users`
+> (`src/lib/db.ts:13-19`) no tiene columna de rol, así que hoy no hay forma de
+> saber si el usuario es administrador. Ese cambio de esquema hace falta
+> primero.
+>
+> La regla de no agregar funciones ni dependencias que la tarea no pida está en
+> `…\merc_tech\CLAUDE.md`. Según esa regla, la conversación principal tiene que
+> confirmar con el usuario antes de agregar la columna de rol y la
+> comprobación.
+
+- Dijo la frase exacta que le pide su archivo y no cambió nada. Después,
+  `git status --short` solo mostró `docs/REVISION.md`, que escribió la
+  conversación principal.
+- Que no edite lo garantizan sus `tools`. La frase sale de la orden 1 del
+  cuerpo.
+- Fue más allá de la frase: explicó qué haría falta y citó el `CLAUDE.md`. Eso
+  prueba que lo leyó.
+
+### Qué se corrigió y la nota
+
+La §2 no tenía ningún hallazgo R1. Se corrigieron sus tres hallazgos R2, con
+constantes nuevas en `src/lib/constants.ts`:
+
+- **A** · el largo máximo del nombre `120`, que estaba duplicado →
+  `PRODUCT_NAME_MAX_LENGTH`.
+- **B** · el umbral de stock bajo `5`, que estaba duplicado →
+  `LOW_STOCK_THRESHOLD`. Obligó a tocar `src/components/StockBadge.tsx`, que
+  está fuera del módulo, y lo autoricé.
+- **C** · el stock inicial `10`, que estaba en línea →
+  `DEFAULT_NEW_PRODUCT_STOCK`.
+
+`npm run build` terminó sin error y confirmé en el navegador que `/admin`, el
+catálogo y la ficha se ven igual. No hay pruebas automáticas.
+
+| | Críticos | Importantes | Sugerencias | Nota |
+|---|---|---|---|---|
+| Antes (§2) | 2 | 3 | 1 | **0,75** |
+| Después (§3) | 3 | 1 | 1 | **−0,25** |
+
+**La nota bajó aunque la corrección funcionó.** Los tres hallazgos corregidos
+no volvieron a aparecer y valían 2,25. Pero el Tech Lead restó 3 por contar
+aparte la columna de rol que falta, aunque `db.ts` no cambió, y 0,25 por el
+`2` del largo mínimo, que ya estaba en la §2 y no reportó. La cuenta es
+0,75 + 2,25 − 3 − 0,25 = −0,25. La nota mezcla lo corregido con un cambio de
+criterio del revisor entre corridas: para comparar hay que leer la tabla
+hallazgo por hallazgo de la §3, no la nota.
+
+### Qué encontró sin que nadie le dijera dónde
+
+El encargo solo nombró el módulo (`src/app/admin/`).
+
+| Defecto | §2 / §3 | Por qué |
+|---|---|---|
+| 3 · Cero pruebas | Sí / Sí | |
+| 4a · `/admin` abierta | Sí / Sí | |
+| 4a · `createProductAction` acepta a cualquiera | Sí / Sí | La leyó porque el formulario la importa |
+| 2 · `120` duplicado | Sí / corregido | |
+| 2 · `defaultValue={10}` | Sí / corregido | |
+| 1 · SQL de `users` en `actions.ts` | No / No | Está en el registro y el login, fuera del panel |
+| 1 · `admin/page.tsx` obtiene datos y renderiza | No / No | La R1 lo excluye porque pasa por `listProducts()`. La rúbrica y el inventario no usan el mismo criterio |
+| 2 · `99`, `100`, `SESSION_DAYS = 30`, los dos textos comerciales | No / No | Fuera del módulo |
+
+**Encontró tres cosas que el inventario no tenía:** el umbral `5` duplicado,
+la columna de rol como hallazgo aparte y el `2` del largo mínimo.
+
+**Pero «sin que nadie le dijera dónde» no se cumplió del todo.** El
+`CLAUDE.md`, que el subagente lee, nombra `admin/page.tsx:10`,
+`actions.ts:107-123`, el `120` en `actions.ts:115` y `ProductForm.tsx:20`,
+`ProductForm.tsx:34`, y que `users` no tiene columna de rol. De lo que
+encontró dentro del módulo, lo único que el `CLAUDE.md` no nombra es el umbral
+`5` y el `2`. El informe no dice si usó esas pistas. Lo que sí se sabe es que
+leyó el `CLAUDE.md`, porque lo cita en su respuesta al pedido de corregir.
+
+### Costo de la sesión 5
+
+Sin medir: no se corrió `tokens.py`. Lo único medido es el contexto que
+costó delegar en la 5.1 (17.1k).
+
+### Qué salió mal
+
+1. **La nota no sirve sola para comparar antes y después.** El revisor no
+   aplicó el mismo criterio en las dos corridas: la columna de rol pasó de
+   estar dentro de otro hallazgo a contarse como un crítico propio, y el `2`
+   apareció la segunda vez.
+2. **La R2 solo busca números de dos o más cifras**, y por eso el `2` no
+   salió en la primera auditoría.
+3. **La R1 y el inventario se contradicen** sobre la página que obtiene los
+   datos y los renderiza. No está decidido cuál vale.
+4. **El revisor no estaba a ciegas:** el `CLAUDE.md` le da rutas y líneas.
+5. **Placeholders sin rellenar, otra vez.** El prompt de la 5.3 se pegó con
+   `<RUTA_PROYECTO>` y `[MÓDULO]`, y el de este cierre con `<RUTA_PROYECTO>` y
+   `<TU_REPO>`. Es el mismo problema de la sesión 1.
+6. **El repositorio no tiene remoto.** En este cierre `git remote -v` sale
+   vacío y `main` no sigue a ninguna rama remota, aunque en la sesión 3 se
+   empujó a `origin`. No se sabe cuándo ni cómo se quitó. El push de este
+   cierre no se hizo.
+7. **El `CLAUDE.md` sigue con afirmaciones viejas** en «Valores ajustables»:
+   dice que `src/lib/constants.ts` «todavía no existe», y lista como
+   incrustados el `120` y `ProductForm.tsx:34`, que se corrigieron en la 5.3.
+   No se cambió porque las dos reglas de los defectos 1 y 2 siguen sin pasar
+   su comando de verificación (el de la regla del defecto 1 devuelve el SQL de
+   `users`; el del defecto 2, el `99`, el `100` y los dos textos comerciales).
+
+### Pendiente para la sesión 6
+
+- [ ] **Configurar el remoto y hacer el push** de la sesión 5. Comprobar con
+      `git status -sb` que diga `## main...origin/main` sin `ahead`.
+- [ ] **Defecto 3, pruebas** (sesión 6). **Defecto 4, permisos** (sesiones 6
+      y 7): `/admin`, `createProductAction` y la columna de rol en `users`.
+- [ ] Fila 5 de `docs/DECISIONES.md`: el hook.
+- [ ] Decidir el criterio de la R1 (el del inventario o el de la rúbrica) y
+      escribirlo en `.claude/agents/tech-lead.md`.
+- [ ] Decidir si se sacan las rutas y líneas del `CLAUDE.md` para que el Tech
+      Lead revise a ciegas, o si se acepta que las vea.
+- [ ] El `2` del largo mínimo del nombre: anotado y sin tocar.
+- [ ] Defecto 1: el SQL de `users` sigue en `actions.ts`. La 5.3 no lo tocó
+      porque el Tech Lead no lo reportó.
+- [ ] Las afirmaciones viejas del `CLAUDE.md` en «Valores ajustables» (punto
+      7 de arriba).
+- [ ] Pendientes de sesiones anteriores que no se tocaron: la regla de no
+      agregar funciones que empuja a paginar en memoria, la referencia a
+      «regla 7» del `SKILL.md`, la versión del servidor en `.mcp.json`, la
+      fecha de las tarifas de `tokens.py` y las precisiones de
+      `docs/COSTOS.md`.
