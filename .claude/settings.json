@@ -4,6 +4,7 @@
       "Bash(npm run typecheck)",
       "Bash(npm run build)",
       "Bash(git diff *)",
+      "Bash(npm test)",
       "PowerShell(npm run typecheck)",
       "PowerShell(npm run build)",
       "PowerShell(git diff *)"
@@ -32,6 +33,13 @@
         "matcher": "Bash|PowerShell|Read|Grep|Glob",
         "hooks": [
           { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bloquear-peligroso.js\"" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/exigir-pruebas.js\"" }
         ]
       }
     ]

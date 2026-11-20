@@ -5,9 +5,9 @@ Tienda de práctica del curso; cada regla de abajo sale del inventario de `docs/
 
 ## Comandos
 `npm run dev` · `npm run build` · `npm run typecheck` · `npm run start` · `npm run db:reset` (borra `data/`).
-- Pruebas: todavía no hay, ni archivos ni script `test`. No digas que las pruebas pasaron;
-  lo único que se puede afirmar es que `typecheck` y `build` terminaron sin error.
-  Verificación: `grep -c '"test"' package.json` devuelve 0 mientras esto siga siendo cierto.
+- Pruebas: `npm test` (Vitest, funciones puras, archivos `*.test.ts` junto a su módulo) tiene que
+  pasar antes de dar algo por terminado. El hook `Stop` (`.claude/hooks/exigir-pruebas.js`) lo exige.
+  Verificación: `npm test` termina con `passed` y sin `failed`.
 
 ## Reglas de arquitectura
 - `src/app/actions.ts` no ejecuta SQL: el acceso a `users` pasa por `src/lib/auth.ts`.
