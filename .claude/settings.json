@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck)",
+      "Bash(npm run build)",
+      "Bash(git diff *)"
+    ],
+    "ask": [
+      "Bash(npm install *)",
+      "Bash(npm i *)",
+      "Bash(npm add *)",
+      "Edit(./package.json)",
+      "Bash(npm update *)",
+      "Bash(npm run db:reset)"
+    ],
+    "deny": [
+      "Edit(./docs/00-ANTES.md)",
+      "Edit(./docs/MEDICIONES.md)"
+    ]
+  }
+}
