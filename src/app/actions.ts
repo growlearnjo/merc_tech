@@ -14,6 +14,7 @@ import {
 import { OrderError, placeOrder, type OrderLine } from "@/lib/orders";
 import { insertProduct } from "@/lib/products";
 import { parseSolesToCents } from "@/lib/money";
+import { PRODUCT_NAME_MAX_LENGTH } from "@/lib/constants";
 
 export type FormState = { error?: string; ok?: string; orderId?: number } | undefined;
 
@@ -112,7 +113,9 @@ export async function createProductAction(_: FormState, fd: FormData): Promise<F
   const stock = Number(str(fd, "stock"));
   const imageUrl = str(fd, "imageUrl") || null;
 
-  if (name.length < 2 || name.length > 120) return { error: "El nombre debe tener entre 2 y 120 caracteres." };
+  if (name.length < 2 || name.length > PRODUCT_NAME_MAX_LENGTH) {
+    return { error: `El nombre debe tener entre 2 y ${PRODUCT_NAME_MAX_LENGTH} caracteres.` };
+  }
   if (!category) return { error: "Elige o escribe una categoría." };
   if (priceCents === null || priceCents <= 0) return { error: "El precio no es válido (ej. 1299.90)." };
   if (!Number.isInteger(stock) || stock < 0) return { error: "El stock debe ser un número entero, 0 o más." };

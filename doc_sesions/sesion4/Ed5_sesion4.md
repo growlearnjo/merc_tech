@@ -139,6 +139,11 @@ salir sin diferencias.
 | 9 | **Conectar o quitar un servidor MCP rompe la caché** de la conversación: cambia la capa de arriba de la petición | Se dice en clase, con la tabla de la sesión 3 en la mano. No se conecta ni se desconecta nada a mitad de una medición | 4.2 |
 | 10 | Los nombres de herramienta son `mcp__<servidor>__<herramienta>`, y se usan en reglas de permisos, en `allowed-tools` y en los hooks | Se nombran y se dejan: los permisos y los hooks son la sesión 6, y la tabla de decisión los reserva | 4.2, 4.3 |
 | 11 | **El servidor de archivos se descarga con `npx` la primera vez**, así que la primera conexión necesita internet y tarda | Va en las tareas humanas, y el Prompt 0 comprueba `npx` antes de llegar a la fase | 4.2 |
+| 12 | **En PowerShell, `claude mcp add … -- npx -y …` falla** con `error: unknown option '-y'`: `claude` abre `claude.ps1`, y PowerShell se come el `--`. Salió en el ensayo del 2026-11-18 | En PowerShell se escribe `claude.cmd`. En Git Bash o en `cmd` el comando funciona tal cual | 4.2 |
+| 13 | **El servidor de archivos ignora la carpeta del comando**: las "raíces" que manda el cliente la reemplazan por completo, y Claude Code manda la carpeta del proyecto. `list_allowed_directories` devolvía el proyecto. Lo dice el README del servidor, y se comprobó en el ensayo del 2026-11-18 | Se agrega `--confine-roots`: la raíz del cliente solo puede achicar la carpeta, nunca reemplazarla. Con eso, `list_allowed_directories` devuelve la carpeta de conversaciones. `--read-only` no cambia: las raíces nunca lo levantan | 4.2 |
+| 14 | **El agente lee la carpeta de conversaciones sin el servidor**: está dentro del usuario, y `ls` o leer un archivo llegan a ella si los permisos lo dejan. En el ensayo llegó sin problema | La fase deja de decir "sin el servidor no la alcanzas". Lo que aporta el servidor es **un canal acotado a esa carpeta y sin escritura**, frente a una terminal que llega a todo y escribe. Cerrar la terminal es permisos, sesión 6 | 4.2 |
+| 15 | **Las dos peticiones de la 4.1 son tareas de verdad**, y fuera del modo plan el agente las hace. En el ensayo, la primera terminó con una función de favoritos programada en tres archivos | Las comprobaciones se hacen **en modo plan** y **cada una en su chat**: si las dos van en el mismo, la segunda ya tiene la Skill delante | 4.1 |
+| 16 | **`.mcp.json` guarda la ruta absoluta**, con el usuario de la máquina. En otra máquina no existe, y en un repositorio público el usuario queda visible | Se dice en la fase en lugar de prometer que "el equipo lo tiene al clonar". Es la misma exposición que `docs/SALIDA_TOKENS.txt` desde la sesión 3 | 4.2 |
 
 ---
 
@@ -211,9 +216,10 @@ El Prompt 0, el `CLAUDE.md` de la sesión 2 y el inventario de `docs/00-ANTES.md
 ### Cómo verificar al terminar
 
 1. `/skills` → la Skill aparece en la lista.
-2. Una petición que coincide con la `description` → la Skill se carga sola, sin
-   que el alumno la invoque.
-3. Una petición que **no** coincide → la Skill **no** se carga.
+2. En un chat nuevo y en modo plan, una petición que coincide con la
+   `description` → la Skill se carga sola, sin que el alumno la invoque.
+3. En otro chat nuevo y en modo plan, una petición que **no** coincide → la
+   Skill **no** se carga (hallazgo 15).
 4. `/skill-doctor` → dice cuánto ocupa la Skill en contexto.
 5. Si la regla se movió del `CLAUDE.md`, `wc -l CLAUDE.md` tiene menos líneas
    que antes y la regla no está en los dos sitios.
@@ -245,10 +251,17 @@ La Fase 4.1, y que `npx` funcione.
 ### Reglas
 
 * **El servidor se conecta con ámbito de proyecto**, para que quede en
-  `.mcp.json` y lo tenga el equipo al clonar.
+  `.mcp.json`. La ruta queda escrita entera, con el usuario de la máquina: en
+  otra máquina hay que cambiarla (hallazgo 16).
 * **Siempre con `--read-only`.** El servidor entonces registra solo sus
   herramientas de lectura, y las de escritura no existen para el cliente. Lo
   impone el servidor, no el agente ni el alumno.
+* **Siempre con `--confine-roots`.** Sin esa opción, el servidor usa la carpeta
+  del proyecto que le manda Claude Code, y no la del comando (hallazgo 13).
+* **En PowerShell, `claude.cmd`** en lugar de `claude` (hallazgo 12).
+* **Lo que el servidor aporta no es alcance, es límite**: un canal que solo
+  llega a esa carpeta y no puede escribir. El agente probablemente ya alcanza
+  la carpeta con la terminal (hallazgo 14).
 * **La carpeta que se le pasa es la del proyecto, no todo el disco.** La
   imprime `tokens.py` al correrlo. Apuntar más arriba es darle acceso a
   conversaciones de otros proyectos, y además hace que cualquier búsqueda
@@ -263,12 +276,15 @@ La Fase 4.1, y que `npx` funcione.
 
 ### Cómo verificar al terminar
 
-1. `/mcp` → el servidor aparece y dice `Connected`.
-2. `.mcp.json` existe en la raíz y nombra el servidor con `--read-only` entre
-   sus argumentos.
-3. El agente responde una pregunta sobre una conversación pasada, y cita de qué
+1. `/mcp` → el servidor aparece, dice `Connected`, y todas sus herramientas son
+   de lectura.
+2. `.mcp.json` existe en la raíz y nombra el servidor con `--read-only` y
+   `--confine-roots` entre sus argumentos.
+3. `list_allowed_directories`, del servidor, devuelve la carpeta de
+   conversaciones y no el proyecto.
+4. El agente responde una pregunta sobre una conversación pasada, y cita de qué
    archivo la sacó.
-4. Se le pide escribir algo por el servidor → **no puede**, porque esa
+5. Se le pide escribir algo por el servidor → **no puede**, porque esa
    herramienta no está registrada.
 
 ---
@@ -324,7 +340,11 @@ de hacer.
 | El frontmatter no se parsea | el `---` no está en la primera línea, o la indentación | la Skill **carga igual, sin ningún campo puesto**, así que parece que la descripción no sirve cuando el problema es el formato |
 | `/mcp` dice `Failed to connect` | `npx` no encontró el paquete, o la ruta de la carpeta está mal escrita | `claude mcp get <nombre>` para ver qué quedó configurado, y comprobar la ruta con la que imprime `tokens.py` |
 | La primera conexión tarda mucho | `npx` está descargando el servidor | es normal la primera vez. Si no hay internet, la fase no se puede hacer |
-| El agente dice que no puede escribir por el servidor | está en `--read-only` | **no es un fallo: es el resultado.** Es la comprobación 4 de la fase |
+| El agente dice que no puede escribir por el servidor | está en `--read-only` | **no es un fallo: es el resultado.** Es la comprobación 5 de la fase |
+| `claude mcp add` responde `error: unknown option '-y'` | se corrió en PowerShell, que se come el `--` | escribir `claude.cmd` en lugar de `claude`, o correrlo en Git Bash o `cmd` |
+| El servidor dice `Access denied - path outside allowed directories` sobre la carpeta de conversaciones | falta `--confine-roots`, y el servidor usa la carpeta del proyecto | `list_allowed_directories` lo confirma. Quitar el servidor y volver a agregarlo con `--confine-roots` |
+| El agente lee la carpeta de conversaciones sin el servidor | sus herramientas normales llegan a ella | **no es un fallo**: el servidor aporta límite, no alcance. Cerrar la terminal es la sesión 6 |
+| Al probar la Skill, el agente programó algo | la prueba no se hizo en modo plan | descartar los cambios con `git restore` y repetir la prueba en modo plan |
 | La respuesta del servidor se corta | el tope de salida, 25.000 tokens por defecto | acotar la pregunta. Y es la lámina del costo: esa salida entra al contexto y se paga |
 | Al compañero no le arranca el servidor al clonar | los servidores de `.mcp.json` piden aprobación la primera vez | aceptarla cuando Claude Code la pida, o `claude mcp reset-project-choices` para volver a preguntar |
 | El alumno quiere conectar el MCP de su base de datos | el de SQLite está archivado | hoy no. Y si fuera otro motor, con un usuario de solo lectura en la cadena de conexión |
@@ -364,8 +384,9 @@ conversaciones.
 * La `description` dice cuándo usarla, con al menos dos peticiones reales entre
   comillas, y dice qué no cubre.
 * Si la regla se movió del `CLAUDE.md`, ya no está en los dos sitios.
-* `.mcp.json` existe, el servidor dice `Connected` y sus argumentos incluyen
-  `--read-only`.
+* `.mcp.json` existe, el servidor dice `Connected`, sus argumentos incluyen
+  `--read-only` y `--confine-roots`, y `list_allowed_directories` devuelve la
+  carpeta de conversaciones.
 * El agente respondió una consulta que el código no podía contestar, y dijo de
   qué archivo la sacó.
 * `docs/DECISIONES.md` tiene cinco filas, las tres primeras con casos del
@@ -383,7 +404,19 @@ fuera porque su servidor está archivado; GitHub queda fuera porque su login
 falla y pediría un token por alumno; y el servidor de archivos entra porque no
 pide credenciales y **sí** trae un modo de solo lectura que impone él mismo.
 
-**Pendiente antes de dar la clase.** El laboratorio no se ha corrido entero de
-principio a fin: falta el ensayo, que es el que convierte esta spec en material
-dado. Y la presentación `Ed5_sesion4.pptx` ya está armada, pero se escribió
+**2026-11-18 — versión 1.1.** Cambios que salen del ensayo en `merc_tech3`,
+fases 4.1 y 4.2, hallazgos 12 a 16. En la 4.2: el comando lleva
+`--confine-roots`, porque sin él el servidor ignoraba la carpeta y apuntaba al
+proyecto (comprobado con `list_allowed_directories`, antes y después, y con el
+README del servidor); en PowerShell se escribe `claude.cmd`; se agrega la
+aprobación del servidor y la comprobación de a qué carpeta apunta; y la fase
+deja de decir que el agente no alcanza la carpeta sin el servidor, porque en el
+ensayo la alcanzó con `ls`. En la 4.1, las dos peticiones se hacen en modo plan
+y cada una en su chat. Y `.mcp.json` ya no promete que "el equipo lo tiene al
+clonar", porque guarda una ruta absoluta. Cambian esta spec y
+`PROMPTS_sesion4.md`; la versión anterior quedó en
+`../_backup_sesion4_pre_ensayo_20261118/`. La presentación no se tocó.
+
+**Pendiente antes de dar la clase.** El ensayo cubrió las fases 4.1 y 4.2; la
+4.3 y el cierre todavía no se han corrido. Y la presentación `Ed5_sesion4.pptx` ya está armada, pero se escribió
 antes que esta spec: hay que comprobar que las dos digan lo mismo.

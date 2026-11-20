@@ -1,3 +1,5 @@
+import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
+
 export function StockBadge({ stock }: { stock: number }) {
   if (stock === 0) {
     return (
@@ -6,7 +8,7 @@ export function StockBadge({ stock }: { stock: number }) {
       </span>
     );
   }
-  if (stock <= 5) {
+  if (stock <= LOW_STOCK_THRESHOLD) {
     return (
       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
         ¡Quedan {stock}!

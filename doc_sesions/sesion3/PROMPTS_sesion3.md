@@ -32,7 +32,7 @@ lugar.
 | # | Paso | ¿Dónde? |
 |---|---|---|
 | 1 | **Prompt 0** — verificar el terreno | chat nuevo. Deja escrito `docs/VERIFICACION_S3.md`, y de ahí leen los demás |
-| 2 | **Paso 2 de la ruta (condicional)** — volver a medir los costos de las sesiones 1 y 2 | dos comandos **en la terminal** y un prompt en chat nuevo. Solo si el Prompt 0 lo pidió |
+| 2 | **Paso 2 de la ruta (condicional)** — volver a medir los costos de las sesiones 1 y 2 | dos comandos **en la terminal** y un prompt en chat nuevo. Solo si el Prompt 0 lo pidió. El prompt pone al día `docs/VERIFICACION_S3.md` |
 | 3 | **Prompt 1** — leer la spec | chat nuevo |
 | 4 | **Fase 3.1** — tu factura y tus hipótesis | chat nuevo |
 | 5 | **Fase 3.2** — las cinco corridas | **diez** chats: por cada corrida, uno corto para el revert y el de la corrida, con dos pasos dentro |
@@ -304,6 +304,12 @@ que lo último solo pasa si borraste las sesiones a propósito.
 > **Chat nuevo.** Tú corriste la herramienta; el agente escribe. Los dos
 > comandos de arriba dejaron su salida en `docs/SALIDA_TOKENS.txt`, así que no
 > tienes que pegar ninguna fila: el agente la lee de ahí.
+>
+> **Y pone al día `docs/VERIFICACION_S3.md`.** El Prompt 0 lo escribió antes
+> de esta medición, así que ahí tu FACTURA sigue con el número viejo o con
+> "sin dato". La Fase 3.1 lee tu FACTURA de ese archivo, no de
+> `docs/00-ANTES.md`. Si no se pone al día, tus hipótesis se escriben sobre el
+> número equivocado.
 
 ```text
 [CONTEXTO] Mi proyecto está en <RUTA_PROYECTO>. Acabo de correr la herramienta
@@ -327,9 +333,21 @@ copiando los números del archivo de salida.
 3. Al pie de cada uno de los dos archivos, una línea: de qué conversación y de
    qué bloque salió el dato, que se midió con tokens.py ya corregido, y la
    fecha de hoy.
+4. Pon al día docs/VERIFICACION_S3.md, que el Prompt 0 escribió antes de esta
+   medición. La Fase 3.1 lee mi FACTURA de ahí. Cambia solo tres partes:
+   - los cuatro datos de la FACTURA, citados tal como quedaron ahora en
+     docs/00-ANTES.md, incluidos los dos números de la caché;
+   - en la sección que dice de qué bloque salió cada dato, las líneas de los
+     datos que acabas de escribir. Si alguno quedó "sin medir", lo dice;
+   - el veredicto final, que pasa a "terreno listo, adelante con la lectura".
+   Debajo del veredicto, una línea: que se puso al día después del Paso 2 de
+   la ruta, y la fecha de hoy.
 
 [RESTRICCIONES]
 - No toques ningún dato que la verificación no haya marcado como pendiente.
+- En docs/VERIFICACION_S3.md cambia solo esas tres partes y agrega esa línea.
+  El enunciado de la tarea patrón y el commit de la tarea no se tocan: los
+  leen las fases 3.1 y 3.2.
 - No estimes, no redondees y no recalcules: los números van copiados tal cual
   del archivo de salida.
 - Si un dato no aparece ahí, escribe "sin medir" y dímelo. No lo inventes y no
@@ -345,8 +363,10 @@ dos candidatas, dímelo y no elijas tú.
 [FORMATO DE SALIDA] (1) qué conversación y qué bloque tomaste como la
 generación, antes de escribir; (2) después de mi confirmación, qué celdas
 cambiaste, una línea por celda, con el valor viejo y el nuevo; (3) las dos
-notas al pie; (4) commit propuesto: "docs: re-measure the old costs with the
-fixed tokens.py".
+notas al pie; (4) qué cambiaste en docs/VERIFICACION_S3.md, una línea por
+parte; (5) commit propuesto: "docs: re-measure the old costs with the fixed
+tokens.py". docs/VERIFICACION_S3.md no entra en este commit: va en el de la
+Fase 3.1.
 ```
 
 ### Solo si no apareció ninguna — repetir el laboratorio 2
@@ -397,6 +417,10 @@ Que los tres datos digan de qué bloque salieron y con qué script se midieron:
 el consumo de la FACTURA, la fila S1 y la fila S2. Si uno queda sin medir, se
 escribe "sin medir" y se sigue; lo que no vale es dejarlo con el número viejo
 sin decir de dónde salió.
+
+Y que `docs/VERIFICACION_S3.md` cite tu FACTURA con los números nuevos y su
+veredicto diga "terreno listo": la Fase 3.1 lee de ahí, no de
+`docs/00-ANTES.md`.
 
 ---
 

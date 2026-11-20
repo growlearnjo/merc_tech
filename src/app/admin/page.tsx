@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { listCategories, listProducts } from "@/lib/products";
 import { formatSoles } from "@/lib/money";
+import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
 import { ProductForm } from "./ProductForm";
 
 export const metadata: Metadata = { title: "Cargar productos" };
@@ -46,7 +47,7 @@ export default function AdminPage() {
                     <td className="whitespace-nowrap px-4 py-2.5 text-right">{formatSoles(p.priceCents)}</td>
                     <td
                       className={`px-4 py-2.5 text-right font-semibold tabular-nums ${
-                        p.stock === 0 ? "text-rose-600" : p.stock <= 5 ? "text-amber-600" : ""
+                        p.stock === 0 ? "text-rose-600" : p.stock <= LOW_STOCK_THRESHOLD ? "text-amber-600" : ""
                       }`}
                     >
                       {p.stock}
