@@ -7,7 +7,8 @@
       "Bash(npm test)",
       "PowerShell(npm run typecheck)",
       "PowerShell(npm run build)",
-      "PowerShell(git diff *)"
+      "PowerShell(git diff *)",
+      "PowerShell(npm test)"
     ],
     "ask": [
       "Bash(npm install *)",
@@ -20,11 +21,15 @@
       "PowerShell(npm i *)",
       "PowerShell(npm add *)",
       "PowerShell(npm update *)",
-      "PowerShell(npm run db:reset)"
+      "PowerShell(npm run db:reset)",
+      "Bash(git push *)",
+      "PowerShell(git push *)"
     ],
     "deny": [
       "Edit(./docs/00-ANTES.md)",
-      "Edit(./docs/MEDICIONES.md)"
+      "Edit(./docs/MEDICIONES.md)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/hooks/**)"
     ]
   },
   "hooks": {
@@ -32,14 +37,20 @@
       {
         "matcher": "Bash|PowerShell|Read|Grep|Glob",
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bloquear-peligroso.js\"" }
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bloquear-peligroso.js\""
+          }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/exigir-pruebas.js\"" }
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/exigir-pruebas.js\""
+          }
         ]
       }
     ]
