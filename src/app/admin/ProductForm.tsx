@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { createProductAction } from "@/app/actions";
 import { Alert, Field, SubmitButton } from "@/components/ui";
 import { useKeepValuesSubmit } from "@/components/useKeepValuesSubmit";
+import { DEFAULT_NEW_PRODUCT_STOCK, PRODUCT_NAME_MAX_LENGTH } from "@/lib/constants";
 
 export function ProductForm({ categories }: { categories: string[] }) {
   const [state, formAction, pending] = useActionState(createProductAction, undefined);
@@ -17,7 +18,7 @@ export function ProductForm({ categories }: { categories: string[] }) {
   return (
     <form ref={formRef} onSubmit={onSubmit}className="h-fit space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
       <h2 className="font-semibold">Nuevo producto</h2>
-      <Field label="Nombre" name="name" required maxLength={120} placeholder='Tablet 11" 128 GB' />
+      <Field label="Nombre" name="name" required maxLength={PRODUCT_NAME_MAX_LENGTH} placeholder='Tablet 11" 128 GB' />
 
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-slate-700">Descripción</span>
@@ -31,7 +32,7 @@ export function ProductForm({ categories }: { categories: string[] }) {
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Precio (S/)" name="price" required inputMode="decimal" placeholder="1299.90" />
-        <Field label="Stock" name="stock" type="number" required min={0} step={1} defaultValue={10} />
+        <Field label="Stock" name="stock" type="number" required min={0} step={1} defaultValue={DEFAULT_NEW_PRODUCT_STOCK} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">

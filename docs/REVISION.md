@@ -90,3 +90,93 @@ El informe va tal como lo devolvió el subagente:
 
 ## Nota
 10 − 3 × 2 − 1 × 3 − 0,25 × 1 = 0,75
+
+## 3. Después
+
+**Fecha:** 2026-11-20
+**Módulo:** `src/app/admin/`, el mismo de la sección 2.
+**Encargo al subagente `tech-lead`:** "Audita el panel de administración, en src/app/admin/. Usa tu rúbrica.", el mismo texto de la sección 2, sin nada más.
+
+**Lo que se corrigió antes de esta auditoría.** El alumno eligió los tres hallazgos de la sección 2 que caen en los defectos 1 y 2. Los tres son R2; la sección 2 no tenía ninguno R1. Las constantes nuevas van en `src/lib/constants.ts`, como pide `CLAUDE.md`:
+
+- `PRODUCT_NAME_MAX_LENGTH = 120`, usada en `ProductForm.tsx` (`maxLength`) y en `actions.ts` (la validación y el mensaje de error).
+- `LOW_STOCK_THRESHOLD = 5`, usada en `admin/page.tsx` (el color de la tabla) y en `components/StockBadge.tsx`. Este archivo está fuera del módulo, y el alumno autorizó tocarlo.
+- `DEFAULT_NEW_PRODUCT_STOCK = 10`, usada en `ProductForm.tsx` (`defaultValue`).
+
+`npm run build` terminó sin error, y el alumno confirmó en el navegador que `/admin`, el catálogo y la ficha de producto se ven igual. No hay pruebas automáticas.
+
+El informe va tal como lo devolvió el subagente:
+
+# Informe del Tech Lead — panel de administración (`src/app/admin/page.tsx`, `src/app/admin/ProductForm.tsx` y su acción `createProductAction` en `src/app/actions.ts`)
+
+## Crítico
+- `src/app/admin/page.tsx:12` · R4 · `AdminPage` lista el inventario y muestra el formulario de alta sin llamar a `getCurrentUser()` ni comprobar un rol. No existe `middleware`/`proxy` que proteja `/admin`. El comentario de la línea 11 lo reconoce: "página abierta, sin control de permisos".
+- `src/app/actions.ts:108` · R4 · `createProductAction` escribe en `products` (`insertProduct`, línea 126) sin obtener el usuario actual ni comprobar permisos. Cualquiera puede crear productos sin iniciar sesión.
+- `src/lib/db.ts:13` · R4 · La tabla `users` no tiene columna de rol (líneas 13-19). Hoy no hay forma de distinguir a un administrador, aunque la página o la acción quisieran comprobarlo.
+
+## Importante
+- `package.json:8` · R3 · No hay pruebas para el panel ni para `createProductAction`. No hay archivos `*.test.*` ni `*.spec.*` fuera de `node_modules/`, `scripts` no tiene `test` y no hay dependencia de pruebas.
+
+## Sugerencia
+- `src/app/actions.ts:116` · R2 · El largo mínimo del nombre (`2`) está en línea en la comparación y repetido a mano en el mensaje de la línea 117, mientras que el máximo ya vive en `src/lib/constants.ts`.
+
+## Nota
+10 − 3 × 3 − 1 × 1 − 0,25 × 1 = −0,25
+
+### Hallazgo por hallazgo
+
+Las líneas de `admin/page.tsx` y `actions.ts` se corrieron una posición hacia abajo por los `import` nuevos. Por eso `:11` pasa a `:12` y `:107` pasa a `:108`, pero el hallazgo es el mismo.
+
+| # | Hallazgo | Defecto | Antes (§2) | Después (§3) | Qué pasó |
+|---|---|---|---|---|---|
+| 1 | `/admin` abierta, sin `getCurrentUser()` ni rol | 4 | Crítico · `admin/page.tsx:11` | Crítico · `admin/page.tsx:12` | No se tocó: es de las sesiones 6 y 7 |
+| 2 | `createProductAction` sin comprobar usuario ni permiso | 4 | Crítico · `actions.ts:107` | Crítico · `actions.ts:108` | No se tocó: es de las sesiones 6 y 7 |
+| 3 | `users` sin columna de rol | 4 | Dentro del texto del hallazgo 1, sin contarse aparte | Crítico · `db.ts:13` | No se tocó. En §3 el Tech Lead lo cuenta como hallazgo propio, y eso suma un crítico a la nota |
+| 4 | Largo máximo del nombre `120` duplicado | 2 | Importante · `ProductForm.tsx:20` + `actions.ts:115` | — | **Corregido** (A) |
+| 5 | Umbral de stock bajo `5` duplicado | 2 | Importante · `admin/page.tsx:49` + `StockBadge.tsx:9` | — | **Corregido** (B) |
+| 6 | Sin pruebas | 3 | Importante · `package.json:8` | Importante · `package.json:8` | No se tocó: es de la sesión 6 |
+| 7 | Stock inicial `10` en línea | 2 | Sugerencia · `ProductForm.tsx:34` | — | **Corregido** (C) |
+| 8 | Largo mínimo del nombre `2` en línea y repetido en el mensaje | 2 | No se reportó (el `2` ya estaba en `actions.ts:115`) | Sugerencia · `actions.ts:116` | No se tocó: no estaba en la §2 y ya se corrigieron los tres permitidos. Queda anotado |
+
+### Nota de antes y de después
+
+| | Críticos | Importantes | Sugerencias | Nota |
+|---|---|---|---|---|
+| Antes (§2) | 2 | 3 | 1 | 10 − 3 × 2 − 1 × 3 − 0,25 × 1 = **0,75** |
+| Después (§3) | 3 | 1 | 1 | 10 − 3 × 3 − 1 × 1 − 0,25 × 1 = **−0,25** |
+
+Los tres hallazgos corregidos no volvieron a aparecer: valían 2 importantes y 1 sugerencia, o sea 2,25 puntos. Aun así la nota bajó 1 punto, por dos motivos que no salen de la corrección:
+
+- La falta de columna de rol pasó de estar mencionada dentro de un crítico a ser un crítico propio. Eso resta 3 puntos, y el código de `db.ts` no cambió.
+- El Tech Lead reportó el `2` del largo mínimo, que ya estaba en la §2 y no reportó. Eso resta 0,25. Probablemente lo vio porque ahora el máximo es una constante y el mínimo sigue en línea. La rúbrica R2 solo busca números de dos o más cifras, así que la primera vez no lo atrapó.
+
+0,75 + 2,25 − 3 − 0,25 = −0,25. La diferencia entre las dos notas mezcla lo corregido con lo que cambió el criterio del revisor entre una corrida y otra. Por eso conviene leer la tabla de hallazgos, no solo la nota.
+
+### El inventario de daños contra las dos auditorías
+
+Hay una fila por cada aparición de un defecto en `docs/00-ANTES.md` §5. «Sin que nadie le dijera dónde» quiere decir que el encargo solo nombró el módulo (`src/app/admin/`), no el archivo ni la línea.
+
+| Defecto del inventario | Dónde | ¿Lo encontró? (§2 / §3) | Por qué sí o por qué no |
+|---|---|---|---|
+| 1 · SQL de `users` dentro de `actions.ts` (parcial) | `actions.ts:33-34`, `:38`, `:48-49` (hoy `:34-35`, `:39`, `:49-50`) | No / No | El Tech Lead leyó `actions.ts` solo por `createProductAction`. El SQL está en el registro y el login, fuera del panel |
+| 1 · Página de servidor que obtiene datos y renderiza en el mismo archivo (nota 1) | `admin/page.tsx:12` (y `src/app/page.tsx:14`, fuera del módulo) | No / No | La R1 lo excluye a propósito, porque la página pasa por `listProducts()`, que es la «función intermedia». El inventario lo cuenta como resto del defecto y la rúbrica no. **Lección de rúbrica:** hay que decidir cuál de los dos criterios vale y escribirlo en la R1 |
+| 2 · `120` duplicado | `ProductForm.tsx:20` y `actions.ts:115` | Sí / — (corregido) | Lo encontró sin pista |
+| 2 · `defaultValue={10}` en línea | `ProductForm.tsx:34` | Sí / — (corregido) | Lo encontró sin pista |
+| 2 · `99` duplicado | `actions.ts:77` y `CartButton.tsx:21` | No / No | Fuera del módulo: es del carrito |
+| 2 · `100` en línea | `actions.ts:72` | No / No | Fuera del módulo: es del carrito |
+| 2 · `SESSION_DAYS = 30` | `auth.ts:8` | No / No | Fuera del módulo |
+| 2 · «Envío gratis en Lima desde S/ 199» | `src/app/page.tsx:32` | No / No | Fuera del módulo: es el catálogo |
+| 2 · «12 meses de garantía» | `producto/[id]/page.tsx:61` | No / No | Fuera del módulo: es la ficha de producto |
+| 3 · Cero pruebas | `package.json` | Sí / Sí | Lo encontró sin pista |
+| 4a · `/admin` no comprueba quién la usa | `admin/page.tsx:10-11` | Sí / Sí | Lo encontró sin pista |
+| 4a · `createProductAction` acepta a cualquiera, y no hay middleware | `actions.ts:107-123` | Sí / Sí | Lo encontró sin pista. Leyó la acción porque el formulario del módulo la importa |
+
+Lo que encontró el Tech Lead y el inventario no tenía:
+
+- El umbral `5` duplicado (§2, corregido).
+- La columna de rol que falta como hallazgo aparte (§3). `CLAUDE.md` sí la nombra.
+- El `2` del largo mínimo (§3).
+
+Los problemas 5 a 7 del inventario (la tarea patrón ya hecha, el esquema sin `cart_items` y que el proyecto no era repositorio git) no son preguntas de la rúbrica y no se cuentan aquí.
+
+De lo que el inventario marcó dentro del módulo, lo encontró todo excepto el resto del defecto 1 en `admin/page.tsx`. Ese caso no lo encontró por cómo está escrita la R1, no porque no leyera el archivo. Todo lo demás que no encontró está fuera de `src/app/admin/`, y el encargo no le pedía mirarlo.
