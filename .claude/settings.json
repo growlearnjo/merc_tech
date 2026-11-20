@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm run typecheck)",
       "Bash(npm run build)",
-      "Bash(git diff *)"
+      "Bash(git diff *)",
+      "PowerShell(npm run typecheck)",
+      "PowerShell(npm run build)",
+      "PowerShell(git diff *)"
     ],
     "ask": [
       "Bash(npm install *)",
@@ -11,7 +14,12 @@
       "Bash(npm add *)",
       "Edit(./package.json)",
       "Bash(npm update *)",
-      "Bash(npm run db:reset)"
+      "Bash(npm run db:reset)",
+      "PowerShell(npm install *)",
+      "PowerShell(npm i *)",
+      "PowerShell(npm add *)",
+      "PowerShell(npm update *)",
+      "PowerShell(npm run db:reset)"
     ],
     "deny": [
       "Edit(./docs/00-ANTES.md)",
@@ -21,7 +29,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash|Read|Grep|Glob",
+        "matcher": "Bash|PowerShell|Read|Grep|Glob",
         "hooks": [
           { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bloquear-peligroso.js\"" }
         ]

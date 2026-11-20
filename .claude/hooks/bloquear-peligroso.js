@@ -8,13 +8,15 @@ process.stdin.on("end", () => {
   const input = e.tool_input || {};
 
   // 1. Comandos destructivos, aunque vengan en medio de otro comando.
-  if (tool === "Bash") {
+  // En Windows, Claude Code tiene dos consolas: Bash y PowerShell. Se vigilan las dos.
+  if (tool === "Bash" || tool === "PowerShell") {
     const cmd = String(input.command || "");
     const reglas = [
       [/git\s+reset\s+--hard/, "git reset --hard borra cambios sin commitear"],
       [/git\s+push\b[^\n]*(--force|\s-f\b)/, "git push --force reescribe la historia del remoto"],
       [/git\s+clean\s+-[a-zA-Z]*f/, "git clean -f borra archivos que git no sigue"],
       [/\brm\s+-[a-zA-Z]*(r[a-zA-Z]*f|f[a-zA-Z]*r)/, "rm -rf borra carpetas enteras sin papelera"],
+      [/\bRemove-Item\b(?=[^\n]*-Recurse)(?=[^\n]*-Force)/i, "Remove-Item -Recurse -Force borra carpetas enteras sin papelera"],
     ];
     for (const [patron, motivo] of reglas) {
       if (patron.test(cmd)) {

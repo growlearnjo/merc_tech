@@ -14,9 +14,11 @@ Para qué sirve: dice qué hace el agente solo, qué me pregunta y qué no hace 
 | 10 | Build | allow | `Bash(npm run build)` | `CLAUDE.md:9`: "`typecheck` y `build` terminaron sin error" |
 | 11 | Ver el diff | allow | `Bash(git diff *)` | `CLAUDE.md:18`: "Verificación: `git diff --stat`… `git diff package.json`" |
 
+**Las mismas reglas para PowerShell.** En Windows, Claude Code tiene dos consolas, `Bash` y `PowerShell`, y el modelo elige cuál usar. Una regla `Bash(...)` no alcanza a la herramienta `PowerShell`, que tiene sus propias reglas (documentación oficial, sección PowerShell de Permissions). Por eso las filas 3 a 5 y 7 a 11 están repetidas en `.claude/settings.json` como `PowerShell(...)`, con la misma lista y el mismo origen. Se descubrió en la prueba de la Fase 6.2: el modelo corrió `git reset --hard HEAD` con `PowerShell` y nada lo frenó.
+
 ## El hook
 
-`.claude/hooks/bloquear-peligroso.js`, registrado en `.claude/settings.json` con `PreToolUse` y el matcher `Bash|Read|Grep|Glob`. Claude Code lo corre antes de cada comando de consola y de cada lectura, lo invoque alguien o no. Exit 2 bloquea, y el motivo le llega al agente.
+`.claude/hooks/bloquear-peligroso.js`, registrado en `.claude/settings.json` con `PreToolUse` y el matcher `Bash|PowerShell|Read|Grep|Glob`. Claude Code lo corre antes de cada comando de consola y de cada lectura, lo invoque alguien o no. Exit 2 bloquea, y el motivo le llega al agente.
 
 | Qué bloquea | Por qué no alcanzaba una regla de permisos |
 |---|---|
@@ -29,3 +31,5 @@ Qué **no** cubre:
 - Variantes que no calzan con los patrones, como `rm -r -f`, `rm --recursive --force` o `git checkout -- .`. Ampliar las expresiones las cubriría; no se hizo porque el hook es el del anexo, tal cual.
 - Si el hook se rompe (por ejemplo, un evento que no es JSON), `JSON.parse` lanza un error, el proceso sale con 1 y Claude Code **deja pasar** con un aviso: un hook roto abre la puerta en lugar de cerrarla. Un `try/catch` que saliera con 2 la cerraría; tampoco se aplicó, por la misma razón.
 - El hook busca texto, no entiende el comando: también frena uno que solo *menciona* esas palabras. Pasó al escribir esta sección: un `cat >> docs/PERMISOS.md` con este texto quedó bloqueado.
+- En `PowerShell` el hook reconoce los mismos comandos de git y además `Remove-Item -Recurse -Force`, el equivalente de `rm -rf`. No reconoce otras formas de borrar, como `rd /s` o `del /s` llamados desde PowerShell.
+- La documentación dice que un `deny` de `Edit` cubre lo que se escribe desde `Bash` con `>` o `>>`. No dice lo mismo de `PowerShell` (`>`, `Out-File`, `Set-Content`). No está comprobado que los `deny` de las filas 1 y 2 lo frenen.
