@@ -82,6 +82,21 @@ cuenta". Lo que cambió en el material:
 * Los archivos los escribe el agente con su herramienta de edición: el hook busca
   texto, y `docs/INYECCION.md` trae `git reset --hard`.
 
+## Ensayo en GitHub, 20 de noviembre por la tarde
+
+Corrido como alumno en `merc_tech`, ya con su repositorio en GitHub, en modo
+auto. La 7.1 completa y la 7.2. Decisiones 21 a 25 de la spec.
+
+| Qué pasó | Qué cambió en el material |
+|---|---|
+| El chat de la 7.1 corrió en la extensión de VS Code, con la ruta `c:\…` en minúscula: Vitest falló sin correr pruebas y el hook `Stop` marcó un rojo falso | El hook del anexo de la sesión 6 pasa la letra a mayúscula (versión 2.1). Y se trabaja en la terminal |
+| El cuarto intento de leer `.env.local`, `cmd /c type`, lo frenó el **clasificador del modo auto**, no una regla | La tabla de la 7.1 admite los dos resultados y dice cuál es cuál |
+| CI en verde en el PR y en `main`. La revisión de Claude falló: "Either ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN … is required". Corrió sin el secreto; el token se había generado primero con otra cuenta de Claude | La 7.2 dice el orden (primero el secreto, después el push), dónde va exactamente, que se revise la cuenta de claude.ai, y qué hacer si falla |
+| La 7.3 pedía "el correo con el que te registraste", y no había ninguna cuenta en la tienda | El Paso 1 pide dos cuentas, creadas en `/registro` |
+| La 7.4 hablaba de "las tres órdenes escondidas" sin decir cuáles, y son cuatro | Tabla con las cuatro y qué pieza frena cada una |
+
+**Sigue sin verse:** una revisión de Claude completa en un PR, y la 7.4 con `gh`.
+
 ---
 
 ## La pregunta de la sesión
