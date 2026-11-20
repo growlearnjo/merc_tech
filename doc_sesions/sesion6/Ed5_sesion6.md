@@ -190,6 +190,7 @@ copia. La documentación oficial se consultó los dos días.
 | 25 | **La línea que registra el hook depende de la consola de los hooks.** `node "$CLAUDE_PROJECT_DIR/…"` funciona en Git Bash y en `sh`, pero en PowerShell `$CLAUDE_PROJECT_DIR` no es una variable de entorno (la documentación usa `$env:CLAUDE_PROJECT_DIR`). La documentación describe además la forma "exec", con `args`, que no pasa por ninguna consola | Se registra con `node "$CLAUDE_PROJECT_DIR/…"`, ensayado en los dos ensayos. Para Windows sin Git Bash, la forma exec queda en "Si algo falla". Ensayo del 20: la forma exec también bloqueó, con Claude Code 2.1.327 | 6.2, 6.3 |
 | 26 | **Una regla `ask` pregunta también en modo auto.** La documentación: "Explicit ask rules still force a prompt." Ensayo del 20, en modo auto: `npm install left-pad` y `npm install` sin argumentos preguntaron, y el rechazo no instaló nada | Se mantiene la verificación de la 6.1, y se agrega el `npm install` sin argumentos | 6.1 |
 | 27 | **Probar un hook a mano con `echo '…' \| node …; echo "exit=$?"` depende de la consola**: en PowerShell `$?` es verdadero o falso, no el código. Y una vez registrado el hook, ese mismo `echo`, que trae `git reset --hard` en el texto, queda bloqueado por el hook | Se prueba con `node .claude/hooks/probar-hooks.js`, que está en el anexo: le pasa 23 eventos falsos a los dos hooks y compara cada código de salida con el esperado. Es igual en todas las consolas y en todos los sistemas, y su comando no trae texto peligroso | 6.2, 6.3 |
+| 29 | **Con la letra de la unidad en minúscula, Vitest falla en Windows.** Ensayo del 20, por la tarde, en la Fase 7.1: el chat corría en la extensión de VS Code, que abre Claude Code con la ruta `c:\…` en minúscula. Con esa ruta, `npm test` terminó con "Cannot read properties of undefined (reading 'config')" y sin correr ninguna prueba; con `C:\…`, 3 de 3 en verde. El hook `Stop` corría las pruebas desde esa ruta y marcaba un rojo que no existía | El hook pasa la letra de la unidad a mayúscula antes de correr `git` y `npm test`. La corrección la hizo el docente, a mano, en el ensayo, y es la del anexo. En macOS y Linux la línea no cambia nada | 6.3 |
 | 28 | **La comprobación de la 6.4 pedía quitar `"Bash(git push *)"`**, una regla que la matriz del alumno podía no tener. El agente diría "no la encuentro" y no se probaría nada | Se pide quitar `"Edit(./docs/00-ANTES.md)"`, que toda matriz tiene en `deny` | 6.4 |
 ---
 
@@ -534,6 +535,7 @@ La Fase 6.3.
 | El hook bloquea todo, con "no pude leer el evento" | el hook no recibe un JSON | es a propósito: un hook que no entiende el evento cierra la puerta. Revisar la línea que lo registra en `.claude/settings.json` |
 | El hook bloquea un comando que solo menciona `git reset --hard` (un `cat >>` o un `echo` con ese texto) | el hook busca texto, no entiende el comando | escribir ese archivo con la herramienta de edición, que el hook no mira (decisión 21) |
 | El hook bloquea un `git restore` o un `git checkout --` que pediste | descartan cambios sin commitear, y el hook los frena | correrlo tú, en tu terminal. Es lo que dice el motivo del bloqueo |
+| El hook `Stop` manda de vuelta al agente con "Cannot read properties of undefined (reading 'config')", y `npm test` en tu terminal pasa | la ruta del proyecto llegó con la letra de la unidad en minúscula (`c:\…`), lo que pasa en la extensión de VS Code, y Vitest falla con esa ruta | el hook del anexo ya la pasa a mayúscula. Si tu hook es anterior, cambiar la línea del `cwd` por la del anexo, a mano (decisión 29) |
 | `node: command not found` al correr un hook | Node no está en el PATH de la consola que corre los hooks | abrir esa consola (Git Bash en Windows, la terminal en macOS y Linux) y correr `node --version`. Si falla, reinstalar Node marcando "agregar al PATH" |
 | En Windows sin Git Bash, el hook no bloquea nada y `/hooks` lo muestra | los hooks corren con PowerShell, y ahí `$CLAUDE_PROJECT_DIR` no es una variable de entorno | instalar Git for Windows, que es lo del curso. Si no se puede, registrar el hook en forma exec, sin consola: `{ "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/bloquear-peligroso.js"] }`. Ensayado con Claude Code 2.1.327 (decisión 25) |
 | El Tech Lead se niega a leer `docs/` y dice 0 herramientas usadas | lo frena su propio archivo, que ya dice que no lea `docs/`: el hook nunca actuó | pedirle que lo intente de todas formas. Si sigue en 0, vale la prueba de `probar-hooks.js` (decisión 22) |
@@ -736,7 +738,7 @@ process.stdin.on("end", () => {
   if (e.stop_hook_active) process.exit(0);
 
   // ¿Cambió algo fuera de docs/? Si no, no hay código nuevo que probar.
-  const cwd = process.env.CLAUDE_PROJECT_DIR || e.cwd || process.cwd();
+  const cwd = (process.env.CLAUDE_PROJECT_DIR || e.cwd || process.cwd()).replace(/^[a-z]:/, (u) => u.toUpperCase());
   const cambios = spawnSync("git", ["status", "--porcelain", "--", ".", ":(exclude)docs"], { cwd, encoding: "utf8" });
   if (!String(cambios.stdout || "").trim()) process.exit(0);
 
@@ -884,6 +886,12 @@ oficial, consultada el 2026-11-20.
 **La sesión 8 empaqueta estos hooks.** Su anexo copia los de la sesión 6, y hay
 que pasarla a esta versión (el matcher, las reglas `PowerShell(...)` y
 `probar-hooks.js`).
+
+**2026-11-20, tarde — versión 2.1.** Decisión 29: el hook de pruebas pasa la
+letra de la unidad a mayúscula, porque con `c:\…` en minúscula Vitest falla y
+el hook marcaba un rojo falso. Salió del ensayo de la sesión 7 en `merc_tech`.
+Comprobado ese día: `probar-hooks.js` da 23 de 23, y el hook con la ruta en
+minúscula deja pasar cuando las pruebas están en verde.
 
 **Pendiente antes de dar la clase (versión 2).** Ensayar `/rewind` y la 6.4
 completa; ensayar en macOS o Linux; cronometrar.
