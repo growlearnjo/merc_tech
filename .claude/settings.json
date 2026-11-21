@@ -15,7 +15,9 @@
     ],
     "deny": [
       "Edit(./docs/00-ANTES.md)",
-      "Edit(./docs/MEDICIONES.md)"
+      "Edit(./docs/MEDICIONES.md)",
+      "Read(./.env)",
+      "Read(./.env.*)"
     ]
   },
   "hooks": {
