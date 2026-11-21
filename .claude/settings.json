@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck)", "PowerShell(npm run typecheck)",
+      "Bash(npm run build)", "PowerShell(npm run build)"
+    ],
+    "ask": [
+      "Bash(npm install *)", "PowerShell(npm install *)",
+      "Bash(npm install)", "PowerShell(npm install)",
+      "Bash(npm i *)", "PowerShell(npm i *)",
+      "Bash(npm add *)", "PowerShell(npm add *)",
+      "Bash(git push *)", "PowerShell(git push *)",
+      "Bash(git push)", "PowerShell(git push)",
+      "Edit(./package.json)"
+    ],
+    "deny": [
+      "Edit(./docs/00-ANTES.md)",
+      "Edit(./docs/MEDICIONES.md)"
+    ]
+  }
+}
