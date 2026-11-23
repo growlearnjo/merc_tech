@@ -58,7 +58,8 @@ construiste, se prueba fuera de tu máquina, y se presenta con tus números.
   sus permisos (`.claude/settings.json`).
 * Las tablas del curso en `docs/`.
 * Una carpeta de prueba que no sea tu proyecto: un clon del ejemplar, o
-  cualquier otro proyecto tuyo.
+  cualquier otro proyecto tuyo. Si no la tienes, la creas antes de la Fase 8.2
+  con los comandos de su Paso 0.
 
 ---
 
@@ -217,6 +218,24 @@ El commit lleva también docs/VERIFICACION_S8.md.
 
 > **Tu terminal y un chat, en la carpeta de prueba.** Después, un chat en tu
 > proyecto para anotarlo.
+
+### Paso 0 — creas la carpeta de prueba, en tu terminal
+
+Si ya la tienes, salta al Paso 1. Es un clon del ejemplar del curso. Va **al
+lado de tu proyecto, no dentro**, y no es una copia de tu repositorio: esa ya
+trae tus hooks, y correrían dos veces. Los comandos son iguales en PowerShell,
+macOS y Linux:
+
+```bash
+cd <CARPETA_QUE_CONTIENE_TU_PROYECTO>
+git clone https://github.com/growlearnjo/mercadotech.git prueba_plugin
+cd prueba_plugin
+git checkout f4c3ffb
+```
+
+`f4c3ffb` es la versión final del ejemplar de la edición 4. Git avisa
+"detached HEAD": es lo esperado, porque ahí no vas a hacer commits. No hace
+falta `npm install`.
 
 ### Paso 1 — instalas, en tu terminal
 

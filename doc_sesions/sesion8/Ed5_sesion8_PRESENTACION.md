@@ -140,7 +140,11 @@ clase, el lab se acorta.
 ## Lo que falta antes de dar el laboratorio
 
 * **Ensayar lo interactivo**: `/plugin` y el menú de `@` con el agente del plugin.
-* **Confirmar cómo acceden los alumnos al ejemplar** para clonarlo en la 8.2.
+* ~~Confirmar cómo acceden los alumnos al ejemplar~~. Resuelto el 2026-11-23:
+  `growlearnjo/mercadotech` es público, pero el tag `v-ed4-final` no está en
+  GitHub. Los comandos clonan y hacen `git checkout f4c3ffb`, su commit. Si se
+  publica el tag (`git push origin v-ed4-final` desde `mercadotech`), se puede
+  usar `git clone --branch v-ed4-final`.
 * **Cronometrar.**
 
 ---

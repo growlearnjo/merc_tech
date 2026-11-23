@@ -91,6 +91,19 @@ flowchart LR
    un clon del ejemplar del curso, MercadoTech, en su tag `v-ed4-final`. Si no lo
    tienes a mano, sirve cualquier proyecto tuyo que no sea esta app. **No uses un
    clon de tu propio repositorio**: ya trae tus hooks, y correrían dos veces.
+   Se crea en tu terminal, **al lado de tu proyecto y no dentro de él**. Los
+   comandos son iguales en PowerShell, macOS y Linux:
+
+   ```bash
+   cd <CARPETA_QUE_CONTIENE_TU_PROYECTO>
+   git clone https://github.com/growlearnjo/mercadotech.git prueba_plugin
+   cd prueba_plugin
+   git checkout f4c3ffb
+   ```
+
+   `f4c3ffb` es el commit del tag `v-ed4-final`. Se usa el commit porque el tag
+   no está publicado en GitHub. Git avisa "detached HEAD": es lo esperado, porque
+   no vas a hacer commits ahí. No hace falta `npm install`.
 3. **Una herramienta para grabar la pantalla**, para el video de la Fase 8.3. La
    que traiga tu sistema basta.
 4. **Trabajar en la terminal**, con `claude` abierto en la raíz de la carpeta
@@ -690,3 +703,8 @@ menú de `@`), el showcase con datos reales y cronometrar.
 seguía al Prompt 0. Qué hacer si la red no es la 2.1 pasó a la tarea humana 5 de
 este documento. Lo de `"tech-lead"` exacto y `npm test` siempre ya lo dice el
 punto 5 del prompt.
+
+**2026-11-23 — versión 2.0.2.** La carpeta de prueba ahora trae sus comandos, en
+la tarea humana 2 y en el Paso 0 de la Fase 8.2. El repositorio del ejemplar es
+público, pero el tag `v-ed4-final` no está en GitHub: se clona y se hace
+`git checkout f4c3ffb`, que es su commit.
