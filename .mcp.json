@@ -8,7 +8,7 @@
         "@modelcontextprotocol/server-filesystem",
         "--read-only",
         "--confine-roots",
-        "C:\\Users\\jhono\\.claude\\projects\\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech3"
+        "C:\\Users\\jhono\\.claude\\projects\\c--Users-jhono-OneDrive-Documents-datapath-esp-merc-tech"
       ],
       "env": {}
     }
