@@ -30,7 +30,16 @@ No se reescribe la historia: el repositorio es público, reescribirla es destruc
 
 Las dos reglas `deny`, `Read(./.env)` y `Read(./.env.*)`, frenan la herramienta de lectura del agente, `cat` en Bash y `Get-Content` en PowerShell. **No frenan un programa aparte que abre el archivo por su cuenta**: `cmd /c type .env.local` llamado desde PowerShell, o un `node -e` con `fs.readFileSync(".env.local")` desde cualquier consola. La regla mira qué herramienta usa el agente y qué comando escribe, no qué archivos abre por dentro el programa que lanza; la documentación de Claude Code lo avisa, y en el ensayo del curso (decisión 15) los dos caminos leyeron el archivo. En Windows nativo no hay sandbox que lo cierre. La consecuencia: **en `.env.local` solo va lo que no importa que el agente vea**, como `ADMIN_EMAILS`. Un secreto de verdad, como el token de la Action, no se guarda en la máquina donde trabaja el agente: vive en GitHub.
 
-Pendiente de comprobar en esta máquina, cuando estén pegadas las dos reglas y exista un `.env.local` de prueba (paso 1 de "Cómo verificar" de la 7.1, en un chat nuevo): que la herramienta, `cat` y `Get-Content` fallen, y que `cmd /c type` o `node -e` sí lean. El resultado se anota aquí.
+Comprobado en esta máquina el 2026-11-20, con las dos reglas pegadas y un `.env.local` de prueba, en un chat nuevo en modo auto:
+
+| Intento | Resultado | Mensaje | Lo frenó |
+|---|---|---|---|
+| Herramienta de lectura | Negado | `File is in a directory that is denied by your permission settings.` | la regla `Read(./.env.*)` |
+| `cat .env.local` en Bash | Negado | `Permission to use Bash with command cat .env.local has been denied.` | la regla |
+| `Get-Content .env.local` en PowerShell | Negado | `get-content targeting '…\.env.local' was blocked. For security, Claude Code may only access files in the allowed working directories…` | la regla. El mensaje habla de "allowed working directories" aunque el archivo está dentro del proyecto: es el texto con que Claude Code bloquea en PowerShell |
+| `cmd /c type .env.local` desde PowerShell | Negado | `Permission for this action was denied by the Claude Code auto mode classifier. Reason: [Undermining Oversight].` | **el clasificador del modo auto, no una regla** |
+
+El cuarto no lo frenó la red: lo frenó el clasificador, que decide en cada llamada. En otro modo, o con el comando escrito de otra forma (un `node -e`), podría pasar; en el ensayo del curso, sin clasificador, `cmd /c type` y `node -e` leyeron el archivo. La conclusión no cambia: en `.env.local` no va un secreto de verdad.
 
 ## Greps anti-fuga
 
