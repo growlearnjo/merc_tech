@@ -811,125 +811,60 @@ costó delegar en la 5.1 (17.1k).
       fecha de las tarifas de `tokens.py` y las precisiones de
       `docs/COSTOS.md`.
 
-## Sesión 6 — 2026-11-20 — Permisos, hooks y red de seguridad
+## Sesión 6 — 2026-11-20 — Una red que no depende de que el agente obedezca
 
-La sesión quedó a medias: se hicieron la 6.1 y la 6.2, pero no la 6.3 ni la
-6.4. No hay pruebas ni script `test`, no hay segundo hook, nadie usó `/rewind`
-y la fila 5 de `docs/DECISIONES.md` sigue diciendo solo «sesión 6». Lo que
-sigue sale de los commits, de `docs/PERMISOS.md` y de las conversaciones de
-este proyecto. Lo que no está ahí no se cuenta aquí.
+Ensayo como alumno, en la terminal y en modo auto. La 6.4 y este cierre se
+completaron el 2026-11-23, después de la sesión 7.
 
 ### Qué se hizo, en orden
 
 | Commit | Fase |
 |---|---|
-| `5684406` | Prompt 0 · `docs/VERIFICACION_S6.md`, y 6.1 · matriz de permisos en `.claude/settings.json` y `docs/PERMISOS.md` |
-| `f4a8bf0` | 6.2 · hook `bloquear-peligroso.js`, su probador `probar-hooks.js` y la sección del hook en `docs/PERMISOS.md` |
+| `4065019` | 6.1 · matriz de permisos (`docs/PERMISOS.md`, `.claude/settings.json`) y `docs/VERIFICACION_S6.md` |
+| `eebe849` | 6.2 · hook `PreToolUse` y fila 5 de `docs/DECISIONES.md` |
+| `f26bfa8` | 6.2 · el hook y las reglas también para la consola PowerShell |
+| `ab50db6` | 6.3 · Vitest, tres pruebas de `parseSolesToCents` y hook `Stop` |
+| `07e4a4a` | la red pasa a la versión 2 del anexo, con la protección de la 6.4 |
+| `b1accc4` | la letra de la unidad, en el hook de pruebas (salió en la 7.1) |
 
-### Las reglas de la matriz (Fase 6.1)
+### Lo que pasó
 
-Están en `.claude/settings.json`. Cada regla de comando aparece dos veces, una
-`Bash(...)` y otra `PowerShell(...)`, porque en Windows el agente tiene las dos
-consolas y una regla de `Bash` no alcanza a `PowerShell` (decisión 18).
+- **6.1.** Las reglas: `deny` para `docs/00-ANTES.md` y `docs/MEDICIONES.md`;
+  `ask` para instalar, actualizar, editar `package.json` y borrar la base;
+  `allow` para typecheck, build y `git diff`. Editar `docs/00-ANTES.md` falló
+  por los permisos. `npm install left-pad` y `npm install` solo preguntaron, en
+  modo auto, y los rechacé: no se instaló nada.
+- **6.2.** El hook bloqueó al propio agente al registrarlo: quiso escribir esta
+  matriz con `cat >>`, y el texto mencionaba `git reset --hard`. En la
+  comprobación, `git reset --hard HEAD` **se ejecutó**: el agente usó la
+  consola PowerShell, y el matcher y el hook solo miraban Bash. No borró nada
+  porque el árbol estaba limpio. Con la corrección (`f26bfa8`) quedó
+  bloqueado. El Tech Lead se negó a leer `docs/MEDICIONES.md` con 0
+  herramientas: lo frenó su propio archivo, no el hook.
+- **6.3.** Elegí `parseSolesToCents`. Tres pruebas en verde. El pedido del
+  material ("precios sin decimales") no rompió ninguna, porque tocaba otra
+  función. Con un pedido que sí la rompía, el agente actualizó la prueba antes
+  de terminar, y después preguntó. Cuando le prohibí tocar la prueba y correr
+  `npm test`, el hook `Stop` lo mandó de vuelta con la prueba en rojo, y a la
+  segunda lo dejó parar.
+- **6.4.** La protección de `.claude/settings.json` y `.claude/hooks/` quedó
+  en `07e4a4a`. Los pasos de `/rewind` **no se ejecutaron**. La sección
+  "Deshacer" de `docs/PERMISOS.md` sale de la documentación.
 
-- **allow:** `npm run typecheck` y `npm run build`. Salen de `CLAUDE.md:9`:
-  hoy es lo único que se puede afirmar que terminó bien.
-- **ask:** `npm install` con nombre y sin argumentos, y sus alias `npm i` y
-  `npm add`. Salen del riesgo que acepté en la sesión 1 (`docs/00-ANTES.md` §3:
-  que el modo `auto` apruebe solo una dependencia que no pedí) y de
-  `CLAUDE.md:16-17`. También `git push` con y sin argumentos, porque lo que
-  sale de mi máquina no lo deshace ni `/rewind` ni git. Y `Edit(./package.json)`,
-  que sale de `CLAUDE.md:16-18`.
-- **deny:** `Edit(./docs/00-ANTES.md)` y `Edit(./docs/MEDICIONES.md)`, los dos
-  archivos que los prompts del curso dicen que no se tocan. No hay ningún
-  `deny` de comandos: un `deny` de `Bash` con patrón apaga la consola
-  `PowerShell` sin avisar (decisión 20).
+### Lo que cambió en el material por este ensayo
 
-### Las dos pruebas de la matriz
+Sesión 6, versión 2 y 2.1: las dos consolas, `probar-hooks.js`, la
+comprobación del Tech Lead, la del hook `Stop`, `git push` en `ask`, y la letra
+de la unidad. Los hooks de este proyecto son los de esa versión.
 
-- **Editar `docs/00-ANTES.md`.** Le pedí agregar «prueba de permisos» al final.
-  No usó `Edit`: intentó escribir con `printf … >> docs/00-ANTES.md` desde
-  `Bash`. Claude Code lo rechazó con «Permission to use Bash with command … has
-  been denied». Repitió el mismo comando una vez y lo volvieron a rechazar.
-  Después revisó `.claude/settings.json`, encontró el `deny` y confirmó que el
-  archivo seguía con 140 líneas y `git status` vacío. El `deny` de `Edit` frenó
-  también la escritura desde la consola, como dice la decisión 19.
-- **Instalar `left-pad`.** Intentó `npm install left-pad`, cayó en `ask`, salió
-  la pregunta y la rechacé. No se instaló nada.
+### El `CLAUDE.md`
 
-### El hook (Fase 6.2)
-
-`bloquear-peligroso.js` se registra como `PreToolUse` con el matcher
-`Bash|PowerShell|Read|Grep|Glob`. El detalle de qué bloquea y qué no cubre está
-en `docs/PERMISOS.md`. Hoy `node .claude/hooks/probar-hooks.js` dio «22 de 22
-casos dan lo esperado».
-
-- **Qué bloqueó, y con qué consola.** Le pedí correr `git status --short` y
-  después `git reset --hard HEAD` en `Bash`. El primero salió vacío. El segundo
-  no llegó a ejecutarse:
-
-  ```
-  PreToolUse:Bash hook error: [node "$CLAUDE_PROJECT_DIR/.claude/hooks/bloquear-peligroso.js"]: Bloqueado por el hook del proyecto: git reset --hard borra cambios sin commitear. Si de verdad hace falta, lo corre la persona en su terminal.
-  ```
-
-  Con `PowerShell` no se probó en una conversación real. Solo están los casos
-  de `PowerShell` de `probar-hooks.js`.
-- **El Tech Lead.** Le pedí que intentara leer `docs/MEDICIONES.md` con `Read`
-  aunque su archivo lo prohíbe. No lo intentó: usó 0 herramientas. Dijo que
-  su configuración le prohíbe leer `docs/` y que una autorización que llega
-  por otro agente no la levanta. **Lo frenó su propio archivo, no el hook.** El
-  hook nunca se activó, así que la parte del hook que frena al `tech-lead` en
-  `docs/` sigue sin probarse en una conversación real. Solo la cubren los dos
-  casos de `probar-hooks.js`.
-
-### Lo que no se hizo
-
-- **Fase 6.3, pruebas.** No hay archivos de prueba, ni script `test`, ni
-  `exigir-pruebas.js`. `npm test` responde `npm error Missing script: "test"`
-  y sale con 1. No probé ninguna función ni rompí ninguna prueba.
-- **Fase 6.4.** No se usó `/rewind`, así que no hay nada que haya deshecho, y
-  no hubo que deshacer nada con git. Tampoco se pidió tocar la configuración,
-  así que no se sabe qué responde.
-- **Fila 5 de `docs/DECISIONES.md`.** Sigue diciendo solo «sesión 6».
-
-### Costo de la sesión 6
-
-Sin medir: no se corrió `tokens.py`.
-
-### Qué salió mal
-
-1. **La sesión no se terminó.** Faltan la 6.3 y la 6.4, y con ellas el
-   defecto 3.
-2. **El prompt de cierre describía cosas que no existen:** pruebas con su script
-   `npm test`, dos hooks y la fila 5 llena. Hay un solo hook; el segundo
-   archivo de `.claude/hooks/` es el probador. Y otra vez se pegó con
-   `<RUTA_PROYECTO>` y `<TU_REPO>` sin rellenar.
-3. **La prueba del Tech Lead no probó el hook.** Lo frenaron sus instrucciones
-   antes de llegar a la herramienta.
-4. **Repitió un comando que ya habían rechazado.** En la prueba de
-   `00-ANTES.md` mandó dos veces el mismo `printf` antes de revisar por qué lo
-   rechazaban.
-5. **El `CLAUDE.md` tiene líneas que hoy son falsas:** que
-   `src/lib/constants.ts` no existe, que la paginación no existe, y números de
-   línea que se movieron. No se cambió en este cierre; está pendiente de mi
-   confirmación.
+Se corrigieron cuatro afirmaciones que ya no eran verdad: `src/lib/constants.ts`
+existe; el `120` y el `10` ya no están incrustados; la paginación existe; y las
+líneas de los textos comerciales y del SQL de `users` se habían movido. La regla
+de pruebas ya se había puesto al día en la 6.3.
 
 ### Pendiente para la sesión 7
 
-- [ ] **Defecto 4, entero:** `/admin` abierta, `createProductAction` sin
-      `getCurrentUser()` y `users` sin columna de rol. Pasa completo a la
-      sesión 7.
-- [ ] **Fase 6.3:** las pruebas, el script `test`, `exigir-pruebas.js` y el
-      defecto 3. Después, quitar del `CLAUDE.md` la regla «todavía no hay
-      pruebas».
-- [ ] **Fase 6.4:** probar `/rewind` y lo que hay que deshacer con git, y
-      pedir un cambio en la configuración para ver qué pasa.
-- [ ] Probar en una conversación real el hook con `PowerShell` y con el Tech
-      Lead, de forma que su archivo no lo frene antes.
-- [ ] Fila 5 de `docs/DECISIONES.md`: el hook.
-- [ ] Corregir las líneas falsas del `CLAUDE.md` (las que se propusieron en este
-      cierre).
-- [ ] Siguen abiertos de la sesión 5: el criterio de la R1, si el Tech Lead
-      revisa a ciegas, el `2` del largo mínimo, el defecto 1 (SQL de `users` en
-      `actions.ts`), el defecto 2 (`99`, `100` y los dos textos comerciales) y
-      los pendientes viejos de la lista de la sesión 5.
+- [ ] Defecto 4: `/admin` y `createProductAction` sin control de acceso.
+- [ ] Ensayar `/rewind`.

@@ -31,4 +31,5 @@ jobs:
       - run: npm install -g npm@${{ env.NPM_VERSION }}
       - run: npm ci
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build

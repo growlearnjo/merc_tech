@@ -1,41 +1,58 @@
-Para qué sirve: dice, acción por acción, qué hace el agente solo, qué te pregunta y qué no hace nunca, con el origen de cada regla; las reglas viven en `.claude/settings.json`, donde Claude Code las aplica sin depender de que el agente se acuerde.
+Para qué sirve: dice qué hace el agente solo, qué me pregunta y qué no hace nunca, con el origen de cada regla; las reglas viven en `.claude/settings.json`.
 
 | # | Acción | Lista | Regla exacta | De dónde sale |
 |---|---|---|---|---|
-| 1 | Chequear tipos | `allow` | `Bash(npm run typecheck)` · `PowerShell(npm run typecheck)` | `CLAUDE.md:9`: "lo único que se puede afirmar es que `typecheck` y `build` terminaron sin error" |
-| 2 | Compilar | `allow` | `Bash(npm run build)` · `PowerShell(npm run build)` | `CLAUDE.md:9`, la misma regla |
-| 3 | Instalar un paquete con nombre | `ask` | `Bash(npm install *)` · `PowerShell(npm install *)` | Riesgo de la sesión 1 (`docs/00-ANTES.md` §3, líneas 55-57) y `CLAUDE.md:16-17`: "No agregues … dependencias … pregunta antes" |
-| 4 | `npm install` sin argumentos | `ask` | `Bash(npm install)` · `PowerShell(npm install)` | Riesgo de la sesión 1: la dependencia puede entrar editando `package.json` e instalarse con el comando sin argumentos |
-| 5 | Instalar con el alias `i` | `ask` | `Bash(npm i *)` · `PowerShell(npm i *)` | Riesgo de la sesión 1: el mismo `npm install` con otro nombre |
-| 6 | Instalar con el alias `add` | `ask` | `Bash(npm add *)` · `PowerShell(npm add *)` | Riesgo de la sesión 1: el mismo `npm install` con otro nombre |
-| 7 | Publicar en el remoto | `ask` | `Bash(git push *)` · `PowerShell(git push *)` | Lo que sale de mi máquina: ni `/rewind` ni git lo deshacen |
-| 8 | `git push` sin argumentos | `ask` | `Bash(git push)` · `PowerShell(git push)` | Lo que sale de mi máquina, igual que la fila 7 |
-| 9 | Editar la foto de la sesión 1 | `deny` | `Edit(./docs/00-ANTES.md)` | Archivo que los prompts del curso repiten que no se toca |
-| 10 | Editar las mediciones | `deny` | `Edit(./docs/MEDICIONES.md)` | Archivo que los prompts del curso repiten que no se toca (cerrado en la sesión 3) |
-| 11 | Editar `package.json` | `ask` | `Edit(./package.json)` | `CLAUDE.md:16-18`: "pregunta antes" y "`git diff package.json` sale vacío" |
+| 1 | Editar la foto de la sesión 1 | deny | `Edit(./docs/00-ANTES.md)` | Archivo que no se toca: `docs/00-ANTES.md` |
+| 2 | Editar las mediciones cerradas | deny | `Edit(./docs/MEDICIONES.md)` | Archivo que no se toca: `docs/MEDICIONES.md` (cerrada en S3) |
+| 3 | Instalar un paquete | ask | `Bash(npm install *)` | Riesgo de la sesión 1, `docs/00-ANTES.md:55-57` |
+| 4 | Instalar un paquete (alias corto) | ask | `Bash(npm i *)` | Riesgo de la sesión 1, `docs/00-ANTES.md:55-57` |
+| 5 | Instalar un paquete (alias `add`) | ask | `Bash(npm add *)` | Riesgo de la sesión 1, `docs/00-ANTES.md:55-57` |
+| 6 | Editar `package.json` a mano (dependencias, versiones) | ask | `Edit(./package.json)` | `CLAUDE.md:16-17`: "dependencias ni cambios de versión… pregunta antes" |
+| 7 | Subir versiones de dependencias | ask | `Bash(npm update *)` | `CLAUDE.md:16-17`: "cambios de versión… pregunta antes" |
+| 8 | Borrar la base de la app | ask | `Bash(npm run db:reset)` | `CLAUDE.md:7`: "`npm run db:reset` (borra `data/`)" |
+| 9 | Chequeo de tipos | allow | `Bash(npm run typecheck)` | `CLAUDE.md:9`: "`typecheck` y `build` terminaron sin error" |
+| 10 | Build | allow | `Bash(npm run build)` | `CLAUDE.md:9`: "`typecheck` y `build` terminaron sin error" |
+| 11 | Ver el diff | allow | `Bash(git diff *)` | `CLAUDE.md:18`: "Verificación: `git diff --stat`… `git diff package.json`" |
+| 12 | Correr las pruebas | allow | `Bash(npm test)` | Fase 6.3: el hook `Stop` las exige, y no tiene sentido preguntar |
+| 13 | Publicar en el remoto | ask | `Bash(git push *)` | Lo que sale de mi máquina: ni `/rewind` ni git lo deshacen (sesión 6 v2, cuarto origen) |
+| 14 | Editar la configuración de la red | deny | `Edit(./.claude/settings.json)` | Fase 6.4: la red la cambia la persona, no el agente |
+| 15 | Editar los hooks | deny | `Edit(./.claude/hooks/**)` | Fase 6.4: lo mismo |
+| 16 | Leer `.env` | deny | `Read(./.env)` | Fase 7.1, pegada a mano: ver `docs/SECRETOS.md` |
+| 17 | Leer `.env.*` | deny | `Read(./.env.*)` | Fase 7.1, pegada a mano |
 
-Por qué cada regla de comando está dos veces: en Windows el agente tiene dos consolas, `Bash` (Git Bash) y `PowerShell`, y elige cuál usar; una regla `Bash(...)` no alcanza a la herramienta `PowerShell`, así que una regla escrita una sola vez deja abierta la otra consola (decisión 18 de la sesión 6). Por eso cada regla de comando tiene su gemela `PowerShell(...)`, con la misma lista y el mismo origen. En macOS y Linux la gemela no estorba, y el archivo se commitea para todo el equipo. Las reglas `Edit(...)` van una sola vez porque el `deny` de `Edit` frena también lo que se escribe desde cualquiera de las dos consolas (decisión 19). Y no hay ningún `deny` de comandos porque un `deny` de `Bash` con patrón apaga la consola `PowerShell` sin avisar (decisión 20): lo destructivo lo frenará el hook de la Fase 6.2.
+**Las mismas reglas para PowerShell.** En Windows, Claude Code tiene dos consolas, `Bash` y `PowerShell`, y el modelo elige cuál usar. Una regla `Bash(...)` no alcanza a la herramienta `PowerShell`, que tiene sus propias reglas (documentación oficial, sección PowerShell de Permissions). Por eso las filas de comandos (3 a 5, 7 a 13) están repetidas en `.claude/settings.json` como `PowerShell(...)`, con la misma lista y el mismo origen. Las de `Edit` y `Read` van una sola vez: se comprobó que también frenan lo que escribe o lee PowerShell (decisión 19 de la sesión 6 y 15 de la sesión 7). Se descubrió en la prueba de la Fase 6.2: el modelo corrió `git reset --hard HEAD` con `PowerShell` y nada lo frenó.
 
 ## El hook
 
-`.claude/hooks/bloquear-peligroso.js`, registrado en `.claude/settings.json` como `PreToolUse` con el matcher `Bash|PowerShell|Read|Grep|Glob`. Claude Code lo corre antes de cada comando y de cada lectura, aunque nadie lo invoque y aunque el modelo no quiera. Sale con 2 y bloquea, o sale con 0 y deja pasar. Se prueba con `node .claude/hooks/probar-hooks.js`, que le pasa 22 eventos falsos y no ejecuta ninguno.
+`.claude/hooks/bloquear-peligroso.js`, registrado en `.claude/settings.json` con `PreToolUse` y el matcher `Bash|PowerShell|Read|Grep|Glob`. Claude Code lo corre antes de cada comando de consola y de cada lectura, lo invoque alguien o no. Exit 2 bloquea, y el motivo le llega al agente.
 
-**Qué bloquea.** Dos cosas y ninguna más:
+| Qué bloquea | Por qué no alcanzaba una regla de permisos |
+|---|---|
+| En `Bash` y en `PowerShell`, **en cualquier parte** del comando: `git reset --hard`; `git checkout --` y `git restore` sin `--staged`; `git push --force`, `-f` o con `+rama`; `git clean -f`; y borrar una carpeta entera (`rm -rf`, `rm -r -f`, `rm --recursive --force`, `Remove-Item -Recurse`, `rd /s`) | Una regla `Bash(...)` compara contra un patrón desde el inicio del comando: `Bash(git reset --hard *)` no ve `git status && git reset --hard HEAD`, ni el mismo programa por `sh -c '…'` o por su ruta completa. El hook lee el comando entero. |
+| `Read`, `Grep` o `Glob` sobre `docs/` **cuando los usa el subagente `tech-lead`** | Un `deny` de `Read(./docs/**)` vale para todos y dejaría ciega a la conversación principal, que necesita `docs/`. Las reglas no saben quién llama; el evento del hook trae `agent_type`. Y `tools:` en `.claude/agents/tech-lead.md` limita qué herramientas usa, no dónde. |
 
-1. En cualquier parte de un comando, también después de `&&` o `;`: `git reset --hard`; `git checkout --` y `git restore` sin `--staged`, que descartan cambios; `git push --force` o con `+rama`; `git clean -f`; y borrar una carpeta entera (`rm -rf`, `rm -r -f`, `rm --recursive --force`, `Remove-Item -Recurse` y sus alias, `rd /s`, `del /s`).
-2. `Read`, `Grep` o `Glob` sobre `docs/` cuando quien los usa es el subagente `tech-lead`. La conversación principal sí lee `docs/`.
+Desde el 2026-11-20 el hook es el de la versión 2.1 del anexo de la sesión 6 (commit `07e4a4a`), más la letra de la unidad en mayúscula en el hook de pruebas (`b1accc4`). `node .claude/hooks/probar-hooks.js` da 23 de 23.
 
-Si recibe un evento que no puede leer, también bloquea: un hook roto no abre la puerta.
+Qué **no** cubre:
 
-**En qué consolas.** En las dos que tiene el agente en Windows, `Bash` (Git Bash) y `PowerShell`, que es la principal. El matcher nombra `PowerShell` y el hook revisa las dos, porque un hook que solo mira `Bash` nunca se entera de lo que corre por PowerShell (decisión 18 de la sesión 6). En macOS y Linux solo existe `Bash`, y el mismo archivo sirve.
+- **Un `Grep` o `Glob` del Tech Lead sin ruta, sobre todo el proyecto**, puede devolver líneas de `docs/`. El hook frena lo que *nombra* `docs/` (en `file_path`, `path` o `pattern`), no lo que lo recorre de paso.
+- **Un comando que borra o descarta por otro camino**: un script, un `node -e`, un `find -delete`. El hook busca texto en el comando, no entiende lo que hace el programa.
+- **Por lo mismo, también frena un comando que solo menciona esas palabras.** Pasó al escribir esta sección en la 6.2: un `cat >> docs/PERMISOS.md` con este texto quedó bloqueado. Los archivos se escriben con la herramienta de edición.
+- **Si el evento no se puede leer, bloquea** (versión 2): un hook roto cierra la puerta. El de pruebas, en cambio, deja pasar con un aviso, porque un `Stop` que siempre dice "no" dejaría al agente en un bucle.
+- **El Tech Lead se niega a leer `docs/` antes de que el hook actúe**: lo dice su propio archivo. En la comprobación de la 6.2 respondió sin usar ninguna herramienta. La prueba del hook con el Tech Lead es la de `probar-hooks.js`.
 
-**Por qué no podía hacerlo una regla de permisos.**
+## Deshacer
 
-- Una regla de comando compara el comando contra un patrón desde el principio: `Bash(git reset *)` no ve un `git reset --hard` escondido después de un `&&`, ni dentro de `sh -c '…'`, ni con la ruta completa del programa. Y un `deny` de `Bash` con patrón apaga la consola `PowerShell` sin avisar, por eso la matriz no tiene ninguno (decisión 20). El hook lee el comando entero.
-- Una regla `Read(./docs/**)` frenaría a todos, también a la conversación principal. Las reglas no saben quién llama, y `tools` en `tech-lead.md` dice qué herramientas tiene el Tech Lead, no qué rutas lee. El evento del hook trae `agent_type`, y con eso frena solo al `tech-lead`.
+| Qué salió mal | Con qué se deshace | Qué no deshace |
+|---|---|---|
+| Algo que el agente editó con su herramienta de edición | `/rewind` (o Esc dos veces), eligiendo restaurar el código | — |
+| Algo que cambió por la consola (`>>`, `sed`, `Add-Content`, `npm install`), lo que hizo un subagente, o lo que edité yo a mano | `git restore`, que corro **yo, en mi terminal**: desde la 6.2 el hook no deja que lo corra el agente | `/rewind` no lo ve |
+| Algo que ya salió de mi máquina: un push, la base de datos | Nada lo deshace del todo. Por eso `git push` está en `ask` | ni `/rewind` ni git |
 
-**Qué no cubre.**
+**En este ensayo la parte de `/rewind` no se ejecutó**: la Fase 6.4 se cerró sin correr sus pasos 1 y 2, que son interactivos. Lo de la tabla sale de la documentación y de la spec de la sesión 6.
 
-- **Un `Grep` del Tech Lead sin ruta, sobre todo el proyecto**, puede devolver líneas de `docs/`: el hook frena lo que nombra `docs/`, no lo que lo recorre de paso.
-- **Un comando que borra o descarta por otro camino**: un script, `node -e`, `find -delete`, o cualquier programa que no esté en su lista. El hook busca texto conocido, no entiende lo que hace el comando.
-- **También frena un comando que solo menciona esas palabras**, aunque no las ejecute: un `echo`, un `cat >>` o un mensaje de commit que traiga el texto de un comando peligroso queda bloqueado. Por eso los archivos de la sesión se escriben con la herramienta de edición, no con la consola (decisión 21).
+**La red, protegida.** Las filas 14 y 15 ponen en `deny` `.claude/settings.json` y `.claude/hooks/`: el agente ya no puede quitar las reglas que lo frenan. Se agregaron el 2026-11-20 (commit `07e4a4a`). Desde ahí, los cambios a la red los hice yo, a mano: las dos reglas de `.env` de la 7.1 y la letra de la unidad del hook de pruebas.
+
+**Lo que no frena el `deny`:** un programa que escribe el archivo por dentro, como un `node -e`. Es el mismo hueco que la 7.1 encontró al leer `.env.local`.
+
+**El sandbox, en mi sistema.** Trabajo en Windows nativo: el sandbox de Claude Code no existe aquí, y los comandos corren sin aislar. Existe en macOS, Linux y WSL2 (en Linux y WSL2, con `bubblewrap` y `socat`). La red de hoy no depende de él.
