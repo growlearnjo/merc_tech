@@ -868,3 +868,79 @@ de pruebas ya se había puesto al día en la 6.3.
 
 - [ ] Defecto 4: `/admin` y `createProductAction` sin control de acceso.
 - [ ] Ensayar `/rewind`.
+
+## Sesión 7 — 2026-11-20 a 2026-11-23 — La red sale de mi máquina
+
+Ensayo como alumno. Se empezó en `merc_tech` (con su repositorio
+`growlearnjo/merc_tech` desde el 20) y se terminó en `merc_tech3`, porque el
+secreto de la revisión estaba guardado aquí. El 23, el estado de `merc_tech` se
+trajo a este repositorio con un merge (`7287260`); el trabajo propio de este
+repositorio en las sesiones 6 y 7 quedó en la rama local
+`respaldo/s6-s7-merc_tech3-20261123`.
+
+### Qué se hizo, en orden
+
+| Commit | Fase |
+|---|---|
+| `5bdfdb4` | 7.1 · `docs/SECRETOS.md`, `docs/VERIFICACION_S7.md` y las dos reglas de `.env`, pegadas a mano |
+| `b1accc4` | la letra de la unidad en el hook de pruebas (salió en la 7.1) |
+| `7dbbcd3` | 7.2 · `ci.yml` y `claude-review.yml`, integrados por el PR #1 de `merc_tech` |
+| `5efca9f` | 7.1 · el resultado de los cuatro intentos de leer `.env.local` |
+| `b482c86` | 7.3 · `/admin` solo para `ADMIN_EMAILS`, integrado por el PR #2 de este repositorio (`1ac1208`) |
+
+### Lo que pasó
+
+- **7.1, los secretos.** La tabla tiene `ADMIN_EMAILS`, el token de la Action,
+  `.env.local`, la base local, y tres datos personales ya publicados: la ruta
+  con mi usuario en `.mcp.json` y en `docs/`, y el correo de autor de los
+  commits. Lo que hago con ellos de aquí en adelante **sigue sin decidir**
+  (las propuestas están en `docs/SECRETOS.md`). Con las dos reglas `Read`, el
+  agente no pudo leer `.env.local` con su herramienta, con `cat` ni con
+  `Get-Content`. El cuarto intento, `cmd /c type`, **no lo frenó una regla**:
+  lo frenó el clasificador del modo auto. En la copia del curso, sin
+  clasificador, ese camino leyó el archivo. Por eso en `.env.local` no va un
+  secreto de verdad.
+- **7.1, un rojo falso.** El chat de la 7.1 corrió en la extensión de VS Code,
+  que pasa la ruta con `c:` en minúscula. Con esa ruta Vitest falla sin correr
+  pruebas, y el hook `Stop` mandaba de vuelta al agente sin motivo. Lo corregí
+  a mano en el hook (`b1accc4`): pasa la letra a mayúscula.
+- **7.2, el CI y la revisión.** El CI pasó en verde en todos los PR y en cada
+  push a `main`, sin ningún secreto. La revisión de Claude:
+  - en `merc_tech`, PR #1 y PR #2: **falló** con "Either ANTHROPIC_API_KEY,
+    CLAUDE_CODE_OAUTH_TOKEN … is required". El secreto no estaba en ese
+    repositorio: cada repositorio tiene los suyos. Antes, el token se había
+    generado con una cuenta de Claude equivocada y se rehízo;
+  - en este repositorio, PR #1 (`ci/workflows`) y PR #2 (`fix/admin-access`):
+    **corrió bien**. En el PR #2 tardó 29 segundos y no dejó ningún
+    comentario. No revisé el registro de la corrida, así que no sé si fue
+    porque no encontró nada.
+- **7.3, el defecto 4.** `isAdminEmail` (`src/lib/admin.ts`) compara el correo
+  con `ADMIN_EMAILS`, y sin la variable nadie es administrador.
+  `getCurrentAdmin()` la usa en la página de `/admin` y en
+  `createProductAction`, en el servidor. Cuatro pruebas nuevas: 7 de 7. El
+  cambio lo escribió el asistente fuera del laboratorio, a pedido mío, y lo
+  comprobó con `next start`: sin sesión, `/admin` manda al login (307); un
+  cliente recibe 404; el administrador ve el inventario (200). **La prueba con
+  dos cuentas en el navegador, mía, no está anotada.**
+- **7.4, la inyección.** **No se hizo**: no se abrió el issue con la orden
+  escondida y no existe `docs/INYECCION.md`.
+
+### El `CLAUDE.md`
+
+La regla de seguridad pasó a decir que `/admin` y `createProductAction` exigen
+un administrador de `ADMIN_EMAILS`, con su comando de verificación. Las demás
+líneas se revisaron en el cierre de la sesión 6 y siguen siendo verdad.
+
+### Los greps anti-fuga, al cerrar
+
+Vacíos los cuatro (Anthropic, GitHub, JWT, claves privadas). `.env` y
+`.env.local` no aparecen en la historia, ningún token aparece en la historia, y
+`.env.local` está excluido por `.gitignore`.
+
+### Pendiente para la sesión 8
+
+- [ ] La 7.4, si se quiere hacer antes del showcase: sin ella, el bloque "la
+      red" del showcase no tiene el dato de la inyección.
+- [ ] Probar `/admin` en el navegador con dos cuentas, y anotarlo.
+- [ ] Decidir qué hacer con los datos personales ya publicados.
+- [ ] Ensayar `/rewind` (pendiente de la sesión 6).
