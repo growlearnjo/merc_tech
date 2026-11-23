@@ -810,3 +810,61 @@ costó delegar en la 5.1 (17.1k).
       «regla 7» del `SKILL.md`, la versión del servidor en `.mcp.json`, la
       fecha de las tarifas de `tokens.py` y las precisiones de
       `docs/COSTOS.md`.
+
+## Sesión 6 — 2026-11-20 — Una red que no depende de que el agente obedezca
+
+Ensayo como alumno, en la terminal y en modo auto. La 6.4 y este cierre se
+completaron el 2026-11-23, después de la sesión 7.
+
+### Qué se hizo, en orden
+
+| Commit | Fase |
+|---|---|
+| `4065019` | 6.1 · matriz de permisos (`docs/PERMISOS.md`, `.claude/settings.json`) y `docs/VERIFICACION_S6.md` |
+| `eebe849` | 6.2 · hook `PreToolUse` y fila 5 de `docs/DECISIONES.md` |
+| `f26bfa8` | 6.2 · el hook y las reglas también para la consola PowerShell |
+| `ab50db6` | 6.3 · Vitest, tres pruebas de `parseSolesToCents` y hook `Stop` |
+| `07e4a4a` | la red pasa a la versión 2 del anexo, con la protección de la 6.4 |
+| `b1accc4` | la letra de la unidad, en el hook de pruebas (salió en la 7.1) |
+
+### Lo que pasó
+
+- **6.1.** Las reglas: `deny` para `docs/00-ANTES.md` y `docs/MEDICIONES.md`;
+  `ask` para instalar, actualizar, editar `package.json` y borrar la base;
+  `allow` para typecheck, build y `git diff`. Editar `docs/00-ANTES.md` falló
+  por los permisos. `npm install left-pad` y `npm install` solo preguntaron, en
+  modo auto, y los rechacé: no se instaló nada.
+- **6.2.** El hook bloqueó al propio agente al registrarlo: quiso escribir esta
+  matriz con `cat >>`, y el texto mencionaba `git reset --hard`. En la
+  comprobación, `git reset --hard HEAD` **se ejecutó**: el agente usó la
+  consola PowerShell, y el matcher y el hook solo miraban Bash. No borró nada
+  porque el árbol estaba limpio. Con la corrección (`f26bfa8`) quedó
+  bloqueado. El Tech Lead se negó a leer `docs/MEDICIONES.md` con 0
+  herramientas: lo frenó su propio archivo, no el hook.
+- **6.3.** Elegí `parseSolesToCents`. Tres pruebas en verde. El pedido del
+  material ("precios sin decimales") no rompió ninguna, porque tocaba otra
+  función. Con un pedido que sí la rompía, el agente actualizó la prueba antes
+  de terminar, y después preguntó. Cuando le prohibí tocar la prueba y correr
+  `npm test`, el hook `Stop` lo mandó de vuelta con la prueba en rojo, y a la
+  segunda lo dejó parar.
+- **6.4.** La protección de `.claude/settings.json` y `.claude/hooks/` quedó
+  en `07e4a4a`. Los pasos de `/rewind` **no se ejecutaron**. La sección
+  "Deshacer" de `docs/PERMISOS.md` sale de la documentación.
+
+### Lo que cambió en el material por este ensayo
+
+Sesión 6, versión 2 y 2.1: las dos consolas, `probar-hooks.js`, la
+comprobación del Tech Lead, la del hook `Stop`, `git push` en `ask`, y la letra
+de la unidad. Los hooks de este proyecto son los de esa versión.
+
+### El `CLAUDE.md`
+
+Se corrigieron cuatro afirmaciones que ya no eran verdad: `src/lib/constants.ts`
+existe; el `120` y el `10` ya no están incrustados; la paginación existe; y las
+líneas de los textos comerciales y del SQL de `users` se habían movido. La regla
+de pruebas ya se había puesto al día en la 6.3.
+
+### Pendiente para la sesión 7
+
+- [ ] Defecto 4: `/admin` y `createProductAction` sin control de acceso.
+- [ ] Ensayar `/rewind`.

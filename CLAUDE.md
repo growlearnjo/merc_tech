@@ -11,23 +11,23 @@ Tienda de práctica del curso; cada regla de abajo sale del inventario de `docs/
 
 ## Reglas de arquitectura
 - `src/app/actions.ts` no ejecuta SQL: el acceso a `users` pasa por `src/lib/auth.ts`.
-  Hoy no se cumple (`actions.ts:33-34`, `:38`, `:48-49`).
+  Hoy no se cumple (`actions.ts:34-35`, `:39`, `:49-50`).
   Verificación: `grep -nE "getDb|prepare\(" src/app/actions.ts` debe devolver vacío.
 - No agregues funciones, páginas, dependencias ni cambios de versión que la tarea no pida.
   Si crees que hacen falta, pregunta antes.
   Verificación: `git diff --stat` solo toca archivos de la tarea, y `git diff package.json` sale vacío.
 
 ## Valores ajustables
-- Viven en un solo archivo, `src/lib/constants.ts`, que todavía no existe. Hoy están incrustados
-  y duplicados: `120` en `actions.ts:115` y `ProductForm.tsx:20`; `99` en `actions.ts:77` y
-  `CartButton.tsx:21`; además `actions.ts:72`, `ProductForm.tsx:34`, `auth.ts:8`, `src/app/page.tsx:13`.
+- Viven en un solo archivo, `src/lib/constants.ts`. Todavía quedan incrustados: `99` en
+  `actions.ts:78` y `CartButton.tsx:21`; `100` en `actions.ts:73`; y `30` en `auth.ts:8`.
 - Un valor nuevo no se escribe en línea, y no se inventan textos comerciales
-  (envío gratis, garantía): hoy hay dos sin aprobar, en `src/app/page.tsx:32` y `producto/[id]/page.tsx:61`.
+  (envío gratis, garantía): hoy hay dos sin aprobar, en `src/app/page.tsx:40` y `producto/[id]/page.tsx:61`.
   Verificación (cubre `99`, `100`, `120` y los textos comerciales; `10`, `30` y `80` se revisan a mano): `grep -rnE "> ?99|> ?100|> ?120|maxLength=\{[0-9]|S/ [0-9]|[0-9]+ meses" src --include="*.ts*" | grep -v -e seed.ts -e money.ts` debe devolver vacío.
 
 ## Estado de la interfaz
 - Filtros, búsqueda y paginación del catálogo viven en la URL (`searchParams`), no en `useState`.
-  La paginación hoy no existe (se revirtió en la Fase 2.2). Verificación: `grep -n "useState\|use client" src/app/page.tsx` debe devolver vacío.
+  La paginación existe desde la corrida E de la Fase 3.2, con `PRODUCTS_PER_PAGE` y el parámetro `page`.
+  Verificación: `grep -n "useState\|use client" src/app/page.tsx` debe devolver vacío.
 
 ## Seguridad
 - `/admin` y `createProductAction` exigen un usuario administrador. Hoy no se cumple:
