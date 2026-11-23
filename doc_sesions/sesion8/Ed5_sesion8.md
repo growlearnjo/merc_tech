@@ -161,6 +161,7 @@ consultó el 19.
 | 16 | **Desinstalar con `--scope local` vacía la configuración local y no toca la global**, pero deja la copia en `~/.claude/plugins/cache/<marketplace>/`. Ensayo del 23: `settings.local.json` de la carpeta de prueba quedó con las dos listas vacías; `~/.claude/settings.json`, idéntico antes y después (md5); la entrada del plugin salió de `installed_plugins.json`; la carpeta de la caché siguió ahí | Se dice en la 8.2. La carpeta de la caché se puede borrar a mano; no afecta a nada | 8.2 |
 | 17 | **El Tech Lead del plugin se niega a leer `docs/` por su propio archivo**, igual que en la sesión 6 (su decisión 22). Ensayo del 23: con el encargo de intentarlo "autorizado por la persona", respondió que su configuración se lo prohíbe y no usó ninguna herramienta. El hook no llegó a actuar. Con un registro en el hook, se vio que el Tech Lead del plugin leyó `package.json` y que el evento traía `agent_type: "red-de-seguridad:tech-lead"` | La prueba del hook con el prefijo es la del probador (decisión 13). En la 8.2 se pide igual que lo intente, y se anota si usó herramientas | 8.1, 8.2 |
 | 18 | **Lo que se aprendió en las sesiones 6 y 7 vale aquí**: se trabaja en la terminal (en la extensión de VS Code la ruta llega con `c:` en minúscula, y el hook de pruebas de la 2.1 ya lo corrige); los archivos se escriben con la herramienta de edición, porque el hook busca texto | Va en las tareas humanas y en las restricciones de la 8.1 | toda |
+| 19 | **Las notas de la 8.2 las escribe el agente de la carpeta de prueba, en `docs/`.** Ensayo del 23 con la versión que viaja de `exigir-pruebas.js`, en un clon del ejemplar sin `npm install`: un archivo nuevo en la raíz hace que el hook corra `npm test`, que falla, y devuelve exit 2, así que el agente no podría terminar. El mismo archivo en `docs/` da exit 0. `.claude/settings.local.json` no cuenta como cambio | El Paso 2 de la 8.2 termina pidiendo `docs/PRUEBA_PLUGIN.md`, escrito con la herramienta de edición porque trae `git reset --hard`. El Paso 4 lo lee desde tu proyecto | 8.2 |
 
 ---
 
@@ -272,11 +273,15 @@ La Fase 8.1, y la carpeta de prueba de las tareas humanas.
 | Archivo | Rol |
 |---|---|
 | La carpeta de prueba | Recibe el plugin con alcance local. **No se commitea nada en ella.** |
-| `docs/PLUGIN.md` | Gana la sección "Instalado en limpio": qué carpeta, qué comandos, qué actuó y qué no. |
+| `docs/PRUEBA_PLUGIN.md`, **en la carpeta de prueba** | Las notas de la prueba. Las escribe el agente de ese chat, con lo que pasó y lo que tú viste en pantalla. Va en `docs/` porque el hook de pruebas no mira esa carpeta (decisión 19). No se commitea. |
+| `docs/PLUGIN.md` | Gana la sección "Instalado en limpio": qué carpeta, qué comandos, qué actuó y qué no. Se escribe leyendo las notas. |
 
 ### Reglas
 
-* **Los comandos corren desde la carpeta de prueba**, con `--scope local`:
+* **Los comandos `claude plugin …` se escriben en la terminal, sin `claude`
+  abierto.** Son comandos de la consola, no mensajes para el agente. Si tienes
+  un chat abierto, sal con `/exit` o abre otra pestaña de la terminal. Se corren
+  desde la carpeta de prueba, con `--scope local`:
 
   ```bash
   claude plugin marketplace add <RUTA_PROYECTO> --scope local
@@ -297,6 +302,10 @@ La Fase 8.1, y la carpeta de prueba de las tareas humanas.
   no lo muevas ni lo borres.
 * **Si una pieza no sirve allí, se escribe**, con lo que respondió. Es la
   respuesta a la pregunta de la 8.1.
+* **Las notas no se toman a mano.** Al terminar las pruebas, el agente de la
+  carpeta de prueba escribe `docs/PRUEBA_PLUGIN.md` con su herramienta de
+  edición. Lo que solo ves tú, como el menú de `@`, se lo dices en ese mismo
+  mensaje. El chat de tu proyecto lee ese archivo para escribir `docs/PLUGIN.md`.
 * **Al final se desinstala** y se quita el marketplace de esa carpeta. La copia
   de `~/.claude/plugins/cache/` se queda, y se puede borrar a mano (decisión 16).
 
@@ -310,7 +319,10 @@ La Fase 8.1, y la carpeta de prueba de las tareas humanas.
 3. Al escribir `@` → aparece tu Tech Lead con el prefijo del plugin.
 4. Tu configuración global no cambió: `~/.claude/settings.json` no tiene tu
    marketplace.
-5. `docs/PLUGIN.md` tiene la sección "Instalado en limpio".
+5. En la carpeta de prueba, `docs/PRUEBA_PLUGIN.md` tiene las notas, y
+   `.claude/settings.local.json` quedó con las dos listas vacías después de
+   desinstalar.
+6. `docs/PLUGIN.md` tiene la sección "Instalado en limpio".
 
 ---
 
@@ -382,6 +394,9 @@ La Fase 8.2.
 | Después de desinstalar, sigue la carpeta del plugin en `~/.claude/plugins/cache/` | la desinstalación no la borra | se puede borrar a mano (decisión 16) |
 | El marketplace quedó en tu configuración global | faltó `--scope local` | `claude plugin marketplace remove <nombre>` y repetir con `--scope local` |
 | Un servidor MCP pide aprobación o falla en la carpeta de prueba | es el `.mcp.json` de ese proyecto | no es tu plugin. Se puede rechazar |
+| Escribiste `claude plugin install …` dentro del chat y el agente lo tomó como un pedido | es un comando de la terminal, no un mensaje | sal con `/exit` y escríbelo en la terminal |
+| En la carpeta de prueba, el hook de pruebas no deja terminar al agente | el agente creó o cambió un archivo fuera de `docs/`, y el ejemplar tiene `npm test` pero no tiene `npm install` | las notas van en `docs/PRUEBA_PLUGIN.md`. Si creó otro archivo, bórralo a mano (decisión 19) |
+| El chat de tu proyecto pide permiso para leer las notas | están fuera de tu proyecto | aprobarlo: solo lee ese archivo y el `settings.local.json` de la carpeta de prueba |
 | El showcase dura más de cinco minutos | demasiado contenido | sacar un bloque y dejarlo para preguntas |
 
 ## Restricciones de la sesión
@@ -389,7 +404,8 @@ La Fase 8.2.
 * **No se publica el plugin** en ningún directorio público.
 * **No se instala nada con alcance global.**
 * **No se instala el plugin en tu propio proyecto.**
-* **No se modifica la carpeta de prueba** más allá de su `.claude/settings.local.json`.
+* **No se modifica la carpeta de prueba** más allá de su `.claude/settings.local.json`
+  y de las notas en `docs/PRUEBA_PLUGIN.md`, que no se commitean.
 * **No se agrega ninguna pieza nueva** al plugin: se empaqueta lo que existe.
   Adaptar los dos hooks para que viajen, y su probador, no es una pieza nueva:
   es lo que hace falta para que lo que existe funcione fuera.
@@ -708,3 +724,11 @@ punto 5 del prompt.
 la tarea humana 2 y en el Paso 0 de la Fase 8.2. El repositorio del ejemplar es
 público, pero el tag `v-ed4-final` no está en GitHub: se clona y se hace
 `git checkout f4c3ffb`, que es su commit.
+
+**2026-11-23 — versión 2.0.3.** La 8.2 separa la terminal sin `claude` (los
+`git` y los `claude plugin …`) del chat, en los prompts y en las reglas, con una
+tabla en "Cómo usar estos prompts". Las notas ya no se toman a mano: el agente
+de la carpeta de prueba escribe `docs/PRUEBA_PLUGIN.md`, y el Paso 4 lo lee y
+comprueba la desinstalación (decisión 19, probada con la versión que viaja del
+hook de pruebas). Nuevo marcador: `<RUTA_PRUEBA>`. Tres filas nuevas en "Si
+algo falla".

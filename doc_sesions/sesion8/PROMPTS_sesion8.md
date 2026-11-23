@@ -24,7 +24,7 @@ construiste, se prueba fuera de tu máquina, y se presenta con tus números.
 | 1 | **Prompt 0** — verificar el terreno | chat nuevo. Deja escrito `docs/VERIFICACION_S8.md` |
 | 2 | **Prompt 1** — leer la spec | chat nuevo |
 | 3 | **Fase 8.1** — empaquetar | chat nuevo, en tu proyecto |
-| 4 | **Fase 8.2** — instalar en limpio | **tu terminal** en la carpeta de prueba, un chat **en esa carpeta**, y un chat en tu proyecto para anotarlo |
+| 4 | **Fase 8.2** — instalar en limpio | **tu terminal sin `claude`** en la carpeta de prueba, después un chat **en esa carpeta**, y al final un chat en tu proyecto que lee las notas |
 | 5 | **Fase 8.3** — el showcase | chat nuevo, y **tú** con el reloj y la grabación |
 | 6 | **Cierre del curso** | chat nuevo |
 
@@ -35,18 +35,29 @@ construiste, se prueba fuera de tu máquina, y se presenta con tus números.
 1. **Se trabaja en la terminal**, con `claude` abierto en la raíz de la carpeta
    que dice cada paso: tu proyecto, o la carpeta de prueba en la 8.2. **Cada
    fase empieza en una conversación nueva**, en orden.
-2. **Los comandos que empiezan con `/` y las menciones con `@` las escribes tú.**
-3. **Rellena los marcadores** del bloque `[CONTEXTO]`:
+2. **Hay dos lugares donde escribes, y no se mezclan:**
+
+   | Dónde | Cómo lo reconoces | Qué va ahí |
+   |---|---|---|
+   | **La terminal, sin `claude`** | El indicador de tu consola (`PS C:\…>` en PowerShell, `$` en macOS y Linux) | `git clone`, `git checkout` y todos los `claude plugin …` |
+   | **El chat de `claude`** | Lo abriste escribiendo `claude`, y el indicador es `>` dentro del recuadro | Los prompts, los comandos que empiezan con `/` y las menciones con `@` |
+
+   Para pasar del chat a la terminal, escribe `/exit`, o abre otra pestaña de
+   la terminal. Un `claude plugin install` escrito dentro del chat no instala
+   nada: el agente lo toma como un pedido.
+3. **Los comandos que empiezan con `/` y las menciones con `@` las escribes tú.**
+4. **Rellena los marcadores** del bloque `[CONTEXTO]`:
 
    | Marcador | Qué es | Cómo lo consigues |
    |---|---|---|
    | `<RUTA_PROYECTO>` | La carpeta donde vive tu app | `pwd` desde la carpeta del proyecto |
    | `<COMMIT_ANTERIOR>` | El commit con el que cerraste la sesión 7 | `git log --oneline -1` al empezar hoy |
    | `<TU_REPO>` | Tu repositorio en GitHub | `git remote -v` |
+   | `<RUTA_PRUEBA>` | La carpeta de prueba de la 8.2 | `pwd` desde esa carpeta |
 
-4. **Todo lo que se instala, con `--scope local`.** Así no cambia tu
+5. **Todo lo que se instala, con `--scope local`.** Así no cambia tu
    configuración global.
-5. **Commit por fase**: `feat:` para la 8.1, `docs:` para la 8.2, la 8.3 y el
+6. **Commit por fase**: `feat:` para la 8.1, `docs:` para la 8.2, la 8.3 y el
    cierre.
 
 ### Estado del repositorio al iniciar la sesión
@@ -216,10 +227,19 @@ El commit lleva también docs/VERIFICACION_S8.md.
 
 ## Prompt Fase 8.2 — Instalar en limpio
 
-> **Tu terminal y un chat, en la carpeta de prueba.** Después, un chat en tu
-> proyecto para anotarlo.
+> **Tu terminal sin `claude`, después un chat, los dos en la carpeta de
+> prueba.** Al final, un chat en tu proyecto que lee las notas que dejó el
+> primero. No anotas nada a mano.
 
-### Paso 0 — creas la carpeta de prueba, en tu terminal
+| Paso | Dónde | Qué |
+|---|---|---|
+| 0 | terminal, **sin `claude`** | crear la carpeta de prueba, si no la tienes |
+| 1 | terminal, **sin `claude`**, en la carpeta de prueba | instalar |
+| 2 | **chat** de `claude`, en la carpeta de prueba | probar, y que el agente escriba las notas |
+| 3 | terminal, **sin `claude`**, en la carpeta de prueba | desinstalar |
+| 4 | **chat nuevo** en tu proyecto | leer las notas y escribir `docs/PLUGIN.md` |
+
+### Paso 0 — creas la carpeta de prueba, en tu terminal, sin `claude`
 
 Si ya la tienes, salta al Paso 1. Es un clon del ejemplar del curso. Va **al
 lado de tu proyecto, no dentro**, y no es una copia de tu repositorio: esa ya
@@ -237,10 +257,14 @@ git checkout f4c3ffb
 "detached HEAD": es lo esperado, porque ahí no vas a hacer commits. No hace
 falta `npm install`.
 
-### Paso 1 — instalas, en tu terminal
+### Paso 1 — instalas, en tu terminal, sin `claude`
 
-Abre una terminal **en la carpeta de prueba**, no en tu proyecto. Cambia los
-nombres por los de tu `marketplace.json`:
+En una terminal **sin `claude` abierto**, entra a la carpeta de prueba, no a tu
+proyecto. Cambia los nombres por los de tu `marketplace.json`:
+
+```bash
+cd <RUTA_PRUEBA>
+```
 
 ```bash
 claude plugin marketplace add <RUTA_PROYECTO> --scope local
@@ -261,8 +285,13 @@ local, el plugin corre desde tu carpeta `plugin/`.
 
 ### Paso 2 — lo pruebas, en un chat abierto en la carpeta de prueba
 
-Abre Claude Code en la carpeta de prueba. Si te pide aprobar un servidor MCP de
+En esa misma terminal, escribe `claude`. Si te pregunta si confías en la
+carpeta, sí: es tu copia del ejemplar. Si te pide aprobar un servidor MCP de
 ese proyecto, puedes rechazarlo: no es tu plugin.
+
+**No anotes a mano.** Fíjate solo en lo que el agente no puede ver, que es lo
+que aparece en tu pantalla fuera de sus respuestas: el menú de `@` y las
+preguntas de aprobación. En el punto 5 se lo dices y él escribe las notas.
 
 1. Pega esto:
 
@@ -282,8 +311,9 @@ ese proyecto, puedes rechazarlo: no es tu plugin.
 
    También tiene que quedar bloqueado.
 
-2. Escribe `@` y busca tu Tech Lead. Tiene que aparecer con el prefijo del
-   plugin.
+2. Escribe `@` y busca tu Tech Lead, sin enviar nada. Tiene que aparecer con el
+   prefijo del plugin. Fíjate en cómo aparece exactamente: lo usas en el punto 3
+   y lo dices en el punto 5. Borra la `@` antes de seguir.
 
 3. Elige un módulo de ese proyecto y pégale esto, con el nombre que aparezca en
    `@`:
@@ -305,9 +335,38 @@ ese proyecto, puedes rechazarlo: no es tu plugin.
 4. Si llevaste la Skill, pídele algo que coincida con su descripción y mira si se
    carga, y si lo que dice tiene sentido en este proyecto.
 
-**Anota todo lo que pase**, actúe o no.
+5. Pídele que deje las notas. Completa los corchetes con lo que viste tú:
 
-### Paso 3 — desinstalas, en tu terminal
+   ```text
+   Escribe docs/PRUEBA_PLUGIN.md, con tu herramienta de edición y no con la
+   consola, con lo que pasó en esta conversación, tal cual y sin resumir:
+   1. La carpeta: el nombre de esta carpeta, sin la ruta de mi máquina, y su
+      commit (git log --oneline -1).
+   2. El plugin instalado: corre claude plugin list y copia su salida.
+   3. Cada comando que corriste para probar el hook, con qué consola, qué pasó
+      y el mensaje de bloqueo tal cual.
+   4. Cómo apareció el Tech Lead en mi menú de @. Lo vi yo: [CÓMO APARECIÓ].
+   5. El encargo que le pasaste al Tech Lead y lo que respondió: los hallazgos
+      con su severidad, y si su rúbrica tuvo sentido en este código.
+   6. La Skill, si la probé: [QUÉ PASÓ, o "no viajó"].
+   7. Lo que me preguntó Claude Code fuera de tus respuestas: [POR EJEMPLO, la
+      aprobación del servidor MCP, y qué respondí].
+   8. Qué funcionó, qué no, y qué te sorprendió.
+   Escribe solo ese archivo. No cambies nada más en esta carpeta y no hagas
+   commit.
+   ```
+
+   Va en `docs/` a propósito: el hook de pruebas de tu plugin no mira esa
+   carpeta. Un archivo nuevo en la raíz le haría correr `npm test`, que en el
+   ejemplar falla sin `npm install`, y el agente no podría terminar. Y va con la
+   herramienta de edición porque el texto trae `git reset --hard`: escrito con
+   la consola, tu propio hook lo bloquearía.
+
+   Cuando termine, sal del chat con `/exit`.
+
+### Paso 3 — desinstalas, en tu terminal, sin `claude`
+
+En la misma terminal, ya fuera del chat y todavía en la carpeta de prueba:
 
 ```bash
 claude plugin uninstall <nombre-del-plugin>@<nombre-del-marketplace> --scope local
@@ -317,11 +376,19 @@ claude plugin uninstall <nombre-del-plugin>@<nombre-del-marketplace> --scope loc
 claude plugin marketplace remove <nombre-del-marketplace> --scope local
 ```
 
+```bash
+claude plugin list
+```
+
 `claude plugin list` ya no lo muestra, y el `.claude/settings.local.json` de la
 carpeta de prueba queda con las dos listas vacías. La copia del plugin en
 `~/.claude/plugins/cache/<marketplace>/` se queda: si quieres, la borras a mano.
 
-### Paso 4 — lo anotas, en un chat nuevo en tu proyecto
+### Paso 4 — lo pasa a tu proyecto, un chat nuevo en tu proyecto
+
+En la terminal, entra a tu proyecto (`cd <RUTA_PROYECTO>`) y escribe `claude`.
+Te va a pedir permiso para leer archivos de la carpeta de prueba, porque están
+fuera de tu proyecto: apruébalo.
 
 ```text
 [ROL] Actúa como quien escribe el informe de una prueba de campo: qué se probó,
@@ -329,17 +396,24 @@ dónde, qué funcionó y qué no, sin adornarlo.
 
 [CONTEXTO] Mi proyecto está en <RUTA_PROYECTO>. Lee la Fase 8.2 de
 doc_sesions/sesion8/Ed5_sesion8.md y docs/PLUGIN.md. Instalé mi plugin con
-alcance local en otra carpeta y lo probé. Lo que pasó te lo cuento aquí:
-[PEGA AQUÍ TUS NOTAS: qué carpeta usaste, qué respondió al reset, cómo apareció
-el Tech Lead, qué encontró en el módulo, y qué pasó con la Skill si la llevaste]
+alcance local en <RUTA_PRUEBA>, lo probé y lo desinstalé. Las notas de la
+prueba están en <RUTA_PRUEBA>/docs/PRUEBA_PLUGIN.md: léelas completas.
 
-[OBJETIVO] Agrega a docs/PLUGIN.md una sección "Instalado en limpio": la carpeta
-de prueba (sin rutas de mi máquina), los comandos, qué actuó, qué no, y qué
-cambiarías en el plugin. Y, con eso, responde la pregunta de la 8.1: ¿las piezas
-que dije que viajaban, viajaron?
+[OBJETIVO]
+1. Comprueba que la desinstalación quedó limpia: que
+   <RUTA_PRUEBA>/.claude/settings.local.json tenga vacías las listas
+   enabledPlugins y extraKnownMarketplaces, y que ~/.claude/settings.json no
+   nombre mi marketplace. Dime qué encontraste.
+2. Agrega a docs/PLUGIN.md una sección "Instalado en limpio": la carpeta de
+   prueba (sin rutas de mi máquina), los comandos, qué actuó, qué no, lo del
+   punto 1, y qué cambiarías en el plugin. Y, con eso, responde la pregunta de
+   la 8.1: ¿las piezas que dije que viajaban, viajaron?
 
 [RESTRICCIONES]
-- Escribe lo que pasó, no lo que debería haber pasado.
+- Escribe lo que dicen las notas y lo que comprobaste, no lo que debería haber
+  pasado. Si las notas no dicen algo, escribe "no consta".
+- De la carpeta de prueba solo lees esos dos archivos, y no escribes nada en
+  ella.
 - No cambies el plugin en esta fase.
 
 [FORMATO DE SALIDA] (1) la sección escrita; (2) commit propuesto: "docs: record
