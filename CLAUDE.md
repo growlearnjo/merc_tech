@@ -30,7 +30,9 @@ Tienda de práctica del curso; cada regla de abajo sale del inventario de `docs/
   Verificación: `grep -n "useState\|use client" src/app/page.tsx` debe devolver vacío.
 
 ## Seguridad
-- `/admin` y `createProductAction` exigen un usuario administrador. Hoy no se cumple:
-  `admin/page.tsx:10` está abierta, `actions.ts:107-123` no llama a `getCurrentUser()`,
-  y `users` no tiene columna de rol. No digas que el panel está protegido.
-  Verificación: `grep -nE "getCurrentUser|isAdmin|role" src/app/admin/*.tsx` debe devolver algo.
+- `/admin` y `createProductAction` exigen un usuario administrador: su correo tiene que estar en
+  `ADMIN_EMAILS` (`.env.local`, separados por coma). Sin la variable, nadie es administrador.
+  Las dos lo comprueban en el servidor con `getCurrentAdmin()` (`src/lib/auth.ts`); no se esconde
+  el enlace como solución, y no se agrega una columna de rol a `users`.
+  Verificación: `grep -n "getCurrentAdmin" src/app/admin/page.tsx src/app/actions.ts` devuelve una
+  línea en cada archivo, y `npm test` pasa las pruebas de `src/lib/admin.test.ts`.
