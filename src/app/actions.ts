@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import {
   endSession,
+  getCurrentAdmin,
   getCurrentUser,
   hashPassword,
   safeNext,
@@ -106,6 +107,9 @@ export async function checkoutAction(_: FormState, fd: FormData): Promise<FormSt
 // ---------- Administración de productos ----------
 
 export async function createProductAction(_: FormState, fd: FormData): Promise<FormState> {
+  // La acción se puede llamar sin pasar por la página: se comprueba aquí también.
+  if (!(await getCurrentAdmin())) return { error: "No tienes permiso para crear productos." };
+
   const name = str(fd, "name");
   const description = str(fd, "description");
   const category = str(fd, "newCategory") || str(fd, "category");

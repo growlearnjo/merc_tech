@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { getCurrentAdmin, getCurrentUser } from "@/lib/auth";
 import { listCategories, listProducts } from "@/lib/products";
 import { formatSoles } from "@/lib/money";
 import { LOW_STOCK_THRESHOLD } from "@/lib/constants";
@@ -8,8 +10,11 @@ import { ProductForm } from "./ProductForm";
 export const metadata: Metadata = { title: "Cargar productos" };
 export const dynamic = "force-dynamic";
 
-// NOTA: página abierta, sin control de permisos (pedido explícito para la demo).
-export default function AdminPage() {
+// Solo para administradores: su correo tiene que estar en ADMIN_EMAILS. Se comprueba aquí, en el
+// servidor, y otra vez en createProductAction: esconder el enlace no protege nada.
+export default async function AdminPage() {
+  if (!(await getCurrentUser())) redirect("/login?next=/admin");
+  if (!(await getCurrentAdmin())) notFound();
   const products = listProducts();
   const categories = listCategories();
 

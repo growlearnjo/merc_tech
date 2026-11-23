@@ -3,6 +3,7 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { getDb, queryOne } from "./db";
+import { isAdminEmail } from "./admin";
 
 export const SESSION_COOKIE = "tienda_session";
 const SESSION_DAYS = 30;
@@ -59,6 +60,13 @@ export async function getCurrentUser(): Promise<User | null> {
     sha256(token),
     Date.now()
   );
+}
+
+/** El usuario actual, solo si es administrador (su correo está en ADMIN_EMAILS). Si no, null. */
+export async function getCurrentAdmin(): Promise<User | null> {
+  const user = await getCurrentUser();
+  if (!user || !isAdminEmail(user.email, process.env.ADMIN_EMAILS)) return null;
+  return user;
 }
 
 /** Solo permite redirigir a rutas internas (evita redirecciones a otros sitios). */
