@@ -115,15 +115,6 @@ estado de los hooks; (3) veredicto en una línea; (4) docs/VERIFICACION_S8.md
 escrito, y cuántas líneas tiene. Sin commit: entra en el commit de la Fase 8.1.
 ```
 
-> **Si tu red no es la versión 2.1:** copia a mano los tres archivos del anexo de
-> `doc_sesions/sesion6/Ed5_sesion6.md` en `.claude/hooks/`, y el matcher y las
-> reglas de su sección "Cómo se registran". El agente no puede: están
-> protegidos desde la sesión 6.
->
-> **Que compare contra `"tech-lead"` exacto y exija `npm test` siempre no es un
-> error de tu red.** Es lo que la 8.1 te va a mostrar fallando fuera de tu
-> proyecto, y lo que vas a adaptar en el plugin.
-
 ---
 
 ## Prompt 1 — Lectura de la spec (sin ejecutar nada)

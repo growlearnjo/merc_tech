@@ -97,7 +97,10 @@ flowchart LR
    que corresponda, como desde la sesión 6, y no en la extensión de VS Code.
 5. **Tener la red de la sesión 6 en su versión 2.1**: los tres archivos de
    `.claude/hooks/`, con `probar-hooks.js` dando 23 de 23. El Prompt 0 lo
-   comprueba.
+   comprueba. Si te falta, copia a mano los tres archivos del anexo de
+   `doc_sesions/sesion6/Ed5_sesion6.md`, y el matcher y las reglas de su sección
+   "Cómo se registran": el agente no puede, porque `.claude/` está protegida
+   desde la sesión 6.
 
 No hace falta crear ninguna cuenta ni ningún token.
 
@@ -682,3 +685,8 @@ con la configuración global idéntica antes y después.
 
 **Pendiente antes de dar la clase (versión 2).** Lo interactivo (`/plugin`, el
 menú de `@`), el showcase con datos reales y cronometrar.
+
+**2026-11-23 — versión 2.0.1.** Se quitó de `PROMPTS_sesion8.md` el aviso que
+seguía al Prompt 0. Qué hacer si la red no es la 2.1 pasó a la tarea humana 5 de
+este documento. Lo de `"tech-lead"` exacto y `npm test` siempre ya lo dice el
+punto 5 del prompt.
